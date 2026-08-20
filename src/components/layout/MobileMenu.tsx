@@ -37,7 +37,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
       {/* Drawer */}
       <div
         className={cn(
-          'fixed top-0 right-0 z-50 h-full w-80 max-w-full bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden flex flex-col border-l border-border',
+          'fixed top-0 right-0 z-50 h-full w-80 max-w-full bg-surface-card text-text shadow-2xl transition-transform duration-300 ease-out lg:hidden flex flex-col border-l border-border',
           open ? 'translate-x-0' : 'translate-x-full'
         )}
         role="dialog"

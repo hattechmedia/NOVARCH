@@ -19,10 +19,10 @@ export default function ServicesOverviewPage() {
           <Badge variant="default" className="mb-4">
             COMMERCIAL PRODUCT DOORS
           </Badge>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[#0D1B2A] mb-4">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-text mb-4">
             System delivery doors.
           </h1>
-          <p className="text-lg text-[#4A5B6F] leading-relaxed">
+          <p className="text-lg text-text-muted leading-relaxed">
             NOVARCH delivers technology through four distinct service models. Each model begins with a fixed-price Blueprint to ensure commercial fit and technical feasibility before implementation.
           </p>
         </div>
