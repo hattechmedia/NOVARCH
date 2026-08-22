@@ -1,7 +1,7 @@
 import { ContactInquiry, CreateContactDTO, LeadStatus, SubmissionType } from '../types/contact.types.js';
 import { initialInquiries } from '../data/store.js';
 import { ContactModel } from '../models/contact.model.js';
-import { isDatabaseConnected } from '../config/database.js';
+import { connectDatabase } from '../config/database.js';
 
 export interface IContactRepository {
   findAll(): Promise<ContactInquiry[]>;
@@ -35,7 +35,8 @@ export class MongoContactRepository implements IContactRepository {
   }
 
   async findAll(): Promise<ContactInquiry[]> {
-    if (isDatabaseConnected()) {
+    const connected = await connectDatabase();
+    if (connected) {
       try {
         const docs = await ContactModel.find().sort({ createdAt: -1 }).lean();
         return docs.map(formatContactDoc);
@@ -50,7 +51,8 @@ export class MongoContactRepository implements IContactRepository {
   }
 
   async findById(id: string): Promise<ContactInquiry | null> {
-    if (isDatabaseConnected()) {
+    const connected = await connectDatabase();
+    if (connected) {
       try {
         const doc = await ContactModel.findById(id).lean();
         if (doc) return formatContactDoc(doc);
@@ -105,7 +107,10 @@ export class MongoContactRepository implements IContactRepository {
         ? `Package subscription for ${preferredService} - ${dto.planName || 'Plan'}`
         : 'Inquiry submitted via website contact form.');
 
-    if (isDatabaseConnected()) {
+    const initialStatus = dto.status || 'New';
+
+    const connected = await connectDatabase();
+    if (connected) {
       try {
         const doc = await ContactModel.create({
           submissionType,
@@ -122,7 +127,7 @@ export class MongoContactRepository implements IContactRepository {
           serviceType,
           preferredService,
           message,
-          status: 'New',
+          status: initialStatus,
           estimatedValue,
           source,
         });
@@ -151,7 +156,7 @@ export class MongoContactRepository implements IContactRepository {
       serviceType,
       preferredService,
       message,
-      status: 'New',
+      status: initialStatus,
       estimatedValue,
       source,
       createdAt: new Date().toISOString(),
@@ -163,7 +168,8 @@ export class MongoContactRepository implements IContactRepository {
   }
 
   async updateStatus(id: string, status: LeadStatus): Promise<ContactInquiry | null> {
-    if (isDatabaseConnected()) {
+    const connected = await connectDatabase();
+    if (connected) {
       try {
         const doc = await ContactModel.findByIdAndUpdate(
           id,
@@ -189,7 +195,8 @@ export class MongoContactRepository implements IContactRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    if (isDatabaseConnected()) {
+    const connected = await connectDatabase();
+    if (connected) {
       try {
         const res = await ContactModel.findByIdAndDelete(id);
         return !!res;

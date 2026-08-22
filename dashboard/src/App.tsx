@@ -85,7 +85,7 @@ function DashboardView({
   const totalPipelineValue = useMemo(
     () =>
       inquiries
-        .filter((i) => i.status !== 'Closed')
+        .filter((i) => i.status !== 'Payment Declined')
         .reduce((sum, i) => sum + (i.estimatedValue || 0), 0),
     [inquiries]
   );

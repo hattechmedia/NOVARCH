@@ -12,14 +12,17 @@ try {
 let isConnected = false;
 
 export async function connectDatabase(): Promise<boolean> {
-  if (isConnected) return true;
+  if (mongoose.connection.readyState === 1) {
+    isConnected = true;
+    return true;
+  }
 
   try {
     console.log('🔄 Connecting to MongoDB Atlas...');
     const conn = await mongoose.connect(config.mongodbUri, {
       serverSelectionTimeoutMS: 8000,
       maxPoolSize: 10,
-      minPoolSize: 2,
+      minPoolSize: 1,
       maxIdleTimeMS: 30000,
       socketTimeoutMS: 45000,
       connectTimeoutMS: 10000,
@@ -31,8 +34,8 @@ export async function connectDatabase(): Promise<boolean> {
     return true;
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error);
-    isConnected = false;
-    return false;
+    isConnected = mongoose.connection.readyState === 1;
+    return isConnected;
   }
 }
 
