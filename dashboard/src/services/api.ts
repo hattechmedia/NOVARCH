@@ -1,6 +1,7 @@
 import { ContactInquiry, DashboardStats, HealthResponse, LeadStatus } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const rawBase = (import.meta.env.VITE_API_URL || '/api').trim();
+const API_BASE = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
 
 // In-flight request deduplication map to prevent redundant concurrent GET queries
 const inFlightRequests = new Map<string, Promise<any>>();

@@ -14,23 +14,29 @@ const app = express();
 // HTTP Response Compression (gzip / deflate / brotli)
 app.use(compression());
 
-// Middleware
+// CORS Middleware
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true);
       if (
         config.corsOrigins.includes(origin) ||
         config.corsOrigins.includes('*') ||
+        origin.endsWith('.vercel.app') ||
         origin.startsWith('http://localhost:')
       ) {
-        return callback(null, true);
+        return callback(null, origin);
       }
-      return callback(null, true);
+      return callback(null, origin);
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['X-CSRF-Token', 'X-Requested-With', 'Accept', 'Accept-Version', 'Content-Length', 'Content-MD5', 'Content-Type', 'Date', 'X-Api-Version', 'Authorization'],
   })
 );
+
+app.options('*', cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -38,17 +44,23 @@ app.use(express.urlencoded({ extended: true }));
 // Request Logger (active in development, quiet during health check polls)
 if (config.nodeEnv !== 'production') {
   app.use((req, _res, next) => {
-    if (req.path !== '/api/health') {
+    if (!req.path.includes('health')) {
       console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
     }
     next();
   });
 }
 
-// API Routes
+// API Routes (supports both direct paths and /api prefixed paths)
+app.use('/health', healthRoutes);
 app.use('/api/health', healthRoutes);
+
+app.use('/contact', contactRoutes);
+app.use('/contacts', contactRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/contacts', contactRoutes);
+
+app.use('/dashboard', dashboardRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 // Root endpoint info
@@ -59,10 +71,9 @@ app.get('/', (_req, res) => {
     version: '1.0.0',
     database: 'MongoDB Atlas',
     documentation: {
-      health: '/api/health',
-      contact: '/api/contact',
-      contacts: '/api/contacts',
-      dashboard: '/api/dashboard/stats',
+      health: '/health',
+      contact: '/contacts',
+      dashboard: '/dashboard/stats',
     },
   });
 });
@@ -78,7 +89,7 @@ async function startServer() {
     await contactRepository.seedInitialData();
   }
 
-  if (process.env.NODE_ENV !== 'test') {
+  if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
     app.listen(config.port, () => {
       console.log(`🚀 NOVARCH Backend API is running on http://localhost:${config.port}`);
       console.log(`📡 Health Check: http://localhost:${config.port}/api/health`);
