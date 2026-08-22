@@ -8,6 +8,7 @@ import { errorHandler } from './middleware/error.middleware.js';
 import healthRoutes from './routes/health.routes.js';
 import contactRoutes from './routes/contact.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
+import checkoutRoutes from './routes/checkout.routes.js';
 
 const app = express();
 
@@ -38,6 +39,10 @@ app.use(
 
 app.options('*', cors());
 
+// Stripe raw body parser for webhook verification
+app.use('/checkout/webhook', express.raw({ type: 'application/json' }));
+app.use('/api/checkout/webhook', express.raw({ type: 'application/json' }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -62,6 +67,9 @@ app.use('/api/contacts', contactRoutes);
 
 app.use('/dashboard', dashboardRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+
+app.use('/checkout', checkoutRoutes);
+app.use('/api/checkout', checkoutRoutes);
 
 // Root endpoint info
 app.get('/', (_req, res) => {

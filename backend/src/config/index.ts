@@ -11,4 +11,7 @@ export const config = {
   mongodbUri:
     process.env.MONGODB_URI ||
     'mongodb+srv://developerphantoms:Phantoms102102@cluster0.4jrks.mongodb.net/NOVARCH',
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+  frontendUrl: process.env.FRONTEND_URL || 'https://novarch-frontend.vercel.app',
 };

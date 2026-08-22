@@ -77,33 +77,53 @@ export function ServicePackageModal({
       const payload = {
         submissionType: 'service_lead',
         preferredService: serviceName,
-        serviceType: serviceName,
-        planName: pkg.name,
-        planTier: pkg.tier,
-        planPrice: pkg.price,
-        estimatedValue: pkg.priceNumber,
-        name: formData.name,
-        email: formData.email,
-        phone: formattedPhone,
-        countryCode: formData.countryCode,
-        company: formData.company || undefined,
-        message: formData.notes || `Subscription booking for ${serviceName} - ${pkg.name} (${pkg.price})`,
-        news: formData.notes || undefined,
+        serviceName: serviceName,
+        packageName: pkg.name,
+        tier: pkg.tier,
+        price: pkg.price,
+        userName: formData.name,
+        userEmail: formData.email,
+        userPhone: formattedPhone,
+        userCompany: formData.company || undefined,
+        userNotes: formData.notes || undefined,
       };
 
-      const res = await fetch('/api/contact', {
+      // 1. Also record lead inquiry
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...payload,
+          planName: pkg.name,
+          planTier: pkg.tier,
+          planPrice: pkg.price,
+          name: formData.name,
+          email: formData.email,
+          phone: formattedPhone,
+          company: formData.company || undefined,
+          message: formData.notes || `Subscription booking for ${serviceName} - ${pkg.name} (${pkg.price})`,
+        }),
+      }).catch(() => {});
+
+      // 2. Initiate Stripe Checkout Session
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://novarch-backend.vercel.app').replace(/\/+$/, '');
+      const res = await fetch(`${apiBase}/api/checkout/create-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Booking submission failed');
+      if (!res.ok) throw new Error(json.error || 'Failed to initiate Stripe Checkout');
 
-      setIsSubmitted(true);
+      if (json.url) {
+        // Redirect client to Stripe Hosted Checkout
+        window.location.href = json.url;
+      } else {
+        setIsSubmitted(true);
+      }
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -282,7 +302,7 @@ export function ServicePackageModal({
                 </div>
                 <span className="flex items-center gap-1 text-emerald-400 text-[10px]">
                   <ShieldCheck className="h-3.5 w-3.5" />
-                  Ready (No upfront charge)
+                  256-Bit SSL Encrypted
                 </span>
               </div>
 
@@ -293,10 +313,10 @@ export function ServicePackageModal({
                   variant="primary"
                   size="md"
                   disabled={isSubmitting}
-                  className="w-full flex items-center justify-center gap-2 font-bold py-3 text-xs"
+                  className="w-full flex items-center justify-center gap-2 font-bold py-3 text-xs bg-gradient-to-r from-[#1E5FBF] to-[#38B2D8] text-white shadow-lg shadow-[#1E5FBF]/25 hover:opacity-95"
                 >
-                  <Send className="h-3.5 w-3.5" />
-                  <span>{isSubmitting ? 'Confirming Booking...' : `Avail ${pkg.name} (${pkg.price})`}</span>
+                  <CreditCard className="h-4 w-4" />
+                  <span>{isSubmitting ? 'Redirecting to Stripe...' : `Pay & Subscribe — ${pkg.price}`}</span>
                 </Button>
               </div>
             </form>
