@@ -24,7 +24,7 @@ interface InquiryDrawerProps {
   onDelete: (id: string) => void;
 }
 
-const statusOptions: LeadStatus[] = ['New', 'Contacted', 'Proposal Sent', 'Closed'];
+const statusOptions: LeadStatus[] = ['New', 'Contacted', 'Proposal Sent', 'Closed', 'Paid', 'Payment Declined', 'Payment Pending'];
 
 export const InquiryDrawer: React.FC<InquiryDrawerProps> = ({
   inquiry,

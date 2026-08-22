@@ -27,7 +27,7 @@ const ContactSchema = new Schema<ContactDocument>(
     message: { type: String, trim: true },
     status: {
       type: String,
-      enum: ['New', 'Contacted', 'Proposal Sent', 'Closed'],
+      enum: ['New', 'Contacted', 'Proposal Sent', 'Closed', 'Paid', 'Payment Declined', 'Payment Pending'],
       default: 'New',
     },
     estimatedValue: { type: Number, default: 15000 },

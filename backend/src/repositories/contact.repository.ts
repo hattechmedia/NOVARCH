@@ -75,26 +75,28 @@ export class MongoContactRepository implements IContactRepository {
     const preferredService =
       dto.preferredService || (performances.length > 0 ? performances[0] : 'General Inquiry');
 
-    // Estimate pipeline value
-    let estimatedValue = dto.estimatedValue || 15000;
-    if (!dto.estimatedValue) {
-      if (dto.planPrice) {
-        const numeric = parseInt(dto.planPrice.replace(/[^0-9]/g, ''), 10);
-        if (!isNaN(numeric)) estimatedValue = numeric;
-      } else if (performances.length > 0) {
-        const valueMap: Record<string, number> = {
-          'Technical Editorial Department': 18000,
-          'CE conformity': 22000,
-          'IT systems house': 35000,
-          'Information security': 28000,
-          'Continuing education': 12000,
-        };
-        estimatedValue = performances.reduce(
-          (sum, p) => sum + (valueMap[p] || 15000),
-          0
-        );
+    // Estimate pipeline value accurately
+    let estimatedValue = dto.estimatedValue || 0;
+    if (dto.planPrice) {
+      const numeric = parseInt(String(dto.planPrice).replace(/[^0-9]/g, ''), 10);
+      if (!isNaN(numeric) && numeric > 0) {
+        estimatedValue = numeric;
       }
     }
+    if (!estimatedValue && performances.length > 0) {
+      const valueMap: Record<string, number> = {
+        'Technical Editorial Department': 18000,
+        'CE conformity': 22000,
+        'IT systems house': 35000,
+        'Information security': 28000,
+        'Continuing education': 12000,
+      };
+      estimatedValue = performances.reduce(
+        (sum, p) => sum + (valueMap[p] || 2500),
+        0
+      );
+    }
+    if (!estimatedValue) estimatedValue = 2499;
 
     const message =
       dto.message ||

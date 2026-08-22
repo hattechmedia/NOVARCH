@@ -1,4 +1,4 @@
-export type LeadStatus = 'New' | 'Contacted' | 'Proposal Sent' | 'Closed';
+export type LeadStatus = 'New' | 'Contacted' | 'Proposal Sent' | 'Closed' | 'Paid' | 'Payment Declined' | 'Payment Pending';
 export type SubmissionType = 'service_lead' | 'message';
 
 export interface ContactInquiry {

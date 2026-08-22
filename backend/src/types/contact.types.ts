@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export type LeadStatus = 'New' | 'Contacted' | 'Proposal Sent' | 'Closed';
+export type LeadStatus = 'New' | 'Contacted' | 'Proposal Sent' | 'Closed' | 'Paid' | 'Payment Declined' | 'Payment Pending';
 export type SubmissionType = 'service_lead' | 'message';
 
 export interface ContactInquiry {
@@ -47,5 +47,5 @@ export const CreateContactSchema = z.object({
 export type CreateContactDTO = z.infer<typeof CreateContactSchema>;
 
 export const UpdateContactStatusSchema = z.object({
-  status: z.enum(['New', 'Contacted', 'Proposal Sent', 'Closed']),
+  status: z.enum(['New', 'Contacted', 'Proposal Sent', 'Closed', 'Paid', 'Payment Declined', 'Payment Pending']),
 });

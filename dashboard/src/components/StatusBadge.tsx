@@ -37,6 +37,27 @@ const statusConfig: Record<
     border: 'border-purple-500/30',
     dot: 'bg-purple-400',
   },
+  Paid: {
+    label: 'Payment Accepted',
+    bg: 'bg-emerald-500/15',
+    text: 'text-emerald-300',
+    border: 'border-emerald-500/40',
+    dot: 'bg-emerald-400',
+  },
+  'Payment Declined': {
+    label: 'Payment Declined',
+    bg: 'bg-red-500/15',
+    text: 'text-red-400',
+    border: 'border-red-500/40',
+    dot: 'bg-red-400',
+  },
+  'Payment Pending': {
+    label: 'Payment Pending',
+    bg: 'bg-amber-500/15',
+    text: 'text-amber-300',
+    border: 'border-amber-500/40',
+    dot: 'bg-amber-400',
+  },
 };
 
 export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(({ status }) => {

@@ -30,7 +30,7 @@ interface InquiryDetailPageProps {
   onDelete: (id: string) => void;
 }
 
-const statusSteps: LeadStatus[] = ['New', 'Contacted', 'Proposal Sent', 'Closed'];
+const statusSteps: LeadStatus[] = ['New', 'Contacted', 'Proposal Sent', 'Closed', 'Paid', 'Payment Declined', 'Payment Pending'];
 
 export const InquiryDetailPage: React.FC<InquiryDetailPageProps> = ({
   inquiries,

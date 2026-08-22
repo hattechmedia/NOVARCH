@@ -31,7 +31,7 @@ interface InquiryTableProps {
   onUpdateStatus?: (id: string, status: LeadStatus) => void;
 }
 
-const statusOptions: LeadStatus[] = ['New', 'Contacted', 'Proposal Sent', 'Closed'];
+const statusOptions: LeadStatus[] = ['New', 'Contacted', 'Proposal Sent', 'Closed', 'Paid', 'Payment Declined', 'Payment Pending'];
 
 export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
   inquiries,
