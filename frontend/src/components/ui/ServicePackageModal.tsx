@@ -89,8 +89,10 @@ export function ServicePackageModal({
         userNotes: formData.notes || undefined,
       };
 
-      // 1. Also record lead inquiry
-      fetch('/api/contact', {
+      const isImplementationScope = pkg.tier === 'Premium' || pkg.price.toLowerCase().includes('from');
+
+      // 1. Record lead inquiry
+      const resContact = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -103,11 +105,18 @@ export function ServicePackageModal({
           email: formData.email,
           phone: formattedPhone,
           company: formData.company || undefined,
-          message: formData.notes || `Subscription booking for ${serviceName} - ${pkg.name} (${pkg.price})`,
+          message: formData.notes || `${isImplementationScope ? 'Scope qualification request' : 'Package booking'} for ${serviceName} - ${pkg.name} (${pkg.price})`,
         }),
-      }).catch(() => {});
+      });
 
-      // 2. Initiate Stripe Checkout Session
+      if (isImplementationScope) {
+        // Implementation comes after qualification & scope: do not create blind checkout product
+        setIsSubmitted(true);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 2. Initiate Stripe Checkout Session for Basic Blueprint Plans
       const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://novarch-backend.vercel.app').replace(/\/+$/, '');
       const res = await fetch(`${apiBase}/api/checkout/create-session`, {
         method: 'POST',
@@ -296,15 +305,15 @@ export function ServicePackageModal({
                 </div>
               </div>
 
-              {/* Stripe Payment Gateway Ready Indicator */}
+              {/* Indicator Badge */}
               <div className="rounded-xl bg-[#080E18] border border-[#17304E] p-3 flex items-center justify-between text-[11px] font-mono text-[#7A8FA6]">
                 <div className="flex items-center gap-2">
                   <CreditCard className="h-4 w-4 text-[#38B2D8]" />
-                  <span>Stripe Instant Checkout</span>
+                  <span>{pkg.tier === 'Basic' ? 'Stripe Instant Checkout' : 'Scope Qualification Request'}</span>
                 </div>
                 <span className="flex items-center gap-1 text-emerald-400 text-[10px]">
                   <ShieldCheck className="h-3.5 w-3.5" />
-                  256-Bit SSL Encrypted
+                  {pkg.tier === 'Basic' ? '256-Bit SSL Encrypted' : 'Qualified Architecture Scope'}
                 </span>
               </div>
 
@@ -317,8 +326,12 @@ export function ServicePackageModal({
                   disabled={isSubmitting}
                   className="w-full flex items-center justify-center gap-2 font-bold py-3 text-xs bg-gradient-to-r from-[#1E5FBF] to-[#38B2D8] text-white shadow-lg shadow-[#1E5FBF]/25 hover:opacity-95"
                 >
-                  <CreditCard className="h-4 w-4" />
-                  <span>{isSubmitting ? 'Redirecting to Stripe...' : `Pay & Subscribe — ${pkg.price}`}</span>
+                  {pkg.tier === 'Basic' ? <CreditCard className="h-4 w-4" /> : <Send className="h-4 w-4" />}
+                  <span>
+                    {isSubmitting
+                      ? (pkg.tier === 'Basic' ? 'Redirecting to Stripe...' : 'Submitting Request...')
+                      : (pkg.tier === 'Basic' ? `Pay & Subscribe — ${pkg.price}` : `Request Scope Qualification — ${pkg.price}`)}
+                  </span>
                 </Button>
               </div>
             </form>

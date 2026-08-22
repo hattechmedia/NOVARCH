@@ -171,7 +171,7 @@ export function ServicePackagesSection({ service }: ServicePackagesSectionProps)
                       size="lg"
                       className="w-full flex items-center justify-center gap-2 font-bold py-3 text-xs sm:text-sm group cursor-pointer"
                     >
-                      <span>Avail {basic.name} — {basic.price}</span>
+                      <span>Book {basic.name} — {basic.price}</span>
                       <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                     </Button>
                   </div>
@@ -191,7 +191,7 @@ export function ServicePackagesSection({ service }: ServicePackagesSectionProps)
               className="absolute top-0 right-0 z-30"
             >
               <div className="rounded-bl-xl bg-gradient-to-r from-[#1E5FBF] to-[#38B2D8] px-4 py-1.5 text-[11px] font-mono font-bold text-white uppercase tracking-wider shadow-md">
-                Most Popular
+                Enterprise Scope
               </div>
             </motion.div>
 
@@ -229,7 +229,7 @@ export function ServicePackagesSection({ service }: ServicePackagesSectionProps)
 
                   <div className="absolute bottom-4 left-4 z-10">
                     <div className="rounded-xl bg-[#0A1626]/90 border border-[#38B2D8]/40 px-3.5 py-1.5 shadow-lg backdrop-blur-md">
-                      <span className="text-[10px] font-mono uppercase text-[#7A8FA6] block">Turnkey Value</span>
+                      <span className="text-[10px] font-mono uppercase text-[#7A8FA6] block">Implementation</span>
                       <span className="text-xl font-mono font-extrabold text-emerald-400">{premium.price}</span>
                     </div>
                   </div>
@@ -242,7 +242,7 @@ export function ServicePackagesSection({ service }: ServicePackagesSectionProps)
                     <div className="flex items-center gap-2 mb-2">
                       <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#1E5FBF]/25 text-xs font-mono font-semibold text-[#38B2D8] border border-[#38B2D8]/50">
                         <Sparkles className="h-3.5 w-3.5" />
-                        Premium Plan
+                        Implementation Plan
                       </span>
                       <span className="flex items-center gap-1 text-xs font-mono text-[#CBD5E1]">
                         <Clock className="h-3.5 w-3.5 text-emerald-400" />
@@ -252,18 +252,18 @@ export function ServicePackagesSection({ service }: ServicePackagesSectionProps)
 
                     {/* Title */}
                     <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-2">
-                      {premium.name} — <span className="text-[#38B2D8]">Scale & Dominate</span>
+                      {premium.name} — <span className="text-[#38B2D8]">Custom Scope</span>
                     </h3>
 
                     {/* Description */}
                     <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed mb-4">
-                      {premium.description} Everything in Foundation plus interactive animations, headless CMS, and dedicated SLA maintenance.
+                      {premium.description}
                     </p>
 
                     {/* 2-Column Features List */}
                     <div className="mb-4">
                       <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400 block mb-2.5">
-                        Everything in {basic.name}, plus:
+                        Includes:
                       </span>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
                         {premium.features.map((feature, idx) => (
@@ -287,7 +287,7 @@ export function ServicePackagesSection({ service }: ServicePackagesSectionProps)
                       className="w-full flex items-center justify-center gap-2 font-bold py-3 text-xs sm:text-sm shadow-xl shadow-[#1E5FBF]/30 group cursor-pointer"
                     >
                       <Zap className="h-4 w-4" />
-                      <span>Avail {premium.name} — {premium.price}</span>
+                      <span>Request Scope Qualification — {premium.price}</span>
                       <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                     </Button>
                   </div>

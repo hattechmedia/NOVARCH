@@ -23,7 +23,7 @@ export default function ServicesOverviewPage() {
             System delivery doors.
           </h1>
           <p className="text-lg text-text-muted leading-relaxed">
-            NOVARCH delivers technology through four distinct service models. Each model begins with a fixed-price Blueprint to ensure commercial fit and technical feasibility before implementation.
+            NOVARCH delivers technology through four distinct service models — with transparent fixed-price Basic entry plans and bespoke Enterprise Implementation pathways.
           </p>
         </div>
       </Container>

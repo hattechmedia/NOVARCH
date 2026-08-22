@@ -140,7 +140,7 @@ export function ServicesSection() {
                         <span className="text-xs font-mono font-bold text-white
                                          bg-navy/90 px-3.5 py-1.5 rounded-full
                                          border border-cyan/50 shadow-md backdrop-blur-md">
-                          Blueprint €{service.paidEntry.price}
+                          Basic Plan €{service.paidEntry.price}
                         </span>
                       </div>
 

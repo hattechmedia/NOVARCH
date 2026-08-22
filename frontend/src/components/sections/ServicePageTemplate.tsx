@@ -83,11 +83,11 @@ export function ServicePageTemplate({ service }: ServicePageTemplateProps) {
                 <div className="flex flex-col gap-3 mb-8 text-sm text-text-muted">
                   <div className="flex items-center gap-2.5 font-semibold bg-surface-card border border-border px-4 py-2.5 rounded-lg shadow-sm">
                     <FileText className="h-4 w-4 text-blue" />
-                    Paid Entry: {service.paidEntry.name} — €{service.paidEntry.price}
+                    Basic Plan: {service.packages.basic.name} — {service.packages.basic.price}
                   </div>
                   <div className="flex items-center gap-2.5 font-semibold bg-surface-card border border-border px-4 py-2.5 rounded-lg shadow-sm">
                     <ShieldCheck className="h-4 w-4 text-cyan" />
-                    Implementation: From €{service.implementation.from.toLocaleString()}
+                    Implementation: {service.packages.premium.price}
                   </div>
                   <div className="flex items-center gap-2.5 font-semibold bg-surface-card border border-border px-4 py-2.5 rounded-lg shadow-sm">
                     <Clock className="h-4 w-4 text-blue" />
@@ -98,8 +98,8 @@ export function ServicePageTemplate({ service }: ServicePageTemplateProps) {
 
               <Reveal delay={400}>
                 <div className="pt-2">
-                  <Button href="/contact" size="lg" className="w-full sm:w-auto font-bold shadow-lg shadow-blue/20">
-                    Get {service.paidEntry.name} (€{service.paidEntry.price})
+                  <Button href="#packages" size="lg" className="w-full sm:w-auto font-bold shadow-lg shadow-blue/20">
+                    View Package Options
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
@@ -145,11 +145,11 @@ export function ServicePageTemplate({ service }: ServicePageTemplateProps) {
               <div className="flex flex-wrap items-center gap-6 pt-4 text-sm text-text-muted">
                 <div className="flex items-center gap-2 font-semibold bg-surface-card border border-border px-4 py-2 rounded-sm">
                   <FileText className="h-4 w-4 text-blue" />
-                  Paid Entry: {service.paidEntry.name} — €{service.paidEntry.price}
+                  Basic Plan: {service.packages.basic.name} — {service.packages.basic.price}
                 </div>
                 <div className="flex items-center gap-2 font-semibold bg-surface-card border border-border px-4 py-2 rounded-sm">
                   <ShieldCheck className="h-4 w-4 text-cyan" />
-                  Implementation: From €{service.implementation.from.toLocaleString()}
+                  Implementation: {service.packages.premium.price}
                 </div>
                 <div className="flex items-center gap-2 font-semibold bg-surface-card border border-border px-4 py-2 rounded-sm">
                   <Clock className="h-4 w-4 text-blue" />
@@ -279,52 +279,27 @@ export function ServicePageTemplate({ service }: ServicePageTemplateProps) {
         </Container>
       </section>
 
-      {/* 6. How engagement works & 7. Paid first step */}
+      {/* 6. How engagement works */}
       <section className="py-16 bg-navy-800 text-white border-y border-navy-700">
         <Container>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Paid First Step Highlight */}
-            <div className="lg:col-span-5">
-              <div className="p-8 rounded-sm bg-navy border border-cyan/40 shadow-xl relative overflow-hidden">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan mb-3 block">
-                  STEP 01 — REQUIRED ENTRY
-                </span>
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  {service.paidEntry.name}
-                </h3>
-                <p className="text-3xl font-bold text-cyan mb-4">
-                  €{service.paidEntry.price}
-                </p>
-                <p className="text-xs sm:text-sm text-blue-light leading-relaxed mb-6">
-                  Every NOVARCH engagement starts with a fixed-price Blueprint sprint to audit constraints, specify data schemas, and validate economic ROI before full build commitments.
-                </p>
-                <Button href="/contact" variant="primary" size="md" className="w-full bg-blue hover:bg-blue-600">
-                  Start With {service.paidEntry.name}
-                  <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Process Steps */}
-            <div className="lg:col-span-7">
-              <span className="text-xs font-semibold uppercase tracking-widest text-cyan-light mb-3 block">
-                ENGAGEMENT PATHWAY
-              </span>
-              <h2 className="text-3xl font-bold text-white mb-6">
-                From Blueprint to live operation.
-              </h2>
-              <div className="space-y-4">
-                {service.engagementSteps.map((step, idx) => (
-                  <div key={step} className="flex items-start gap-4 p-4 rounded bg-navy/60 border border-navy-700">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue text-xs font-bold text-white flex-shrink-0 mt-0.5">
-                      {idx + 1}
-                    </span>
-                    <p className="text-sm text-blue-light leading-normal font-medium">
-                      {step}
-                    </p>
-                  </div>
-                ))}
-              </div>
+          <div className="max-w-4xl mx-auto">
+            <span className="text-xs font-semibold uppercase tracking-widest text-cyan-light mb-3 block text-center">
+              ENGAGEMENT PATHWAY
+            </span>
+            <h2 className="text-3xl font-bold text-white mb-8 text-center">
+              From discovery to live operation.
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {service.engagementSteps.map((step, idx) => (
+                <div key={step} className="flex items-start gap-4 p-4 rounded bg-navy/60 border border-navy-700">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue text-xs font-bold text-white flex-shrink-0 mt-0.5">
+                    {idx + 1}
+                  </span>
+                  <p className="text-sm text-blue-light leading-normal font-medium">
+                    {step}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </Container>
@@ -380,10 +355,10 @@ export function ServicePageTemplate({ service }: ServicePageTemplateProps) {
             Ready to deploy your {service.name} System?
           </h2>
           <p className="text-base text-blue-light mb-8 max-w-lg mx-auto">
-            Start with the {service.paidEntry.name} (€{service.paidEntry.price}). Clear scope, zero vendor lock-in.
+            Choose between fixed-scope Basic Plan or custom Enterprise Implementation. Clear scope, zero vendor lock-in.
           </p>
-          <Button href="/contact" variant="primary" size="lg" className="bg-blue hover:bg-blue-600">
-            Start a Project <ArrowRight className="h-4 w-4 ml-1" />
+          <Button href="#packages" variant="primary" size="lg" className="bg-blue hover:bg-blue-600">
+            Choose Package <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </Container>
       </section>
