@@ -7,11 +7,11 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   corsOrigins: process.env.CORS_ORIGINS
     ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
-    : ['http://localhost:3000', 'http://localhost:5173', 'https://novarch-dashboard.vercel.app', 'https://novarch-frontend.vercel.app', '*'],
+    : ['http://localhost:3000', 'http://localhost:5173', 'https://novarch.eu', 'https://www.novarch.eu', 'https://novarch-dashboard.vercel.app', 'https://novarch-frontend.vercel.app', '*'],
   mongodbUri:
     process.env.MONGODB_URI ||
     'mongodb+srv://developerphantoms:Phantoms102102@cluster0.4jrks.mongodb.net/NOVARCH',
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
-  frontendUrl: process.env.FRONTEND_URL || 'https://novarch-frontend.vercel.app',
+  frontendUrl: process.env.FRONTEND_URL || 'https://novarch.eu',
 };
