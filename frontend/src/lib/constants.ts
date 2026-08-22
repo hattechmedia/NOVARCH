@@ -8,6 +8,12 @@ export const SITE = {
   email: 'hello@novarch.io',
 } as const;
 
+export const VAT_CONFIG = {
+  currency: 'EUR',
+  symbol: '€',
+  wording: 'excl. VAT', // Configurable: 'excl. VAT', '+ VAT', 'incl. VAT', etc.
+} as const;
+
 export const ROUTES = {
   home: '/',
   about: '/about',

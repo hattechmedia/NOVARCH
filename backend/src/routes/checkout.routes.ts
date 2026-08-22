@@ -20,7 +20,7 @@ router.post('/create-session', async (req: Request, res: Response) => {
       packageName,
       tier,
       price,
-      currency = 'usd',
+      currency = 'eur',
       userName,
       userEmail,
       userPhone,

@@ -190,7 +190,7 @@ export function ServicePackageModal({
 
               <div className="flex items-baseline justify-between">
                 <h2 className="text-2xl font-bold text-white tracking-tight">{pkg.name}</h2>
-                <span className="text-xl font-bold font-mono text-emerald-400">{pkg.price}</span>
+                <span className="text-xl font-bold font-mono text-emerald-400">{pkg.price} <span className="text-xs font-normal text-[#94A3B8]">excl. VAT</span></span>
               </div>
 
               <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">{pkg.description}</p>

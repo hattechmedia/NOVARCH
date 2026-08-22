@@ -116,7 +116,7 @@ export function ServicePackagesSection({ service }: ServicePackagesSectionProps)
                   <div className="absolute bottom-4 left-4 z-10">
                     <div className="rounded-xl bg-[#070D18]/90 border border-[#17304E] px-3.5 py-1.5 shadow-lg backdrop-blur-md">
                       <span className="text-[10px] font-mono uppercase text-[#7A8FA6] block">Fixed Scope</span>
-                      <span className="text-xl font-mono font-extrabold text-white">{basic.price}</span>
+                      <span className="text-xl font-mono font-extrabold text-white">{basic.price} <span className="text-[11px] font-normal text-[#94A3B8]">excl. VAT</span></span>
                     </div>
                   </div>
                 </div>
@@ -230,7 +230,7 @@ export function ServicePackagesSection({ service }: ServicePackagesSectionProps)
                   <div className="absolute bottom-4 left-4 z-10">
                     <div className="rounded-xl bg-[#0A1626]/90 border border-[#38B2D8]/40 px-3.5 py-1.5 shadow-lg backdrop-blur-md">
                       <span className="text-[10px] font-mono uppercase text-[#7A8FA6] block">Implementation</span>
-                      <span className="text-xl font-mono font-extrabold text-emerald-400">{premium.price}</span>
+                      <span className="text-xl font-mono font-extrabold text-emerald-400">{premium.price} <span className="text-[11px] font-normal text-[#94A3B8]">excl. VAT</span></span>
                     </div>
                   </div>
                 </div>
