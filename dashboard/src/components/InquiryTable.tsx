@@ -29,6 +29,7 @@ interface InquiryTableProps {
   setSearchQuery?: (query: string) => void;
   onSelectInquiry?: (inquiry: ContactInquiry) => void;
   onUpdateStatus?: (id: string, status: LeadStatus) => void;
+  hideCategorySwitcher?: boolean;
 }
 
 const statusOptions: LeadStatus[] = ['New', 'Contacted', 'Proposal Sent', 'Closed', 'Paid', 'Payment Declined', 'Payment Pending'];
@@ -45,6 +46,7 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
   searchQuery = '',
   setSearchQuery,
   onSelectInquiry,
+  hideCategorySwitcher = false,
 }) => {
   const navigate = useNavigate();
 
@@ -108,18 +110,18 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-white tracking-tight">
+              <h2 className="text-lg font-bold text-white tracking-tight">
                 {selectedCategory === 'service_lead'
                   ? 'Service Package Leads'
                   : selectedCategory === 'message'
                   ? 'Website Contact Messages'
                   : 'Inquiries & Leads Stream'}
               </h2>
-              <span className="rounded-full bg-[#17304E] px-2.5 py-0.5 text-[10px] font-mono font-bold text-[#38B2D8]">
+              <span className="rounded-full bg-[#17304E] px-2.5 py-0.5 text-xs font-mono font-bold text-[#38B2D8]">
                 {inquiries.length} {inquiries.length === 1 ? 'Record' : 'Records'}
               </span>
             </div>
-            <p className="text-xs text-[#7A8FA6] mt-1 font-medium">
+            <p className="text-sm text-[#7A8FA6] mt-1 font-medium">
               {selectedCategory === 'service_lead'
                 ? 'Direct package bookings, tier selections and scope requirements'
                 : selectedCategory === 'message'
@@ -132,18 +134,18 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
             {/* Search Input */}
             {setSearchQuery && (
               <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#64748B]" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" />
                 <input
                   type="text"
                   placeholder="Search name, company, email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-xl bg-[#060D17] border border-[#17304E] pl-9 pr-8 py-2 text-xs text-white placeholder-[#475569] focus:border-[#38B2D8] focus:ring-1 focus:ring-[#38B2D8]/40 focus:outline-none transition-all font-mono"
+                  className="w-full rounded-xl bg-[#060D17] border border-[#17304E] pl-9 pr-8 py-2 text-sm text-white placeholder-[#475569] focus:border-[#38B2D8] focus:ring-1 focus:ring-[#38B2D8]/40 focus:outline-none transition-all font-mono"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#64748B] hover:text-white"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-[#64748B] hover:text-white"
                   >
                     &times;
                   </button>
@@ -152,44 +154,46 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
             )}
 
             {/* Category Selector Tabs */}
-            <div className="flex items-center gap-1 bg-[#060D17] p-1 rounded-xl border border-[#17304E] overflow-x-auto">
-              {categoryTabs.map((cat) => {
-                const isSelected = selectedCategory === cat.id;
-                const Icon = cat.icon;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
-                      isSelected
-                        ? cat.activeColor || 'bg-[#1E5FBF] text-white font-bold shadow-md'
-                        : 'text-[#94A3B8] hover:text-white hover:bg-[#0F1E33]'
-                    }`}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    <span>{cat.label}</span>
-                    <span
-                      className={`ml-1 rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
+            {!hideCategorySwitcher && (
+              <div className="flex items-center gap-1 bg-[#060D17] p-1 rounded-xl border border-[#17304E] overflow-x-auto">
+                {categoryTabs.map((cat) => {
+                  const isSelected = selectedCategory === cat.id;
+                  const Icon = cat.icon;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-mono transition-all cursor-pointer whitespace-nowrap ${
                         isSelected
-                          ? 'bg-black/25 text-white'
-                          : 'bg-[#17304E] text-[#7A8FA6]'
+                          ? cat.activeColor || 'bg-[#1E5FBF] text-white font-bold shadow-md'
+                          : 'text-[#94A3B8] hover:text-white hover:bg-[#0F1E33]'
                       }`}
                     >
-                      {cat.count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+                      <Icon className="h-4 w-4" />
+                      <span>{cat.label}</span>
+                      <span
+                        className={`ml-1 rounded-full px-2 py-0.5 text-xs font-bold ${
+                          isSelected
+                            ? 'bg-black/25 text-white'
+                            : 'bg-[#17304E] text-[#7A8FA6]'
+                        }`}
+                      >
+                        {cat.count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             {/* CSV Export Button */}
             <button
               onClick={handleExportCSV}
               disabled={inquiries.length === 0}
-              className="flex items-center gap-1.5 rounded-xl bg-[#0B1524] border border-[#17304E] px-3 py-2 text-xs font-mono text-[#94A3B8] hover:text-white hover:border-[#38B2D8]/50 hover:bg-[#122238] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 rounded-xl bg-[#0B1524] border border-[#17304E] px-3 py-2 text-sm font-mono text-[#94A3B8] hover:text-white hover:border-[#38B2D8]/50 hover:bg-[#122238] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               title="Export filtered records to CSV"
             >
-              <Download className="h-3.5 w-3.5 text-[#38B2D8]" />
+              <Download className="h-4 w-4 text-[#38B2D8]" />
               <span className="hidden sm:inline">Export CSV</span>
             </button>
           </div>
@@ -198,8 +202,8 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
         {/* Status Filter Tabs */}
         <div className="flex items-center justify-between border-t border-[#17304E]/70 pt-3 flex-wrap gap-2">
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-            <span className="text-[10px] font-mono uppercase font-bold text-[#64748B] mr-1 flex items-center gap-1">
-              <Filter className="h-3 w-3 text-[#38B2D8]" />
+            <span className="text-xs font-mono uppercase font-bold text-[#64748B] mr-1 flex items-center gap-1">
+              <Filter className="h-3.5 w-3.5 text-[#38B2D8]" />
               Status:
             </span>
 
@@ -209,7 +213,7 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
                 <button
                   key={tab}
                   onClick={() => setSelectedStatus(tab)}
-                  className={`rounded-lg px-2.5 py-1 text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
+                  className={`rounded-lg px-2.5 py-1 text-xs sm:text-sm font-mono transition-all cursor-pointer whitespace-nowrap ${
                     isSelected
                       ? 'bg-[#1E5FBF]/25 text-[#38B2D8] border border-[#38B2D8]/60 font-bold shadow-sm'
                       : 'bg-[#060D17] text-[#94A3B8] hover:bg-[#17304E] hover:text-white border border-[#17304E]/60'
@@ -221,7 +225,7 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
             })}
           </div>
 
-          <span className="text-[11px] font-mono text-[#64748B]">
+          <span className="text-xs font-mono text-[#64748B]">
             Showing {inquiries.length} result{inquiries.length === 1 ? '' : 's'}
           </span>
         </div>
@@ -229,8 +233,8 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
 
       {/* Table Content */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
-          <thead className="bg-[#060D17]/90 text-[11px] font-mono uppercase text-[#7A8FA6] border-b border-[#17304E]">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-[#060D17]/90 text-xs font-mono uppercase text-[#7A8FA6] border-b border-[#17304E]">
             <tr>
               <th className="px-5 py-3.5 font-semibold">Client / Company</th>
               <th className="px-5 py-3.5 font-semibold">Category & Scope</th>
@@ -245,11 +249,11 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
           <tbody className="divide-y divide-[#17304E]/60 text-white/90">
             {inquiries.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-5 py-16 text-center text-xs font-mono text-[#64748B]">
+                <td colSpan={7} className="px-5 py-16 text-center text-sm font-mono text-[#64748B]">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Layers className="h-8 w-8 text-[#17304E]" />
                     <p className="font-semibold text-[#94A3B8]">No submissions found</p>
-                    <p className="text-[11px] text-[#64748B]">
+                    <p className="text-xs text-[#64748B]">
                       {searchQuery
                         ? `No results matching "${searchQuery}" in ${selectedCategory} category.`
                         : 'New website leads will populate here in real-time.'}
@@ -278,18 +282,18 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
                           {getInitials(inq.name)}
                         </div>
                         <div className="min-w-0">
-                          <div className="font-bold text-white group-hover:text-[#38B2D8] transition-colors truncate">
+                          <div className="font-bold text-white text-sm sm:text-base group-hover:text-[#38B2D8] transition-colors truncate">
                             {inq.name}
                           </div>
-                          <div className="text-[11px] text-[#7A8FA6] font-mono mt-0.5 flex items-center gap-1 truncate">
+                          <div className="text-xs text-[#7A8FA6] font-mono mt-0.5 flex items-center gap-1 truncate">
                             {inq.company ? (
                               <>
-                                <Building className="h-3 w-3 text-[#64748B] flex-shrink-0" />
+                                <Building className="h-3.5 w-3.5 text-[#64748B] flex-shrink-0" />
                                 <span className="truncate">{inq.company}</span>
                               </>
                             ) : (
                               <>
-                                <Mail className="h-3 w-3 text-[#64748B] flex-shrink-0" />
+                                <Mail className="h-3.5 w-3.5 text-[#64748B] flex-shrink-0" />
                                 <span className="truncate">{inq.email}</span>
                               </>
                             )}
@@ -302,21 +306,21 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
                     <td className="px-5 py-4">
                       {isServiceLead ? (
                         <div className="flex flex-col gap-1">
-                          <span className="inline-flex items-center gap-1 w-fit rounded-full bg-[#1E5FBF]/25 border border-[#38B2D8]/50 px-2.5 py-0.5 text-[10px] font-mono font-bold text-[#38B2D8]">
-                            <Zap className="h-3 w-3" />
+                          <span className="inline-flex items-center gap-1 w-fit rounded-full bg-[#1E5FBF]/25 border border-[#38B2D8]/50 px-2.5 py-0.5 text-xs font-mono font-bold text-[#38B2D8]">
+                            <Zap className="h-3.5 w-3.5" />
                             SERVICE LEAD
                           </span>
-                          <span className="text-xs font-semibold text-white">
+                          <span className="text-sm font-semibold text-white">
                             {inq.planName || 'Package Lead'} {inq.planPrice ? `(${inq.planPrice})` : ''}
                           </span>
                         </div>
                       ) : (
                         <div className="flex flex-col gap-1">
-                          <span className="inline-flex items-center gap-1 w-fit rounded-full bg-emerald-500/15 border border-emerald-500/40 px-2.5 py-0.5 text-[10px] font-mono font-bold text-emerald-400">
-                            <MessageSquare className="h-3 w-3" />
+                          <span className="inline-flex items-center gap-1 w-fit rounded-full bg-emerald-500/15 border border-emerald-500/40 px-2.5 py-0.5 text-xs font-mono font-bold text-emerald-400">
+                            <MessageSquare className="h-3.5 w-3.5" />
                             CONTACT MESSAGE
                           </span>
-                          <span className="text-[11px] text-[#94A3B8] line-clamp-1 max-w-[220px]">
+                          <span className="text-xs text-[#94A3B8] line-clamp-1 max-w-[220px]">
                             {inq.news || inq.message || 'Direct Website Inquiry'}
                           </span>
                         </div>
@@ -325,15 +329,15 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
 
                     {/* 3. Service Line */}
                     <td className="px-5 py-4">
-                      <span className="inline-block rounded-lg bg-[#0E1B2C] border border-[#17304E] px-2.5 py-1 text-[11px] font-mono text-[#CBD5E1]">
+                      <span className="inline-block rounded-lg bg-[#0E1B2C] border border-[#17304E] px-2.5 py-1 text-xs font-mono text-[#CBD5E1]">
                         {inq.preferredService || inq.serviceType || 'General Inquiry'}
                       </span>
                     </td>
 
                     {/* 4. Est. Pipeline */}
                     <td className="px-5 py-4">
-                      <div className="flex items-center gap-1 font-mono font-bold text-emerald-400 text-sm">
-                        <DollarSign className="h-3.5 w-3.5 text-emerald-500" />
+                      <div className="flex items-center gap-1 font-mono font-bold text-emerald-400 text-base">
+                        <DollarSign className="h-4 w-4 text-emerald-500" />
                         <span>{(inq.estimatedValue || 0).toLocaleString()}</span>
                       </div>
                     </td>
@@ -344,9 +348,9 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
                     </td>
 
                     {/* 6. Date */}
-                    <td className="px-5 py-4 text-[11px] font-mono text-[#7A8FA6]">
+                    <td className="px-5 py-4 text-xs font-mono text-[#7A8FA6]">
                       <div className="flex items-center gap-1.5">
-                        <Calendar className="h-3 w-3 text-[#64748B]" />
+                        <Calendar className="h-3.5 w-3.5 text-[#64748B]" />
                         <span>
                           {new Date(inq.createdAt).toLocaleDateString(undefined, {
                             month: 'short',
@@ -365,10 +369,10 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
                           e.stopPropagation();
                           handleRowClick(inq);
                         }}
-                        className="inline-flex items-center gap-1 rounded-lg bg-[#0E1B2C] border border-[#17304E] px-2.5 py-1 text-[11px] font-mono text-[#38B2D8] hover:bg-[#1E5FBF]/25 hover:border-[#38B2D8]/50 transition-all cursor-pointer"
+                        className="inline-flex items-center gap-1 rounded-lg bg-[#0E1B2C] border border-[#17304E] px-3 py-1.5 text-xs font-mono text-[#38B2D8] hover:bg-[#1E5FBF]/25 hover:border-[#38B2D8]/50 transition-all cursor-pointer font-bold"
                       >
                         <span>Inspect</span>
-                        <ChevronRight className="h-3 w-3" />
+                        <ChevronRight className="h-3.5 w-3.5" />
                       </button>
                     </td>
                   </tr>

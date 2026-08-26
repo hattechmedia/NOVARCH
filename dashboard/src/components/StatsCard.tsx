@@ -67,7 +67,7 @@ export const StatsCard: React.FC<StatsCardProps> = React.memo(({
 
       <div>
         <div className="flex items-center justify-between">
-          <p className="text-xs font-mono font-bold uppercase tracking-wider text-[#7A8FA6]">
+          <p className="text-sm font-mono font-bold uppercase tracking-wider text-[#7A8FA6]">
             {title}
           </p>
 
@@ -78,19 +78,19 @@ export const StatsCard: React.FC<StatsCardProps> = React.memo(({
           </div>
         </div>
 
-        <h3 className="mt-3 text-2xl sm:text-3xl font-bold tracking-tight text-white font-mono">
+        <h3 className="mt-3 text-3xl sm:text-4xl font-bold tracking-tight text-white font-mono">
           {value}
         </h3>
       </div>
 
       <div className="mt-4 pt-3 border-t border-[#17304E]/70 flex items-center justify-between text-xs">
         {subtitle && (
-          <p className="text-[#94A3B8] font-medium text-[11px] truncate">{subtitle}</p>
+          <p className="text-[#94A3B8] font-medium text-xs truncate">{subtitle}</p>
         )}
 
         {trend && (
-          <div className="flex items-center gap-1 font-mono text-[11px] text-emerald-400 font-bold ml-auto flex-shrink-0">
-            <TrendingUp className="h-3 w-3" />
+          <div className="flex items-center gap-1 font-mono text-xs text-emerald-400 font-bold ml-auto flex-shrink-0">
+            <TrendingUp className="h-3.5 w-3.5" />
             <span>{trend}</span>
           </div>
         )}

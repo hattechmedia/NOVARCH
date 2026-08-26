@@ -6,9 +6,7 @@ import {
   EyeOff,
   ArrowRight,
   ShieldCheck,
-  KeyRound,
   AlertCircle,
-  CheckCircle2,
 } from 'lucide-react';
 
 interface LoginPageProps {
@@ -194,11 +192,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 />
                 <span className="text-xs text-[#94A3B8]">Remember this session</span>
               </label>
-
-              <span className="text-[11px] font-mono text-[#64748B] flex items-center gap-1">
-                <KeyRound className="h-3 w-3 text-[#38B2D8]" />
-                256-bit AES
-              </span>
             </div>
 
             {/* Submit Button */}
@@ -220,12 +213,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               )}
             </button>
           </form>
-        </div>
-
-        {/* Footer info */}
-        <div className="mt-6 text-center text-[11px] text-[#475569] font-mono flex items-center justify-center gap-1.5">
-          <CheckCircle2 className="h-3 w-3 text-emerald-500/70" />
-          <span>NOVARCH Architecture Engine v1.0.0 &copy; 2026</span>
         </div>
       </div>
     </div>

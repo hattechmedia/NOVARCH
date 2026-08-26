@@ -3,11 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "description": "NOVARCH 3-Tier Enterprise Full-Stack Ecosystem Monorepo",
-  "workspaces": [
-    "frontend",
-    "backend",
-    "dashboard"
-  ],
   "scripts": {
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend run dev",

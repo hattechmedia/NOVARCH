@@ -77,11 +77,11 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
           </div>
 
           <div className="mt-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-[10px] font-mono font-semibold text-[#7A8FA6] tracking-wider uppercase">
-              <ShieldCheck className="h-3 w-3 text-[#38B2D8]" />
+            <div className="flex items-center gap-1.5 text-xs font-mono font-semibold text-[#7A8FA6] tracking-wider uppercase">
+              <ShieldCheck className="h-3.5 w-3.5 text-[#38B2D8]" />
               <span>COMMAND PORTAL</span>
             </div>
-            <span className="rounded-md bg-[#1E5FBF]/20 px-1.5 py-0.5 text-[9px] font-mono font-bold text-[#38B2D8] border border-[#38B2D8]/30">
+            <span className="rounded-md bg-[#1E5FBF]/20 px-1.5 py-0.5 text-[11px] font-mono font-bold text-[#38B2D8] border border-[#38B2D8]/30">
               v1.0
             </span>
           </div>
@@ -89,7 +89,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
 
         {/* Navigation Section */}
         <div className="mt-6">
-          <span className="px-3 text-[10px] font-mono font-bold uppercase tracking-widest text-[#64748B] block mb-2">
+          <span className="px-3 text-xs font-mono font-bold uppercase tracking-widest text-[#64748B] block mb-2">
             Navigation
           </span>
 
@@ -102,7 +102,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                 <button
                   key={item.id}
                   onClick={() => setCurrentTab(item.id)}
-                  className={`group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium transition-all duration-200 cursor-pointer ${
+                  className={`group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer ${
                     isActive
                       ? 'bg-gradient-to-r from-[#1E5FBF] to-[#2563EB] text-white shadow-lg shadow-[#1E5FBF]/25 font-bold'
                       : 'text-[#94A3B8] hover:bg-[#0E1B2C] hover:text-white'
@@ -121,7 +121,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
                     <div className="text-left truncate">
                       <span className="block leading-tight truncate">{item.label}</span>
                       <span
-                        className={`text-[10px] font-mono leading-none block mt-0.5 ${
+                        className={`text-[11px] font-mono leading-none block mt-0.5 ${
                           isActive ? 'text-white/80' : 'text-[#64748B]'
                         }`}
                       >
@@ -132,7 +132,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
 
                   {item.badge !== undefined && (
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-mono font-bold flex-shrink-0 ${
+                      className={`rounded-full px-2 py-0.5 text-xs font-mono font-bold flex-shrink-0 ${
                         isActive
                           ? 'bg-white/20 text-white'
                           : item.badgeColor || 'bg-[#17304E] text-[#38B2D8]'
@@ -155,13 +155,13 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
           href={frontendUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex w-full items-center justify-between rounded-xl bg-[#0B1524] border border-[#17304E] px-3 py-2 text-xs font-mono text-[#94A3B8] hover:text-white hover:border-[#38B2D8]/40 hover:bg-[#0E1B2C] transition-all duration-200 group cursor-pointer"
+          className="flex w-full items-center justify-between rounded-xl bg-[#0B1524] border border-[#17304E] px-3 py-2 text-sm font-mono text-[#94A3B8] hover:text-white hover:border-[#38B2D8]/40 hover:bg-[#0E1B2C] transition-all duration-200 group cursor-pointer"
         >
           <div className="flex items-center gap-2">
-            <Globe className="h-3.5 w-3.5 text-[#38B2D8]" />
+            <Globe className="h-4 w-4 text-[#38B2D8]" />
             <span>Live Website</span>
           </div>
-          <ExternalLink className="h-3 w-3 text-[#64748B] group-hover:text-[#38B2D8] transition-colors" />
+          <ExternalLink className="h-3.5 w-3.5 text-[#64748B] group-hover:text-[#38B2D8] transition-colors" />
         </a>
 
         {/* User Card with Status Dot & Logout Action */}
@@ -181,10 +181,10 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-white truncate leading-tight">
+              <p className="text-sm font-bold text-white truncate leading-tight">
                 Super Admin
               </p>
-              <p className="text-[10px] font-mono text-[#7A8FA6] truncate mt-0.5" title={adminEmail}>
+              <p className="text-xs font-mono text-[#7A8FA6] truncate mt-0.5" title={adminEmail}>
                 {adminEmail}
               </p>
             </div>

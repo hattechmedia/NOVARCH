@@ -41,6 +41,7 @@ export const CreateContactSchema = z.object({
   news: z.string().optional(),
   serviceType: z.string().optional(),
   preferredService: z.string().optional(),
+  status: z.enum(['New', 'Contacted', 'Proposal Sent', 'Closed', 'Paid', 'Payment Declined', 'Payment Pending']).optional(),
   message: z.string().optional(),
 });
 

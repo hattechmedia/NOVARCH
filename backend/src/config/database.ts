@@ -29,18 +29,18 @@ export async function connectDatabase(): Promise<boolean> {
       family: 4,
     });
 
-    isConnected = conn.connection.readyState === 1;
+    isConnected = (conn.connection.readyState as number) === 1;
     console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host} (DB: ${conn.connection.name})`);
     return true;
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error);
-    isConnected = mongoose.connection.readyState === 1;
+    isConnected = (mongoose.connection.readyState as number) === 1;
     return isConnected;
   }
 }
 
 export function isDatabaseConnected(): boolean {
-  return mongoose.connection.readyState === 1;
+  return (mongoose.connection.readyState as number) === 1;
 }
 
 // Graceful disconnection handling

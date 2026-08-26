@@ -65,7 +65,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(({ status }) =
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono font-medium border ${config.bg} ${config.text} ${config.border}`}
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm font-mono font-medium border ${config.bg} ${config.text} ${config.border}`}
     >
       <span className={`h-1.5 w-1.5 rounded-full ${config.dot}`} />
       {config.label}

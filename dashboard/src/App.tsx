@@ -95,7 +95,7 @@ function DashboardView({
       {/* Top App Header Bar */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#17304E]/80 bg-[#070D17]/95 px-6 py-3.5 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-xs font-mono text-[#7A8FA6]">
+          <div className="flex items-center gap-1.5 text-sm font-mono text-[#7A8FA6]">
             <span className="text-[#38B2D8] font-bold">NOVARCH</span>
             <span>/</span>
             <span className="text-white capitalize font-semibold">
@@ -109,15 +109,15 @@ function DashboardView({
 
           <span className="hidden sm:inline-block h-4 w-[1px] bg-[#17304E]" />
 
-          <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono text-[#94A3B8]">
-            <Clock className="h-3 w-3 text-[#38B2D8]" />
+          <span className="hidden sm:inline-flex items-center gap-1 text-xs font-mono text-[#94A3B8]">
+            <Clock className="h-3.5 w-3.5 text-[#38B2D8]" />
             {currentTime}
           </span>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Live Sync Status */}
-          <div className="flex items-center gap-2 rounded-xl bg-[#0B1524] border border-[#17304E] px-3 py-1.5 text-[11px] font-mono">
+          <div className="flex items-center gap-2 rounded-xl bg-[#0B1524] border border-[#17304E] px-3 py-1.5 text-xs font-mono">
             <span
               className={`h-2 w-2 rounded-full ${
                 isBackendConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
@@ -132,10 +132,10 @@ function DashboardView({
           <button
             onClick={() => loadData(true)}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 rounded-xl bg-[#0B1524] border border-[#17304E] px-3 py-1.5 text-xs font-mono text-[#CBD5E1] hover:text-[#38B2D8] hover:border-[#38B2D8]/50 hover:bg-[#122238] transition-all cursor-pointer disabled:opacity-60"
+            className="flex items-center gap-1.5 rounded-xl bg-[#0B1524] border border-[#17304E] px-3 py-1.5 text-sm font-mono text-[#CBD5E1] hover:text-[#38B2D8] hover:border-[#38B2D8]/50 hover:bg-[#122238] transition-all cursor-pointer disabled:opacity-60 font-semibold"
             title="Sync latest inquiries from database"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin text-[#38B2D8]' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-[#38B2D8]' : ''}`} />
             <span className="hidden md:inline">Refresh</span>
           </button>
         </div>
@@ -161,38 +161,40 @@ function DashboardView({
           </div>
         )}
 
-        {/* Top Metric Cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatsCard
-            title="Service Leads"
-            value={serviceLeads.length}
-            subtitle="Package & tier bookings"
-            icon={Zap}
-            color="blue"
-            trend="+100% active"
-          />
-          <StatsCard
-            title="Contact Messages"
-            value={contactMessages.length}
-            subtitle="Website direct inquiries"
-            icon={MessageSquare}
-            color="emerald"
-          />
-          <StatsCard
-            title="New Inquiries"
-            value={newSubmissionsCount}
-            subtitle="Pending architecture triage"
-            icon={Sparkles}
-            color="amber"
-          />
-          <StatsCard
-            title="Pipeline Value"
-            value={`$${(stats?.estimatedPipelineValue ?? totalPipelineValue).toLocaleString()}`}
-            subtitle="Active contract opportunities"
-            icon={DollarSign}
-            color="cyan"
-          />
-        </div>
+        {/* Top Metric Cards — Rendered ONLY on Command Center Overview */}
+        {tab === 'overview' && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatsCard
+              title="Service Leads"
+              value={serviceLeads.length}
+              subtitle="Package & tier bookings"
+              icon={Zap}
+              color="blue"
+              trend="+100% active"
+            />
+            <StatsCard
+              title="Contact Messages"
+              value={contactMessages.length}
+              subtitle="Website direct inquiries"
+              icon={MessageSquare}
+              color="emerald"
+            />
+            <StatsCard
+              title="New Inquiries"
+              value={newSubmissionsCount}
+              subtitle="Pending architecture triage"
+              icon={Sparkles}
+              color="amber"
+            />
+            <StatsCard
+              title="Pipeline Value"
+              value={`$${(stats?.estimatedPipelineValue ?? totalPipelineValue).toLocaleString()}`}
+              subtitle="Active contract opportunities"
+              icon={DollarSign}
+              color="cyan"
+            />
+          </div>
+        )}
 
         {/* Inquiries Table Component */}
         <InquiryTable
@@ -207,6 +209,7 @@ function DashboardView({
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           onUpdateStatus={onUpdateStatus}
+          hideCategorySwitcher={tab !== 'overview'}
         />
       </main>
     </div>
