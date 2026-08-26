@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
-/* ─── NOVARCH Design System ─────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
 
 :root {
   /* Brand Palette — derived from NOVARCH logo */

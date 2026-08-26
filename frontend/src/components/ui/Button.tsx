@@ -86,6 +86,29 @@ export function Button({
         </a>
       );
     }
+
+    if (href.startsWith('#')) {
+      const handleHashClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        const id = href.replace('#', '');
+        const elem = document.getElementById(id);
+        if (elem) {
+          e.preventDefault();
+          const yOffset = -90; // offset for sticky header height
+          const y = elem.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      };
+
+      // Fallback target page if anchor not present on current route
+      const fallbackHref = href === '#packages' ? '/pricing#packages' : href === '#services' ? '/#services' : href;
+
+      return (
+        <Link href={fallbackHref} onClick={handleHashClick} className={classes}>
+          {content}
+        </Link>
+      );
+    }
+
     return (
       <Link href={href} className={classes}>
         {content}
