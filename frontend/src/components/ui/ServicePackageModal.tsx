@@ -330,7 +330,7 @@ export function ServicePackageModal({
                   <span>
                     {isSubmitting
                       ? (pkg.tier === 'Basic' ? 'Redirecting to Stripe...' : 'Submitting Request...')
-                      : (pkg.tier === 'Basic' ? `Pay & Subscribe — ${pkg.price}` : `Request Scope Qualification — ${pkg.price}`)}
+                      : (pkg.tier === 'Basic' ? `Proceed to Checkout — ${pkg.price}` : `Request Scope Qualification — ${pkg.price}`)}
                   </span>
                 </Button>
               </div>

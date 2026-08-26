@@ -40,7 +40,8 @@ router.post('/create-session', async (req: Request, res: Response) => {
 
     const unitAmount = Math.max(numericPrice * 100, 500); // minimum 500 cents ($5.00)
 
-    const title = `${serviceName || 'NOVARCH Service'} - ${packageName || 'Package'} (${tier || 'Standard'})`;
+    const title = packageName ? `${packageName} (${serviceName || 'NOVARCH System'})` : `${serviceName || 'NOVARCH Service'} Package`;
+    const productDesc = `One-time Blueprint purchase for ${serviceName || 'NOVARCH System'}`;
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -50,7 +51,7 @@ router.post('/create-session', async (req: Request, res: Response) => {
             currency: currency.toLowerCase(),
             product_data: {
               name: title,
-              description: `NOVARCH Enterprise Package: ${packageName || 'Service Package'}`,
+              description: productDesc,
             },
             unit_amount: unitAmount,
           },

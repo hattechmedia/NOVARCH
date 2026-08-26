@@ -31,7 +31,7 @@ function PaymentSuccessContent() {
         </h1>
 
         <p className="text-sm text-[#94A3B8] leading-relaxed mb-6">
-          Your package subscription payment has been processed successfully. Our engineering and architecture team has received your order and is initializing project onboarding.
+          Your Blueprint purchase payment has been processed successfully. Our engineering and architecture team has received your order and is initializing project onboarding.
         </p>
 
         {sessionId && (
@@ -48,7 +48,7 @@ function PaymentSuccessContent() {
         <div className="bg-[#0D1929] border border-[#1E3A5F] rounded-2xl p-4 mb-8 text-left flex items-start gap-3">
           <Mail className="h-5 w-5 text-[#38B2D8] shrink-0 mt-0.5" />
           <p className="text-xs text-[#CBD5E1] leading-normal">
-            A confirmation receipt and kickoff questionnaire have been dispatched to your email address.
+            Our engineering team has received your order details and will reach out directly to your email for kickoff.
           </p>
         </div>
 

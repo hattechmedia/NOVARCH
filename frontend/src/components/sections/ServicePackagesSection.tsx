@@ -66,6 +66,7 @@ export function ServicePackagesSection({ service }: ServicePackagesSectionProps)
   return (
     <div
       ref={containerRef}
+      id="packages"
       className="relative h-[240vh] bg-[#040811] border-y border-[#17304E]/80"
     >
       {/* ── Sticky Viewport ────────────────────────────────────────────── */}
