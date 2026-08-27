@@ -30,12 +30,14 @@ const ContactSchema = new Schema<ContactDocument>(
       enum: ['New', 'Contacted', 'Proposal Sent', 'Closed', 'Paid', 'Payment Declined', 'Payment Pending'],
       default: 'New',
     },
-    estimatedValue: { type: Number, default: 15000 },
+    estimatedValue: { type: Number, default: 490 },
     source: {
       type: String,
       enum: ['Website Form', 'Service Package', 'Direct API', 'Referral'],
       default: 'Website Form',
     },
+    stripeSessionId: { type: String, trim: true, index: { unique: true, sparse: true } },
+    stripePaymentIntentId: { type: String, trim: true, index: { unique: true, sparse: true } },
   },
   {
     timestamps: true,
@@ -54,7 +56,6 @@ ContactSchema.index({ status: 1 });
 ContactSchema.index({ submissionType: 1 });
 ContactSchema.index({ createdAt: -1 });
 ContactSchema.index({ email: 1 });
-// Compound indexes for combined status/submissionType filtering and createdAt descending sorting
 ContactSchema.index({ status: 1, createdAt: -1 });
 ContactSchema.index({ submissionType: 1, createdAt: -1 });
 

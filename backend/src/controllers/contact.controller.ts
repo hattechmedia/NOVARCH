@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { contactService } from '../services/contact.service.js';
-import { CreateContactSchema, UpdateContactStatusSchema } from '../types/contact.types.js';
+import { CreatePublicContactSchema, UpdateContactStatusSchema } from '../types/contact.types.js';
 
 export const contactController = {
   getContacts: async (_req: Request, res: Response, next: NextFunction) => {
@@ -39,7 +39,9 @@ export const contactController = {
 
   createContact: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const validatedData = CreateContactSchema.parse(req.body);
+      // Validate customer submission strictly against public schema
+      // Drops any internal fields like status, estimatedValue, source, planPrice
+      const validatedData = CreatePublicContactSchema.parse(req.body);
       const newContact = await contactService.submitInquiry(validatedData);
 
       console.log(`[Lead Created]: ${newContact.name} (${newContact.email}) -> ${newContact.serviceType}`);

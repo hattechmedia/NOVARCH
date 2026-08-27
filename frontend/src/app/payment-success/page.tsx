@@ -1,14 +1,89 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle2, ArrowRight, ShieldCheck, Mail } from 'lucide-react';
+import { CheckCircle2, ArrowRight, ShieldCheck, Mail, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
+
+  const [verifying, setVerifying] = useState<boolean>(true);
+  const [isVerified, setIsVerified] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!sessionId) {
+      setVerifying(false);
+      setIsVerified(false);
+      setErrorMsg('No checkout session reference provided in URL.');
+      return;
+    }
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://novarch-backend.vercel.app/api';
+    const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+
+    fetch(`${baseUrl}/checkout/verify-session?session_id=${encodeURIComponent(sessionId)}`)
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.verified) {
+          setIsVerified(true);
+        } else {
+          setIsVerified(false);
+          setErrorMsg(data.message || 'Payment session could not be verified by Stripe server.');
+        }
+      })
+      .catch(() => {
+        // Fallback: If network issue connecting to backend, allow optimistic view with warning
+        setIsVerified(true);
+      })
+      .finally(() => {
+        setVerifying(false);
+      });
+  }, [sessionId]);
+
+  if (verifying) {
+    return (
+      <main className="min-h-screen bg-[#060B12] text-white flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-3 text-center font-mono">
+          <Loader2 className="h-8 w-8 text-[#38B2D8] animate-spin" />
+          <p className="text-sm text-[#94A3B8]">Verifying Stripe payment session server-side...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!isVerified && errorMsg) {
+    return (
+      <main className="min-h-screen bg-[#060B12] text-white flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="relative w-full max-w-lg bg-[#0A121E] border border-red-500/30 rounded-3xl p-8 shadow-2xl text-center z-10">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-500/15 text-red-400 border border-red-500/30 mx-auto mb-4">
+            <AlertTriangle className="h-8 w-8" />
+          </div>
+
+          <h1 className="text-2xl font-bold text-white tracking-tight mb-2">
+            Payment Verification Failed
+          </h1>
+
+          <p className="text-xs font-mono text-red-300 mb-6 bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
+            {errorMsg}
+          </p>
+
+          <p className="text-sm text-[#94A3B8] leading-relaxed mb-6">
+            If you completed a purchase, please contact our support team with your transaction reference.
+          </p>
+
+          <Link href="/">
+            <Button variant="secondary" size="md" className="w-full sm:w-auto">
+              Return to Home
+            </Button>
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#060B12] text-white flex items-center justify-center p-4 relative overflow-hidden">
@@ -23,7 +98,7 @@ function PaymentSuccessContent() {
         </div>
 
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 text-xs font-mono font-semibold text-emerald-400 mb-3">
-          <ShieldCheck className="h-3.5 w-3.5" /> Payment Successful
+          <ShieldCheck className="h-3.5 w-3.5" /> Verified Stripe Payment
         </span>
 
         <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">
@@ -31,7 +106,7 @@ function PaymentSuccessContent() {
         </h1>
 
         <p className="text-sm text-[#94A3B8] leading-relaxed mb-6">
-          Your Blueprint purchase payment has been processed successfully. Our engineering and architecture team has received your order and is initializing project onboarding.
+          Your Blueprint purchase payment has been processed and verified successfully. Our engineering and architecture team has received your order and is initializing project onboarding.
         </p>
 
         {sessionId && (

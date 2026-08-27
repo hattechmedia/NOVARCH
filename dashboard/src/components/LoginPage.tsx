@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { api } from '../services/api';
 import {
   Lock,
   Mail,
@@ -21,7 +22,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
@@ -37,34 +38,23 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
     setIsLoading(true);
 
-    // Authentication verification
-    setTimeout(() => {
+    try {
+      const res = await api.login(email.trim(), password);
       setIsLoading(false);
-      const normalizedEmail = email.trim().toLowerCase();
 
-      // Check admin credentials
-      if (
-        (normalizedEmail === 'admin@novarch.com' ||
-          normalizedEmail === 'admin@novarch.io' ||
-          normalizedEmail.includes('admin') ||
-          normalizedEmail === 'emaad@gmail.com') &&
-        (password === 'Novarch@Admin2026' ||
-          password === 'Novarch2026!' ||
-          password === 'admin123' ||
-          password.length >= 6)
-      ) {
-        if (rememberMe) {
-          localStorage.setItem('novarch_admin_token', 'jwt_session_token_' + Date.now());
-          localStorage.setItem('novarch_admin_user', email.trim());
-        } else {
-          sessionStorage.setItem('novarch_admin_token', 'jwt_session_token_' + Date.now());
-          sessionStorage.setItem('novarch_admin_user', email.trim());
-        }
-        onLoginSuccess(email.trim());
+      if (rememberMe) {
+        localStorage.setItem('novarch_admin_token', res.token);
+        localStorage.setItem('novarch_admin_user', res.user.email);
       } else {
-        setErrorMessage('Invalid administrator email or password.');
+        sessionStorage.setItem('novarch_admin_token', res.token);
+        sessionStorage.setItem('novarch_admin_user', res.user.email);
       }
-    }, 500);
+
+      onLoginSuccess(res.user.email);
+    } catch (err: any) {
+      setIsLoading(false);
+      setErrorMessage(err.message || 'Invalid administrator email or password.');
+    }
   };
 
   return (
