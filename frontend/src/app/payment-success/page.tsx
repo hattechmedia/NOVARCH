@@ -22,10 +22,10 @@ function PaymentSuccessContent() {
       return;
     }
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://novarch-backend.vercel.app/api';
-    const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+    const rawUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://novarch-backend.vercel.app').replace(/\/+$/, '');
+    const apiBase = rawUrl.endsWith('/api') ? rawUrl.slice(0, -4) : rawUrl;
 
-    fetch(`${baseUrl}/checkout/verify-session?session_id=${encodeURIComponent(sessionId)}`)
+    fetch(`${apiBase}/api/checkout/verify-session?session_id=${encodeURIComponent(sessionId)}`)
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
         if (res.ok && data.verified) {

@@ -117,7 +117,8 @@ export function ServicePackageModal({
       }
 
       // 2. Initiate Stripe Checkout Session for Basic Blueprint Plans
-      const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'https://novarch-backend.vercel.app').replace(/\/+$/, '');
+      const rawUrl = (process.env.NEXT_PUBLIC_API_URL || 'https://novarch-backend.vercel.app').replace(/\/+$/, '');
+      const apiBase = rawUrl.endsWith('/api') ? rawUrl.slice(0, -4) : rawUrl;
       const res = await fetch(`${apiBase}/api/checkout/create-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

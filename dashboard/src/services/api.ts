@@ -1,7 +1,7 @@
 import { ContactInquiry, DashboardStats, HealthResponse, LeadStatus } from '../types';
 
-const rawBase = (import.meta.env.VITE_API_URL || '/api').trim();
-const API_BASE = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
+const rawBase = (import.meta.env.VITE_API_URL || 'https://novarch-backend.vercel.app/api').trim().replace(/\/+$/, '');
+const API_BASE = rawBase.endsWith('/api') ? rawBase : `${rawBase}/api`;
 
 // Helper to get stored JWT Token
 export function getAdminToken(): string | null {
