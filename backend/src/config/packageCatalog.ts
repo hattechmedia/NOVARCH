@@ -16,8 +16,8 @@ export const PACKAGE_CATALOG: Record<string, PackageCatalogItem> = {
     name: 'Launch Blueprint',
     tier: 'Basic',
     serviceName: 'Digital Launch',
-    priceEUR: 490,
-    amountCents: 49000,
+    priceEUR: 1,
+    amountCents: 100,
     isPurchasable: true,
   },
   'automation-integration-basic': {
