@@ -4,6 +4,7 @@ import { config } from '../config/index.js';
 import { getPackageBySlugOrId } from '../config/packageCatalog.js';
 import { contactRepository } from '../repositories/contact.repository.js';
 import { ContactModel } from '../models/contact.model.js';
+import { connectDatabase } from '../config/database.js';
 
 const router = Router();
 const stripe = new Stripe(config.stripeSecretKey || 'sk_test_mock_dummy_key_for_init_123', {
@@ -83,6 +84,7 @@ router.post('/create-session', async (req: Request, res: Response) => {
 
     // Record initial lead in DB as Payment Pending with server-side validated price
     try {
+      await connectDatabase();
       await contactRepository.create({
         name: userName.trim(),
         email: userEmail.trim().toLowerCase(),
@@ -151,26 +153,35 @@ router.get('/verify-session', async (req: Request, res: Response) => {
  */
 router.post('/webhook', async (req: Request, res: Response) => {
   const sig = req.headers['stripe-signature'];
-  let event: Stripe.Event;
+  const webhookSecret = (config.stripeWebhookSecret || '').trim();
 
   // STRICT WEBHOOK SIGNATURE VERIFICATION
-  if (!sig || !config.stripeWebhookSecret) {
+  if (!sig || !webhookSecret) {
     console.error('❌ Webhook Rejected: Missing stripe-signature header or secret configuration');
     res.status(400).send('Webhook Error: Missing Stripe signature or secret');
     return;
   }
 
+  let event: Stripe.Event;
+  let payload: any = (req as any).rawBody || req.body;
+  if (typeof payload === 'object' && !Buffer.isBuffer(payload)) {
+    payload = JSON.stringify(payload);
+  }
+
   try {
     event = stripe.webhooks.constructEvent(
-      req.body,
+      payload,
       sig,
-      config.stripeWebhookSecret
+      webhookSecret
     );
   } catch (err: any) {
     console.error('❌ Webhook signature verification failed:', err.message);
     res.status(400).send(`Webhook Error: ${err.message}`);
     return;
   }
+
+  // Ensure DB connection is active before processing Mongoose operations in cold serverless functions
+  await connectDatabase();
 
   // 1. Payment Accepted (Checkout Completed)
   if (event.type === 'checkout.session.completed') {
@@ -181,7 +192,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
     const amountEUR = session.amount_total
       ? session.amount_total / 100
-      : (parseInt(metadata.numericPrice, 10) || 490);
+      : (parseInt(metadata.numericPrice, 10) || 1);
 
     console.log(`✅ Webhook: Payment ACCEPTED (€${amountEUR}) for session: ${sessionId}`);
 
@@ -235,7 +246,6 @@ router.post('/webhook', async (req: Request, res: Response) => {
       }
     } catch (dbErr) {
       console.error('❌ Database processing error during webhook handling:', dbErr);
-      // FAIL CLOSED: Return 500 so Stripe automatically retries webhook later
       res.status(500).json({ error: 'Database processing failure, retry queued' });
       return;
     }

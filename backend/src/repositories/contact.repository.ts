@@ -130,6 +130,8 @@ export class MongoContactRepository implements IContactRepository {
           status: initialStatus,
           estimatedValue,
           source,
+          stripeSessionId: dto.stripeSessionId || undefined,
+          stripePaymentIntentId: dto.stripePaymentIntentId || undefined,
         });
 
         console.log(`💾 Saved ${submissionType} to MongoDB Atlas: ${doc.name} (${doc._id})`);
