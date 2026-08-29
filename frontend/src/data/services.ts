@@ -12,8 +12,8 @@ export const services: Service[] = [
       basic: {
         name: 'Launch Blueprint',
         tier: 'Basic',
-        price: '€1',
-        priceNumber: 1,
+        price: '€490',
+        priceNumber: 490,
         description: 'Complete digital positioning, message architecture, and conversion blueprint for growing businesses.',
         timeline: '1–2 weeks delivery',
         features: [
@@ -45,7 +45,7 @@ export const services: Service[] = [
     },
     paidEntry: {
       name: 'Launch Blueprint',
-      price: 1,
+      price: 490,
     },
     implementation: {
       from: 2900,
