@@ -212,7 +212,7 @@ export function ServicesOrbitAnimation() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full h-[400px] sm:h-[450px] lg:h-[480px] overflow-visible select-none flex items-center justify-center mt-0 sm:mt-2 lg:mt-4">
+    <div ref={containerRef} className="relative w-full max-w-full h-[350px] sm:h-[450px] lg:h-[480px] overflow-hidden sm:overflow-visible select-none flex items-center justify-center scale-90 sm:scale-100 origin-center transition-transform">
       {/* ── 3D Tilted Perspective Canvas ─────────────────────────── */}
       <div className="absolute inset-0 flex items-center justify-center -translate-y-2 sm:-translate-y-4">
         {/* Orbit SVG Plane with dynamic lighting and dashes */}

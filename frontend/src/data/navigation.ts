@@ -28,6 +28,7 @@ export const navigation: NavItem[] = [
       },
     ],
   },
-  { label: 'About', href: '/about' },
+  // { label: 'About', href: '/about' }, // Disabled
+  { label: 'Our Founder', href: '/founders' },
   { label: 'Contact', href: '/contact' },
 ];

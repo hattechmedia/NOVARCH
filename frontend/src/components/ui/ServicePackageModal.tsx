@@ -141,8 +141,8 @@ export function ServicePackageModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in select-none">
-      <div className="relative w-full max-w-lg rounded-2xl bg-[#0A121E] border border-[#17304E] p-6 sm:p-8 shadow-2xl overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto animate-in fade-in select-none">
+      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-[#0A121E] border border-[#17304E] p-5 sm:p-8 shadow-2xl my-auto">
         {/* Close Button */}
         <button
           onClick={onClose}

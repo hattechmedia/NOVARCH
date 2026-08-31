@@ -207,7 +207,7 @@ export default function ContactPage() {
               </label>
               <div className="flex gap-2">
                 {/* Country Code Select */}
-                <div className="relative w-44 flex-shrink-0">
+                <div className="relative w-28 sm:w-36 flex-shrink-0">
                   <select
                     value={formData.countryCode}
                     onChange={(e) => setFormData((prev) => ({ ...prev, countryCode: e.target.value }))}

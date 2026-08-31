@@ -138,11 +138,10 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               </li>
             )}
 
-            {/* About & Contact */}
-            {['About', 'Contact'].map((label) => {
-              const item = navigation.find((n) => n.label === label);
-              if (!item) return null;
-              return (
+            {/* Other Nav Items (About, Our Founder, Contact, etc.) */}
+            {navigation
+              .filter((item) => item.label !== 'Home' && item.label !== 'We Offer')
+              .map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
@@ -152,8 +151,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                     {item.label}
                   </Link>
                 </li>
-              );
-            })}
+              ))}
           </ul>
         </nav>
 
