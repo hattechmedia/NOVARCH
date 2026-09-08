@@ -64,7 +64,11 @@ function DashboardView({
         selectedStatus === 'All' ? true : inq.status === selectedStatus;
 
       const matchesCategory =
-        selectedCategory === 'all' ? true : inq.submissionType === selectedCategory;
+        selectedCategory === 'all'
+          ? true
+          : selectedCategory === 'service_lead'
+          ? inq.submissionType === 'service_lead' || (!!inq.planName && inq.submissionType !== 'message')
+          : inq.submissionType === 'message' || (!inq.submissionType && !inq.planName);
 
       if (!matchesStatus || !matchesCategory) return false;
       if (!query) return true;
@@ -79,8 +83,14 @@ function DashboardView({
     });
   }, [inquiries, selectedStatus, selectedCategory, deferredSearch]);
 
-  const serviceLeads = useMemo(() => inquiries.filter((i) => i.submissionType === 'service_lead'), [inquiries]);
-  const contactMessages = useMemo(() => inquiries.filter((i) => i.submissionType === 'message'), [inquiries]);
+  const serviceLeads = useMemo(
+    () => inquiries.filter((i) => i.submissionType === 'service_lead' || (!!i.planName && i.submissionType !== 'message')),
+    [inquiries]
+  );
+  const contactMessages = useMemo(
+    () => inquiries.filter((i) => i.submissionType === 'message' || (!i.submissionType && !i.planName)),
+    [inquiries]
+  );
   const newSubmissionsCount = useMemo(() => inquiries.filter((i) => i.status === 'New').length, [inquiries]);
   const totalPipelineValue = useMemo(
     () =>
@@ -245,8 +255,8 @@ function MainLayout({
   };
 
   const frontendUrl = import.meta.env.VITE_FRONTEND_URL || 'http://localhost:3000';
-  const serviceLeads = inquiries.filter((i) => i.submissionType === 'service_lead');
-  const contactMessages = inquiries.filter((i) => i.submissionType === 'message');
+  const serviceLeads = inquiries.filter((i) => i.submissionType === 'service_lead' || (!!i.planName && i.submissionType !== 'message'));
+  const contactMessages = inquiries.filter((i) => i.submissionType === 'message' || (!i.submissionType && !i.planName));
 
   return (
     <div className="flex min-h-screen bg-[#050A12] text-white select-none">

@@ -19,8 +19,12 @@ export interface IContactRepository {
 function formatContactDoc(doc: any): ContactInquiry {
   if (!doc) return doc;
   const { _id, __v, ...rest } = doc;
+  const isLead = doc.submissionType === 'service_lead' || !!doc.planName || !!doc.planTier || !!doc.stripeSessionId;
+  const submissionType: SubmissionType = doc.submissionType || (isLead ? 'service_lead' : 'message');
+
   return {
     ...rest,
+    submissionType,
     id: _id ? _id.toString() : (doc.id ? doc.id.toString() : ''),
     createdAt: rest.createdAt instanceof Date ? rest.createdAt.toISOString() : (rest.createdAt || new Date().toISOString()),
     updatedAt: rest.updatedAt instanceof Date ? rest.updatedAt.toISOString() : (rest.updatedAt || new Date().toISOString()),
