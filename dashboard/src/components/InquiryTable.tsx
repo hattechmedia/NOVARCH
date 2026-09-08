@@ -336,10 +336,14 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
 
                     {/* 4. Est. Pipeline */}
                     <td className="px-5 py-4">
-                      <div className="flex items-center gap-1 font-mono font-bold text-emerald-400 text-base">
-                        <DollarSign className="h-4 w-4 text-emerald-500" />
-                        <span>{(inq.estimatedValue || 0).toLocaleString()}</span>
-                      </div>
+                      {isServiceLead && (inq.estimatedValue || 0) > 0 ? (
+                        <div className="flex items-center gap-1 font-mono font-bold text-emerald-400 text-base">
+                          <DollarSign className="h-4 w-4 text-emerald-500" />
+                          <span>{(inq.estimatedValue || 0).toLocaleString()}</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs font-mono text-[#64748B]">—</span>
+                      )}
                     </td>
 
                     {/* 5. Status */}

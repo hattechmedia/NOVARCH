@@ -320,10 +320,16 @@ Client Notes: ${inquiry.news || inquiry.message || 'N/A'}
                 <span className="text-xs font-mono uppercase text-[#7A8FA6] font-bold block mb-1">
                   Est. Pipeline Value
                 </span>
-                <div className="flex items-center justify-end gap-1 text-2xl sm:text-3xl font-mono font-bold text-emerald-400">
-                  <DollarSign className="h-6 w-6 text-emerald-500" />
-                  <span>{(inquiry.estimatedValue || 0).toLocaleString()}</span>
-                </div>
+                {isServiceLead && (inquiry.estimatedValue || 0) > 0 ? (
+                  <div className="flex items-center justify-end gap-1 text-2xl sm:text-3xl font-mono font-bold text-emerald-400">
+                    <DollarSign className="h-6 w-6 text-emerald-500" />
+                    <span>{(inquiry.estimatedValue || 0).toLocaleString()}</span>
+                  </div>
+                ) : (
+                  <div className="text-xl sm:text-2xl font-mono font-bold text-[#64748B] text-right">
+                    —
+                  </div>
+                )}
               </div>
 
               <div className="rounded-2xl bg-[#060D17] border border-[#17304E] p-4 flex flex-col justify-between">

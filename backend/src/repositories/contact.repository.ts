@@ -102,7 +102,11 @@ export class MongoContactRepository implements IContactRepository {
         0
       );
     }
-    if (!estimatedValue) estimatedValue = 2499;
+    if (!isServiceLead) {
+      estimatedValue = 0; // General contact messages have no payment/pipeline price
+    } else if (!estimatedValue) {
+      estimatedValue = 490; // Default service lead package price
+    }
 
     const message =
       dto.message ||
