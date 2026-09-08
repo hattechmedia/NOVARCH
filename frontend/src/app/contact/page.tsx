@@ -46,7 +46,7 @@ const COUNTRY_CODES = [
   { code: '+61', country: 'Australia', flag: '🇦🇺' },
 ];
 
-const INITIAL_FORM: ContactFormData = {
+const INITIAL_FORM: ContactFormData & { website_hp?: string } = {
   name: '',
   email: '',
   countryCode: '+49',
@@ -54,6 +54,7 @@ const INITIAL_FORM: ContactFormData = {
   company: '',
   performances: [],
   news: '',
+  website_hp: '',
 };
 
 export default function ContactPage() {
@@ -78,8 +79,17 @@ export default function ContactPage() {
     e.preventDefault();
     setErrorMsg('');
 
-    if (!formData.name.trim() || !formData.email.trim()) {
-      setErrorMsg('Please enter your name and e-mail address.');
+    const trimmedName = formData.name.trim();
+    const trimmedEmail = formData.email.trim();
+
+    if (!trimmedName || trimmedName.length < 2) {
+      setErrorMsg('Please enter your full name (at least 2 characters).');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
+      setErrorMsg('Please enter a valid e-mail address (e.g. name@company.com).');
       return;
     }
 
@@ -89,7 +99,11 @@ export default function ContactPage() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          name: trimmedName,
+          email: trimmedEmail,
+        }),
       });
 
       const json = await res.json();
@@ -107,18 +121,34 @@ export default function ContactPage() {
     return (
       <div className="py-20 lg:py-32 text-text">
         <Container size="sm">
-          <Card className="p-8 sm:p-12 text-center border-border/80 bg-surface-card/90 shadow-2xl backdrop-blur-xl">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 mx-auto mb-6">
+          <Card className="p-8 sm:p-12 text-center border-border/80 bg-surface-card/90 shadow-2xl backdrop-blur-xl max-w-xl mx-auto">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 mx-auto mb-6 animate-in zoom-in-50 duration-300">
               <CheckCircle2 className="h-8 w-8" />
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-              Thank you for your inquiry!
+              Inquiry Received Successfully!
             </h1>
 
-            <p className="text-base text-text-muted leading-relaxed max-w-md mx-auto mb-8">
-              We have received your details. One of our team members will get in touch with you as soon as possible.
+            <p className="text-base text-text-muted leading-relaxed max-w-md mx-auto mb-6">
+              Thank you, <span className="text-white font-semibold">{formData.name}</span>. We have logged your request. Our engineering team will review your requirements and respond to <span className="text-[#38B2D8] font-medium">{formData.email}</span> within 24 hours.
             </p>
+
+            {formData.performances.length > 0 && (
+              <div className="mb-8 p-4 rounded-xl bg-surface border border-border text-left">
+                <p className="text-xs font-mono text-[#7A8FA6] uppercase tracking-wider mb-2 font-semibold">
+                  Selected Services & Topics:
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {formData.performances.map((item) => (
+                    <span key={item} className="inline-flex items-center gap-1 rounded-md bg-[#1E5FBF]/15 border border-[#38B2D8]/40 px-2.5 py-1 text-xs text-[#38B2D8] font-medium">
+                      <Sparkles className="h-3 w-3" />
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <Button
               onClick={() => {
@@ -127,6 +157,7 @@ export default function ContactPage() {
               }}
               variant="primary"
               size="md"
+              className="w-full sm:w-auto"
             >
               Submit Another Inquiry
             </Button>
@@ -162,6 +193,18 @@ export default function ContactPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Anti-Spam Honeypot Trap (Hidden from human users) */}
+            <div className="hidden aria-hidden=true">
+              <input
+                type="text"
+                name="website_hp"
+                tabIndex={-1}
+                autoComplete="off"
+                value={(formData as any).website_hp || ''}
+                onChange={(e) => setFormData((prev: any) => ({ ...prev, website_hp: e.target.value }))}
+              />
+            </div>
+
             {/* 1. Name */}
             <div>
               <label htmlFor="name" className="block text-xs font-mono font-bold uppercase tracking-wider text-text-muted mb-2">
@@ -324,8 +367,17 @@ export default function ContactPage() {
                 disabled={isSubmitting}
                 className="w-full flex items-center justify-center gap-2 font-bold py-3.5"
               >
-                <Send className="h-4 w-4" />
-                <span>{isSubmitting ? 'Submitting...' : 'Submit Inquiry'}</span>
+                {isSubmitting ? (
+                  <>
+                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Submitting Inquiry...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    <span>Submit Inquiry</span>
+                  </>
+                )}
               </Button>
             </div>
           </form>

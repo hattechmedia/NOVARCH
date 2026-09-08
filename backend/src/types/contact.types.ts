@@ -41,9 +41,12 @@ export const CreatePublicContactSchema = z.object({
   preferredService: z.string().max(100).optional(),
   planName: z.string().max(100).optional(),
   planTier: z.enum(['Basic', 'Premium']).optional(),
+  planPrice: z.string().max(100).optional(),
+  estimatedValue: z.number().optional(),
   performances: z.array(z.string().max(100)).max(15).optional(),
   news: z.string().max(3000).optional(),
   message: z.string().max(3000).optional(),
+  website_hp: z.string().max(0, 'Spam detected').optional(), // Anti-Spam Honeypot
 });
 
 export type CreatePublicContactDTO = z.infer<typeof CreatePublicContactSchema>;
