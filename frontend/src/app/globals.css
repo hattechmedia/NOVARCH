@@ -41,17 +41,17 @@ html {
 }
 
 .dark {
-  /* Brand Palette — dark black */
-  --color-navy:        #07080F;
-  --color-navy-800:    #0C0E1A;
-  --color-navy-700:    #111320;
-  --color-navy-600:    #171A2E;
+  /* Brand Palette — dark space */
+  --color-navy:        #030712;
+  --color-navy-800:    #050B17;
+  --color-navy-700:    #081224;
+  --color-navy-600:    #0F1E36;
 
-  /* Surfaces — dark black tiers */
-  --color-surface:     #07080F;
-  --color-surface-2:   #0C0E1A;
-  --color-surface-3:   #111320;
-  --color-surface-card: #0C0E1A;
+  /* Surfaces — dark tiers */
+  --color-surface:     #030712;
+  --color-surface-2:   #050B17;
+  --color-surface-3:   #081224;
+  --color-surface-card: #050B17;
 
   /* Text */
   --color-text:        #FFFFFF;
@@ -59,11 +59,11 @@ html {
   --color-text-light:  #A0AEC0;
 
   /* Borders */
-  --color-border:      #1A1D30;
-  --color-border-2:    rgba(255, 255, 255, 0.10);
+  --color-border:      #111C2E;
+  --color-border-2:    rgba(255, 255, 255, 0.08);
 
   /* Background */
-  --background:        #07080F;
+  --background:        #030712;
   --foreground:        #FFFFFF;
 }
 

@@ -46,20 +46,20 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <Link href="/" onClick={handleClose} className="flex items-center gap-1.5" aria-label="NOVARCH — Home">
+          <Link href="/" onClick={handleClose} className="flex flex-col items-center gap-0.5" aria-label="NOVARCH — Home">
             <Image
-              src="/images/logo/logo4F.png"
+              src="/images/logo/newLogo2.png"
               alt="NOVARCH Mark"
               width={70}
               height={70}
-              className="h-12 w-auto object-contain drop-shadow-[0_0_8px_rgba(56,178,216,0.3)]"
+              className="h-8 w-auto object-contain drop-shadow-[0_0_8px_rgba(56,178,216,0.35)]"
             />
             <Image
-              src="/images/logo/ovarch-text.png"
-              alt="OVARCH"
+              src="/images/logo/newLogo1.png"
+              alt="NOVARCH"
               width={140}
               height={24}
-              className="h-5 w-auto object-contain -ml-0.5"
+              className="h-4 w-auto object-contain"
             />
           </Link>
           <div className="flex items-center gap-2">

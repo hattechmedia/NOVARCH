@@ -7,6 +7,21 @@ export const FOUNDER = {
   mantra: 'Ambition made accountable through systems.',
 } as const;
 
+export const COFOUNDER = {
+  name: 'Melissa Pia Mehrle',
+  role: 'Co-founder, NOVARCH',
+  portrait: '/images/Cofounder/Melissa.jpg.jpeg',
+  location: 'Ilmenau, Germany',
+  bio: 'Melissa Pia Mehrle is Co-founder of NOVARCH, working across company-building, operations and coordination. She helps make priorities, ownership and follow-through visible so the company can grow without depending on constant founder intervention.',
+  philosophy:
+    'Based in Ilmenau, she brings a grounded people-and-operations perspective to NOVARCH\u2019s wider Germany\u2013Pakistan story and its belief that better systems should increase human agency, not replace it.',
+  pillars: [
+    { label: 'Operations', desc: 'Company-building, coordination and day-to-day follow-through.' },
+    { label: 'Visibility', desc: 'Making priorities and ownership transparent across the team.' },
+    { label: 'Scalability', desc: 'Building processes that grow without constant founder intervention.' },
+  ],
+} as const;
+
 export const ORIGIN_STORY = {
   image: '/images/founders/novarch-original-handdrawn-mark.png',
   eyebrow: 'BRAND ORIGIN',

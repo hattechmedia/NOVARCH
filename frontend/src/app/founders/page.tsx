@@ -20,11 +20,12 @@ import { FounderJourneyTimeline } from '@/components/sections/FounderJourneyTime
 import { VentureProofGrid } from '@/components/sections/VentureProofGrid';
 import { OperatingBlueprint } from '@/components/sections/OperatingBlueprint';
 import { FounderPrinciples } from '@/components/sections/FounderPrinciples';
+import { CofounderSection } from '@/components/sections/CofounderSection';
 
 export const metadata = generateMetadata({
-  title: 'Our Founder',
+  title: 'Our Founders',
   description:
-    'The story behind NOVARCH — from early curiosity with computers to a founder-built systems company built on ownership, not dependency.',
+    'The story behind NOVARCH — from early curiosity with computers to a founder-built systems company built on ownership, not dependency. Meet the team behind the vision.',
   path: '/founders',
 });
 
@@ -141,6 +142,9 @@ export default function FoundersPage() {
           </div>
         </Container>
       </section>
+
+      {/* ─── Co-founder: Melissa Pia Mehrle ─────────────────────────────── */}
+      <CofounderSection />
 
       {/* ─── Brand Origin Story ─────────────────────────────────────────── */}
       <section className="py-20 lg:py-28 bg-surface-2/40 border-y border-border relative">

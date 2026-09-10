@@ -28,20 +28,20 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
           {/* Brand Column */}
           <div className="lg:col-span-4">
-            <Link href="/" aria-label="NOVARCH — Home" className="flex items-center gap-1.5 mb-6 group">
+            <Link href="/" aria-label="NOVARCH — Home" className="flex flex-col items-center gap-0.5 mb-6 group w-fit">
               <Image
-                src="/images/logo/logo4F.png"
+                src="/images/logo/newLogo2.png"
                 alt="NOVARCH Mark"
                 width={80}
                 height={80}
-                className="h-13 sm:h-15 w-auto object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-[0_0_10px_rgba(56,178,216,0.3)]"
+                className="h-9 sm:h-10 w-auto object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-[0_0_10px_rgba(56,178,216,0.35)]"
               />
               <Image
-                src="/images/logo/ovarch-text.png"
-                alt="OVARCH"
+                src="/images/logo/newLogo1.png"
+                alt="NOVARCH"
                 width={160}
                 height={28}
-                className="h-5.5 sm:h-6.5 w-auto object-contain -ml-1 transition-opacity duration-200 group-hover:opacity-95"
+                className="h-4.5 sm:h-5 w-auto object-contain transition-opacity duration-200 group-hover:opacity-95 drop-shadow-[0_0_6px_rgba(56,178,216,0.2)]"
               />
             </Link>
             <p className="text-sm text-[#7A8FA6] leading-relaxed max-w-xs">
