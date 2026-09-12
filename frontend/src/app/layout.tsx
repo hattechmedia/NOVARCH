@@ -4,6 +4,7 @@ import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { ScrollToTop } from '@/components/layout/ScrollToTop';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body className="flex min-h-full flex-col bg-background text-foreground antialiased" suppressHydrationWarning>
         <ThemeProvider>
+          <ScrollToTop />
           <Navbar />
           <main className="flex-1 pt-20">{children}</main>
           <Footer />
