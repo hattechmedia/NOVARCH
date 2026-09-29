@@ -28,7 +28,7 @@ function DashboardView({
   isRefreshing,
   error,
   currentTime,
-  isBackendConnected,
+  isBackendConnected: _isBackendConnected,
 }: {
   tab: 'overview' | 'service_leads' | 'messages';
   stats: DashboardStats | null;
