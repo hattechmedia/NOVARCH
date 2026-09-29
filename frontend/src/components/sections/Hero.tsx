@@ -8,53 +8,14 @@ import { Reveal } from '@/components/animations/Reveal';
 import { ServicesOrbitAnimation } from '@/components/animations/ServicesOrbitAnimation';
 import { ConstellationBackground } from '@/components/animations/ConstellationBackground';
 import { ArrowRight, Cpu, GitBranch, Globe, Code2 } from 'lucide-react';
+import { HERO_SERVICES_STRIP } from '@/data/hero';
 
-const HERO_SERVICES_STRIP = [
-  {
-    id: 'ai-workflow',
-    title: 'AI Workflows',
-    description: 'Intelligent automation with human approval and control.',
-    href: '/services/ai-workflow',
-    icon: Cpu,
-    iconBg: 'bg-blue-500/15 text-blue-400 border border-blue-500/30 shadow-[0_0_12px_rgba(59,130,246,0.15)]',
-    accentHover: 'group-hover:text-blue-400',
-    borderHover: 'hover:border-blue-500/50 hover:shadow-blue-500/10',
-    linkHover: 'text-blue-400',
-  },
-  {
-    id: 'automation-integration',
-    title: 'Automation & Integration',
-    description: 'Connect tools, eliminate manual work, and streamline operations.',
-    href: '/services/automation-integration',
-    icon: GitBranch,
-    iconBg: 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.15)]',
-    accentHover: 'group-hover:text-cyan-400',
-    borderHover: 'hover:border-cyan-500/50 hover:shadow-cyan-500/10',
-    linkHover: 'text-cyan-400',
-  },
-  {
-    id: 'digital-launch',
-    title: 'Digital Launch',
-    description: 'High-converting websites, landing pages & digital presence.',
-    href: '/services/digital-launch',
-    icon: Globe,
-    iconBg: 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 shadow-[0_0_12px_rgba(99,102,241,0.15)]',
-    accentHover: 'group-hover:text-indigo-400',
-    borderHover: 'hover:border-indigo-500/50 hover:shadow-indigo-500/10',
-    linkHover: 'text-indigo-400',
-  },
-  {
-    id: 'custom-software',
-    title: 'Custom Software',
-    description: 'Powerful web apps, APIs and portals built for your business.',
-    href: '/services/custom-software',
-    icon: Code2,
-    iconBg: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.15)]',
-    accentHover: 'group-hover:text-emerald-400',
-    borderHover: 'hover:border-emerald-500/50 hover:shadow-emerald-500/10',
-    linkHover: 'text-emerald-400',
-  },
-];
+const HERO_ICON_MAP = {
+  Cpu,
+  GitBranch,
+  Globe,
+  Code2,
+};
 
 export function Hero() {
   return (
@@ -78,7 +39,7 @@ export function Hero() {
 
             {/* Main Hero Heading */}
             <Reveal delay={200}>
-              <h1 className="text-4xl sm:text-6xl lg:text-[66px] font-extrabold tracking-tight text-white leading-[1.08] mb-5">
+              <h1 className="text-3xl sm:text-5xl lg:text-[66px] font-extrabold tracking-tight text-white leading-[1.08] mb-5 break-words">
                 Build systems <br />
                 <span className="text-[#258CF4] drop-shadow-[0_0_30px_rgba(37,140,244,0.35)]">
                   you own.
@@ -120,7 +81,7 @@ export function Hero() {
           <div className="w-full">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {HERO_SERVICES_STRIP.map((card) => {
-                const IconComponent = card.icon;
+                const IconComponent = HERO_ICON_MAP[card.iconName] || Cpu;
                 return (
                   <Link
                     key={card.id}

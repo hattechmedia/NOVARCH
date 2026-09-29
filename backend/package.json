@@ -4,7 +4,7 @@
   "description": "NOVARCH REST API Backend Service",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": ".\\node_modules\\.bin\\tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js"
   },

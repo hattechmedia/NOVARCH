@@ -1,4 +1,4 @@
-import { ContactInquiry, DashboardStats, HealthResponse, LeadStatus } from '../types';
+import { ContactInquiry, CommunityMember, DashboardStats, HealthResponse, LeadStatus, CommunityStatus } from '../types';
 
 const rawBase = (import.meta.env.VITE_API_URL || 'https://novarch-backend.vercel.app/api').trim().replace(/\/+$/, '');
 const API_BASE = rawBase.endsWith('/api') ? rawBase : `${rawBase}/api`;
@@ -100,6 +100,26 @@ export const api = {
 
   async deleteContact(id: string): Promise<boolean> {
     await fetchWithAuth(`${API_BASE}/contacts/${id}`, {
+      method: 'DELETE',
+    });
+    return true;
+  },
+
+  async getCommunityMembers(): Promise<CommunityMember[]> {
+    const json = await fetchWithAuth<{ data: CommunityMember[] }>(`${API_BASE}/community`);
+    return json.data;
+  },
+
+  async updateCommunityStatus(id: string, status: CommunityStatus): Promise<CommunityMember> {
+    const json = await fetchWithAuth<{ data: CommunityMember }>(`${API_BASE}/community/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+    return json.data;
+  },
+
+  async deleteCommunityMember(id: string): Promise<boolean> {
+    await fetchWithAuth(`${API_BASE}/community/${id}`, {
       method: 'DELETE',
     });
     return true;

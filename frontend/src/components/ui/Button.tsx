@@ -94,7 +94,8 @@ export function Button({
         if (elem) {
           e.preventDefault();
           const yOffset = -90; // offset for sticky header height
-          const y = elem.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          const scrollY = typeof window.scrollY !== 'undefined' ? window.scrollY : window.pageYOffset;
+          const y = elem.getBoundingClientRect().top + scrollY + yOffset;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
       };

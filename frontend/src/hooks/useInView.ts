@@ -11,7 +11,7 @@ interface UseInViewOptions {
 /** Returns [ref, isInView] — attach ref to the element you want to observe */
 export function useInView<T extends HTMLElement = HTMLDivElement>({
   threshold = 0.1,
-  rootMargin = '0px 0px -60px 0px',
+  rootMargin = '0px 0px -20px 0px',
   triggerOnce = true,
 }: UseInViewOptions = {}): [React.RefObject<T>, boolean] {
   const ref = useRef<T>(null!);

@@ -11,6 +11,7 @@ import { errorHandler } from './middleware/error.middleware.js';
 
 import healthRoutes from './routes/health.routes.js';
 import contactRoutes from './routes/contact.routes.js';
+import communityRoutes from './routes/community.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import checkoutRoutes from './routes/checkout.routes.js';
 import authRoutes from './routes/auth.routes.js';
@@ -96,6 +97,7 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 // Apply rate limiting to sensitive routes
 app.use('/api/auth/login', sensitiveOpsLimiter);
 app.use('/api/contact', sensitiveOpsLimiter);
+app.use('/api/community', sensitiveOpsLimiter);
 app.use('/api/checkout/create-session', sensitiveOpsLimiter);
 
 // API Routes
@@ -108,6 +110,8 @@ app.use('/contact', contactRoutes);
 app.use('/contacts', contactRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/contacts', contactRoutes);
+
+app.use('/api/community', communityRoutes);
 
 app.use('/dashboard', dashboardRoutes);
 app.use('/api/dashboard', dashboardRoutes);

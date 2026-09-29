@@ -46,7 +46,7 @@ export default function FoundersPage() {
             <div className="lg:col-span-7 flex flex-col items-start -mt-2 lg:-mt-4">
               <Reveal delay={100}>
                 <Badge variant="default" className="mb-5 px-3 py-1 text-xs font-semibold uppercase tracking-wider">
-                  OUR FOUNDER
+                  FOUNDER & ARCHITECT
                 </Badge>
               </Reveal>
 

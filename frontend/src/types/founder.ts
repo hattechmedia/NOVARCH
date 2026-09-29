@@ -1,3 +1,10 @@
+export interface JourneyOppositeContext {
+  badgeLabel: string;
+  phaseTitle: string;
+  tag: string;
+  summary: string;
+}
+
 export interface FounderJourneyStep {
   step: string;
   phase: string;
@@ -5,6 +12,7 @@ export interface FounderJourneyStep {
   title: string;
   description: string;
   image?: string;
+  oppositeContext?: JourneyOppositeContext;
 }
 
 export interface VentureProof {

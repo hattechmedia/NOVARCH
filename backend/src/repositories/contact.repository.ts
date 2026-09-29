@@ -91,6 +91,12 @@ export class MongoContactRepository implements IContactRepository {
     }
     if (!estimatedValue && performances.length > 0) {
       const valueMap: Record<string, number> = {
+        'Digital Launch': 2900,
+        'Automation & Integration': 3900,
+        'AI Workflow': 4900,
+        'Custom Software': 7500,
+        'Systems Advisory & Architecture Review': 2500,
+        // Legacy fallback support for older records
         'Technical Editorial Department': 18000,
         'CE conformity': 22000,
         'IT systems house': 35000,
@@ -102,8 +108,8 @@ export class MongoContactRepository implements IContactRepository {
         0
       );
     }
-    if (!isServiceLead) {
-      estimatedValue = 0; // General contact messages have no payment/pipeline price
+    if (!isServiceLead && !estimatedValue) {
+      estimatedValue = 0; // General contact messages with no categories selected have 0 pipeline price
     } else if (!estimatedValue) {
       estimatedValue = 490; // Default service lead package price
     }

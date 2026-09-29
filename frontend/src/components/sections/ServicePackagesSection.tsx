@@ -95,7 +95,7 @@ export function ServicePackagesSection({ service }: ServicePackagesSectionProps)
 
               <div className="grid grid-cols-1 lg:grid-cols-12 h-full items-stretch">
                 {/* Left Side: Rich Generated Image with HUD overlay */}
-                <div className="lg:col-span-5 relative overflow-hidden border-b lg:border-b-0 lg:border-r border-[#17304E]/80 min-h-[180px] lg:min-h-full">
+                <div className="lg:col-span-5 relative overflow-hidden border-b lg:border-b-0 lg:border-r border-[#17304E]/80 min-h-[140px] sm:min-h-[180px] lg:min-h-full">
                   <Image
                     src={serviceImage}
                     alt={`${service.name} Basic Package`}
@@ -123,7 +123,7 @@ export function ServicePackagesSection({ service }: ServicePackagesSectionProps)
                 </div>
 
                 {/* Right Side: Package Details, 2-Col Bullets & CTA */}
-                <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto">
+                <div className="lg:col-span-7 p-4 sm:p-8 flex flex-col justify-between overflow-y-auto">
                   <div>
                     {/* Badge + Timeline */}
                     <div className="flex items-center gap-2 mb-2">
@@ -209,7 +209,7 @@ export function ServicePackagesSection({ service }: ServicePackagesSectionProps)
 
               <div className="grid grid-cols-1 lg:grid-cols-12 h-full items-stretch">
                 {/* Left Side: Rich Generated Image with HUD overlay */}
-                <div className="lg:col-span-5 relative overflow-hidden border-b lg:border-b-0 lg:border-r border-[#1E3A5F] min-h-[180px] lg:min-h-full">
+                <div className="lg:col-span-5 relative overflow-hidden border-b lg:border-b-0 lg:border-r border-[#1E3A5F] min-h-[140px] sm:min-h-[180px] lg:min-h-full">
                   <Image
                     src={serviceImage}
                     alt={`${service.name} Premium Package`}
@@ -237,7 +237,7 @@ export function ServicePackagesSection({ service }: ServicePackagesSectionProps)
                 </div>
 
                 {/* Right Side: Package Details, 2-Col Bullets & CTA */}
-                <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto">
+                <div className="lg:col-span-7 p-4 sm:p-8 flex flex-col justify-between overflow-y-auto">
                   <div>
                     {/* Badge + Timeline */}
                     <div className="flex items-center gap-2 mb-2">

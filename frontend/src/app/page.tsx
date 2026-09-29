@@ -3,6 +3,7 @@ import { Hero } from '@/components/sections/Hero';
 import { ServicesSection } from '@/components/sections/Services';
 import { ProcessSection } from '@/components/sections/Process';
 import { WhyNovarchSection } from '@/components/sections/WhyNovarch';
+import { BuildWithUsSection } from '@/components/sections/BuildWithUs';
 import { CTASection } from '@/components/sections/CTA';
 
 export const metadata = generateMetadata({
@@ -26,7 +27,10 @@ export default function HomePage() {
       {/* Section 04: Why NOVARCH */}
       <WhyNovarchSection />
 
-      {/* Section 05: Final CTA */}
+      {/* Section 05: Build With Us */}
+      <BuildWithUsSection />
+
+      {/* Section 06: Final CTA */}
       <CTASection />
     </>
   );

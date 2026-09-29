@@ -1,5 +1,6 @@
 export type LeadStatus = 'New' | 'Contacted' | 'Proposal Sent' | 'Closed' | 'Paid' | 'Payment Declined' | 'Payment Pending';
 export type SubmissionType = 'service_lead' | 'message';
+export type CommunityStatus = 'New' | 'Contacted' | 'Resolved';
 
 export interface ContactInquiry {
   id: string;
@@ -20,6 +21,22 @@ export interface ContactInquiry {
   status: LeadStatus;
   estimatedValue: number;
   source: 'Website Form' | 'Service Package' | 'Direct API' | 'Referral';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CommunityMember {
+  id: string;
+  fullName: string;
+  email: string;
+  contactNumber?: string;
+  countryCode?: string;
+  organization?: string;
+  role?: string;
+  interests?: string[];
+  message?: string;
+  status: CommunityStatus;
+  source: 'Website Form';
   createdAt: string;
   updatedAt: string;
 }

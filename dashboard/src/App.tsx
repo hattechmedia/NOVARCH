@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useMemo, useDeferredValue } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { api } from './services/api';
-import { ContactInquiry, DashboardStats, LeadStatus } from './types';
+import { ContactInquiry, CommunityMember, DashboardStats, LeadStatus, CommunityStatus } from './types';
 import { Sidebar } from './components/Sidebar';
 import { StatsCard } from './components/StatsCard';
 import { InquiryTable } from './components/InquiryTable';
 import { InquiryDetailPage } from './components/InquiryDetailPage';
+import { CommunityTable } from './components/CommunityTable';
+import { CommunityDetailPage } from './components/CommunityDetailPage';
 import { LoginPage } from './components/LoginPage';
 import {
   DollarSign,
@@ -101,14 +103,27 @@ function DashboardView({
   );
 
   return (
-    <div className="flex-1 flex flex-col min-w-0">
+    <div className="relative flex-1 flex flex-col min-w-0">
       {/* Top App Header Bar */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#17304E]/80 bg-[#070D17]/95 px-6 py-3.5 backdrop-blur-md">
+      <header
+        className="sticky top-0 z-30 flex items-center justify-between px-6 py-3 backdrop-blur-xl"
+        style={{
+          background: 'rgba(5,10,18,0.85)',
+          borderBottom: '1px solid rgba(23,48,78,0.6)',
+          boxShadow: '0 1px 0 rgba(56,178,216,0.04)',
+        }}
+      >
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-sm font-mono text-[#7A8FA6]">
-            <span className="text-[#38B2D8] font-bold">NOVARCH</span>
-            <span>/</span>
-            <span className="text-white capitalize font-semibold">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm font-mono">
+            <span
+              className="font-bold tracking-wide"
+              style={{ color: '#38B2D8', textShadow: '0 0 12px rgba(56,178,216,0.4)' }}
+            >
+              NOVARCH
+            </span>
+            <span className="text-[#1E3A5F]">/</span>
+            <span className="text-white font-semibold">
               {tab === 'service_leads'
                 ? 'Service Package Leads'
                 : tab === 'messages'
@@ -117,41 +132,45 @@ function DashboardView({
             </span>
           </div>
 
-          <span className="hidden sm:inline-block h-4 w-[1px] bg-[#17304E]" />
+          <span className="hidden sm:inline-block h-4 w-px bg-[#17304E]" />
 
-          <span className="hidden sm:inline-flex items-center gap-1 text-xs font-mono text-[#94A3B8]">
-            <Clock className="h-3.5 w-3.5 text-[#38B2D8]" />
-            {currentTime}
-          </span>
+          <div
+            className="hidden sm:flex items-center gap-1.5 rounded-lg px-2.5 py-1"
+            style={{ background: 'rgba(14,27,44,0.6)', border: '1px solid rgba(23,48,78,0.5)' }}
+          >
+            <Clock className="h-3 w-3 text-[#38B2D8]" />
+            <span className="text-xs font-mono text-[#4A6080]">{currentTime}</span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Live Sync Status */}
-          <div className="flex items-center gap-2 rounded-xl bg-[#0B1524] border border-[#17304E] px-3 py-1.5 text-xs font-mono">
-            <span
-              className={`h-2 w-2 rounded-full ${
-                isBackendConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
-              }`}
-            />
-            <span className="text-[#94A3B8]">
-              {isBackendConnected ? 'Express Engine: Live' : 'Local Storage Mode'}
-            </span>
-          </div>
-
-          {/* Refresh Data Button */}
+        <div className="flex items-center gap-2">
+          {/* Refresh Button */}
           <button
             onClick={() => loadData(true)}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 rounded-xl bg-[#0B1524] border border-[#17304E] px-3 py-1.5 text-sm font-mono text-[#CBD5E1] hover:text-[#38B2D8] hover:border-[#38B2D8]/50 hover:bg-[#122238] transition-all cursor-pointer disabled:opacity-60 font-semibold"
-            title="Sync latest inquiries from database"
+            className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-mono font-semibold cursor-pointer disabled:opacity-50 transition-all"
+            style={{
+              background: 'rgba(30,95,191,0.12)',
+              border: '1px solid rgba(56,178,216,0.2)',
+              color: '#38B2D8',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'rgba(30,95,191,0.22)';
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(56,178,216,0.4)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = 'rgba(30,95,191,0.12)';
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(56,178,216,0.2)';
+            }}
+            title="Sync latest data from database"
           >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-[#38B2D8]' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span className="hidden md:inline">Refresh</span>
           </button>
         </div>
       </header>
 
-      <main className="flex-1 p-6 sm:p-8 max-w-7xl w-full mx-auto space-y-8">
+      <main className="relative flex-1 p-6 sm:p-8 max-w-7xl w-full mx-auto space-y-6 z-10">
         {/* Connection Error Banner */}
         {error && (
           <div className="flex items-center justify-between rounded-2xl bg-amber-500/10 border border-amber-500/30 p-4 text-xs text-amber-300">
@@ -228,12 +247,14 @@ function DashboardView({
 
 function MainLayout({
   inquiries,
+  communityCount,
   isBackendConnected,
   adminEmail,
   onLogout,
   children,
 }: {
   inquiries: ContactInquiry[];
+  communityCount: number;
   isBackendConnected: boolean;
   adminEmail: string;
   onLogout: () => void;
@@ -245,12 +266,14 @@ function MainLayout({
   const currentTab = useMemo(() => {
     if (location.pathname.startsWith('/service-leads')) return 'service_leads';
     if (location.pathname.startsWith('/messages')) return 'messages';
+    if (location.pathname.startsWith('/community')) return 'community';
     return 'overview';
   }, [location.pathname]);
 
   const handleTabChange = (tabId: string) => {
     if (tabId === 'service_leads') navigate('/service-leads');
     else if (tabId === 'messages') navigate('/messages');
+    else if (tabId === 'community') navigate('/community');
     else navigate('/');
   };
 
@@ -266,6 +289,7 @@ function MainLayout({
         frontendUrl={frontendUrl}
         serviceLeadsCount={serviceLeads.length}
         messagesCount={contactMessages.length}
+        communityCount={communityCount}
         totalInquiriesCount={inquiries.length}
         isBackendConnected={isBackendConnected}
         adminEmail={adminEmail}
@@ -293,6 +317,7 @@ export function App() {
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [inquiries, setInquiries] = useState<ContactInquiry[]>([]);
+  const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>([]);
   const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -327,13 +352,15 @@ export function App() {
       const health = await api.getHealth();
       setIsBackendConnected(health.status === 'healthy');
 
-      const [fetchedStats, fetchedContacts] = await Promise.all([
+      const [fetchedStats, fetchedContacts, fetchedCommunity] = await Promise.all([
         api.getDashboardStats(),
         api.getContacts(),
+        api.getCommunityMembers(),
       ]);
 
       setStats(fetchedStats);
       setInquiries(fetchedContacts);
+      setCommunityMembers(fetchedCommunity);
     } catch (err: any) {
       console.warn('Backend connection warning:', err);
       setIsBackendConnected(false);
@@ -427,6 +454,26 @@ export function App() {
     }
   }, []);
 
+  const handleUpdateCommunityStatus = useCallback(async (id: string, newStatus: CommunityStatus) => {
+    try {
+      const updated = await api.updateCommunityStatus(id, newStatus);
+      setCommunityMembers((prev) => prev.map((item) => (item.id === id ? updated : item)));
+    } catch (err) {
+      setCommunityMembers((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, status: newStatus, updatedAt: new Date().toISOString() } : item))
+      );
+    }
+  }, []);
+
+  const handleDeleteCommunityMember = useCallback(async (id: string) => {
+    try {
+      await api.deleteCommunityMember(id);
+      setCommunityMembers((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      setCommunityMembers((prev) => prev.filter((item) => item.id !== id));
+    }
+  }, []);
+
   if (!isAuthenticated) {
     return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
@@ -434,7 +481,7 @@ export function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Full-Page Route for Lead by ID (/inquiry/:id) */}
+        {/* Full-Page Route for Contact Lead by ID (/inquiry/:id) */}
         <Route
           path="/inquiry/:id"
           element={
@@ -446,12 +493,25 @@ export function App() {
           }
         />
 
+        {/* Full-Page Route for Community Member by ID (/community/:id) */}
+        <Route
+          path="/community/:id"
+          element={
+            <CommunityDetailPage
+              members={communityMembers}
+              onUpdateStatus={handleUpdateCommunityStatus}
+              onDelete={handleDeleteCommunityMember}
+            />
+          }
+        />
+
         {/* Command Center (Overview) */}
         <Route
           path="/"
           element={
             <MainLayout
               inquiries={inquiries}
+              communityCount={communityMembers.length}
               isBackendConnected={isBackendConnected}
               adminEmail={adminEmail}
               onLogout={handleLogout}
@@ -477,6 +537,7 @@ export function App() {
           element={
             <MainLayout
               inquiries={inquiries}
+              communityCount={communityMembers.length}
               isBackendConnected={isBackendConnected}
               adminEmail={adminEmail}
               onLogout={handleLogout}
@@ -502,6 +563,7 @@ export function App() {
           element={
             <MainLayout
               inquiries={inquiries}
+              communityCount={communityMembers.length}
               isBackendConnected={isBackendConnected}
               adminEmail={adminEmail}
               onLogout={handleLogout}
@@ -521,6 +583,56 @@ export function App() {
           }
         />
 
+        {/* Community Members */}
+        <Route
+          path="/community"
+          element={
+            <MainLayout
+              inquiries={inquiries}
+              communityCount={communityMembers.length}
+              isBackendConnected={isBackendConnected}
+              adminEmail={adminEmail}
+              onLogout={handleLogout}
+            >
+              <div className="flex-1 flex flex-col min-w-0">
+              <header
+                className="sticky top-0 z-30 flex items-center justify-between px-6 py-3 backdrop-blur-xl"
+                style={{
+                  background: 'rgba(5,10,18,0.85)',
+                  borderBottom: '1px solid rgba(23,48,78,0.6)',
+                  boxShadow: '0 1px 0 rgba(56,178,216,0.04)',
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 text-sm font-mono">
+                    <span style={{ color: '#38B2D8', textShadow: '0 0 12px rgba(56,178,216,0.4)', fontWeight: 700 }}>NOVARCH</span>
+                    <span className="text-[#1E3A5F]">/</span>
+                    <span className="text-white font-semibold">Community</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => loadData(true)}
+                    disabled={isRefreshing}
+                    className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-mono font-semibold cursor-pointer disabled:opacity-50 transition-all"
+                    style={{ background: 'rgba(30,95,191,0.12)', border: '1px solid rgba(56,178,216,0.2)', color: '#38B2D8' }}
+                  >
+                    <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    <span className="hidden md:inline">Refresh</span>
+                  </button>
+                </div>
+              </header>
+              <main className="relative flex-1 p-6 sm:p-8 max-w-7xl w-full mx-auto z-10">
+                  <CommunityTable
+                    members={communityMembers}
+                    onUpdateStatus={handleUpdateCommunityStatus}
+                  />
+                </main>
+              </div>
+            </MainLayout>
+          }
+        />
+
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -529,3 +641,4 @@ export function App() {
 }
 
 export default App;
+

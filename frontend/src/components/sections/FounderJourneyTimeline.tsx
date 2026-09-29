@@ -7,54 +7,13 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Container } from '@/components/ui/Container';
 import { Badge } from '@/components/ui/Badge';
 import { Reveal } from '@/components/animations/Reveal';
-import { JOURNEY } from '@/data/founders';
+import { JOURNEY, OPPOSITE_CONTEXT } from '@/data/founders';
 import type { FounderJourneyStep } from '@/types/founder';
 
 const DNAanimation = dynamic(
   () => import('@/components/animations/DNAanimation').then((m) => m.DNAanimation),
   { ssr: false }
 );
-
-const OPPOSITE_CONTEXT: Record<
-  string,
-  { badgeLabel: string; phaseTitle: string; tag: string; summary: string }
-> = {
-  '01': {
-    badgeLabel: 'ARCHIVE',
-    phaseTitle: 'Early Curiosity',
-    tag: 'ORIGIN',
-    summary:
-      'Hands-on early familiarity with technology — curiosity that persisted into professional software architecture.',
-  },
-  '02': {
-    badgeLabel: 'PHASE 02',
-    phaseTitle: 'Commercial Translation',
-    tag: 'FROM 2021',
-    summary:
-      'Sustained client-facing, commercial learning: understanding buyer context, explaining digital capability, and moving prospects toward real sales conversations.',
-  },
-  '03': {
-    badgeLabel: 'PHASE 03',
-    phaseTitle: 'Operations Exposure',
-    tag: 'FROM DEC 2024',
-    summary:
-      'Multi-marketplace store operations, inventory reconciliation, order routing, fulfillment SLAs across Amazon, Shopify, Walmart, TikTok Shop, eBay, and Etsy.',
-  },
-  '04': {
-    badgeLabel: 'PHASE 04',
-    phaseTitle: 'Solo Product Building',
-    tag: 'FROM APR 2026',
-    summary:
-      'The founder-built full-stack system bridging strategy and software: capture inquiry, qualify, assign ownership, maintain follow-up discipline, and keep the pipeline visible.',
-  },
-  '05': {
-    badgeLabel: 'CORE THESIS',
-    phaseTitle: 'The Systems Company',
-    tag: 'PRESENT',
-    summary:
-      'Built on one thesis: systems people can understand, operate, and own. Technology should increase human agency, not create opaque dependency.',
-  },
-};
 
 interface MilestoneRowProps {
   step: FounderJourneyStep;

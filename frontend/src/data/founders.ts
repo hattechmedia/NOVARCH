@@ -1,4 +1,42 @@
-import type { FounderJourneyStep, VentureProof, FounderPrinciple, OperatingStep } from '@/types/founder';
+import type { FounderJourneyStep, VentureProof, FounderPrinciple, OperatingStep, JourneyOppositeContext } from '@/types/founder';
+
+export const OPPOSITE_CONTEXT: Record<string, JourneyOppositeContext> = {
+  '01': {
+    badgeLabel: 'ARCHIVE',
+    phaseTitle: 'Early Curiosity',
+    tag: 'ORIGIN',
+    summary:
+      'Hands-on early familiarity with technology — curiosity that persisted into professional software architecture.',
+  },
+  '02': {
+    badgeLabel: 'PHASE 02',
+    phaseTitle: 'Commercial Translation',
+    tag: 'FROM 2021',
+    summary:
+      'Sustained client-facing, commercial learning: understanding buyer context, explaining digital capability, and moving prospects toward real sales conversations.',
+  },
+  '03': {
+    badgeLabel: 'PHASE 03',
+    phaseTitle: 'Operations Exposure',
+    tag: 'FROM DEC 2024',
+    summary:
+      'Multi-marketplace store operations, inventory reconciliation, order routing, fulfillment SLAs across Amazon, Shopify, Walmart, TikTok Shop, eBay, and Etsy.',
+  },
+  '04': {
+    badgeLabel: 'PHASE 04',
+    phaseTitle: 'Solo Product Building',
+    tag: 'FROM APR 2026',
+    summary:
+      'The founder-built full-stack system bridging strategy and software: capture inquiry, qualify, assign ownership, maintain follow-up discipline, and keep the pipeline visible.',
+  },
+  '05': {
+    badgeLabel: 'CORE THESIS',
+    phaseTitle: 'The Systems Company',
+    tag: 'PRESENT',
+    summary:
+      'Built on one thesis: systems people can understand, operate, and own. Technology should increase human agency, not create opaque dependency.',
+  },
+};
 
 export const FOUNDER = {
   name: 'Mesum',
@@ -41,6 +79,7 @@ export const JOURNEY: FounderJourneyStep[] = [
     description:
       'Early, hands-on familiarity with technology — not a coding origin story, just curiosity that never went away.',
     image: '/images/founders/mesum-childhood-computer.jpg',
+    oppositeContext: OPPOSITE_CONTEXT['01'],
   },
   {
     step: '02',
@@ -49,6 +88,7 @@ export const JOURNEY: FounderJourneyStep[] = [
     title: 'Globe Digits',
     description:
       'Sustained client-facing, commercial learning: understanding buyer context, explaining digital capability, and moving prospects toward real sales conversations.',
+    oppositeContext: OPPOSITE_CONTEXT['02'],
   },
   {
     step: '03',
@@ -57,6 +97,7 @@ export const JOURNEY: FounderJourneyStep[] = [
     title: 'The Retail Cube',
     description:
       'Deeper e-commerce and marketplace-operations exposure — stores, listings, inventory reconciliation, order routing, fulfillment, and customer experience across Amazon FBA, Shopify, Walmart, TikTok Shop, eBay, and Etsy.',
+    oppositeContext: OPPOSITE_CONTEXT['03'],
   },
   {
     step: '04',
@@ -65,6 +106,7 @@ export const JOURNEY: FounderJourneyStep[] = [
     title: 'RaabtaDesk',
     description:
       'The founder-built full-stack system bridging strategy and software: capture inquiry, qualify, assign ownership, maintain follow-up discipline, and keep the pipeline visible.',
+    oppositeContext: OPPOSITE_CONTEXT['04'],
   },
   {
     step: '05',
@@ -72,6 +114,7 @@ export const JOURNEY: FounderJourneyStep[] = [
     title: 'The systems company that combines those lessons.',
     description:
       'Built on one thesis: systems people can understand, operate, and own. Technology should increase human agency, not create opaque dependency.',
+    oppositeContext: OPPOSITE_CONTEXT['05'],
   },
 ];
 

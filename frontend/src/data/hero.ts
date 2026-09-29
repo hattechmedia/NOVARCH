@@ -1,0 +1,48 @@
+import type { HeroServiceItem } from '@/types/hero';
+
+export const HERO_SERVICES_STRIP: HeroServiceItem[] = [
+  {
+    id: 'ai-workflow',
+    title: 'AI Workflows',
+    description: 'Intelligent automation with human approval and control.',
+    href: '/services/ai-workflow',
+    iconName: 'Cpu',
+    iconBg: 'bg-blue-500/15 text-blue-400 border border-blue-500/30 shadow-[0_0_12px_rgba(59,130,246,0.15)]',
+    accentHover: 'group-hover:text-blue-400',
+    borderHover: 'hover:border-blue-500/50 hover:shadow-blue-500/10',
+    linkHover: 'text-blue-400',
+  },
+  {
+    id: 'automation-integration',
+    title: 'Automation & Integration',
+    description: 'Connect tools, eliminate manual work, and streamline operations.',
+    href: '/services/automation-integration',
+    iconName: 'GitBranch',
+    iconBg: 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.15)]',
+    accentHover: 'group-hover:text-cyan-400',
+    borderHover: 'hover:border-cyan-500/50 hover:shadow-cyan-500/10',
+    linkHover: 'text-cyan-400',
+  },
+  {
+    id: 'digital-launch',
+    title: 'Digital Launch',
+    description: 'High-converting websites, landing pages & digital presence.',
+    href: '/services/digital-launch',
+    iconName: 'Globe',
+    iconBg: 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 shadow-[0_0_12px_rgba(99,102,241,0.15)]',
+    accentHover: 'group-hover:text-indigo-400',
+    borderHover: 'hover:border-indigo-500/50 hover:shadow-indigo-500/10',
+    linkHover: 'text-indigo-400',
+  },
+  {
+    id: 'custom-software',
+    title: 'Custom Software',
+    description: 'Powerful web apps, APIs and portals built for your business.',
+    href: '/services/custom-software',
+    iconName: 'Code2',
+    iconBg: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.15)]',
+    accentHover: 'group-hover:text-emerald-400',
+    borderHover: 'hover:border-emerald-500/50 hover:shadow-emerald-500/10',
+    linkHover: 'text-emerald-400',
+  },
+];

@@ -29,6 +29,11 @@ const CustomSoftwareAnimation = dynamic(
   { ssr: false }
 );
 
+const AIWorkflowHeroGraphic = dynamic(
+  () => import('@/components/animations/AIWorkflowHeroGraphic').then((m) => m.AIWorkflowHeroGraphic),
+  { ssr: false }
+);
+
 const DNAanimation = dynamic(
   () => import('@/components/animations/DNAanimation').then((m) => m.DNAanimation),
   { ssr: false }
@@ -55,7 +60,7 @@ export function ServicePageTemplate({ service }: ServicePageTemplateProps) {
     <div className="py-12 lg:py-20">
       {/* 1. Hero */}
       <Container className="mb-16 lg:mb-24">
-        {service.slug === 'digital-launch' || service.slug === 'automation-integration' || service.slug === 'custom-software' ? (
+        {service.slug === 'digital-launch' || service.slug === 'automation-integration' || service.slug === 'custom-software' || service.slug === 'ai-workflow' ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             {/* Left Column: Text & Metrics */}
             <div className="lg:col-span-5 flex flex-col justify-start pt-6 lg:-mt-[2%]">
@@ -106,15 +111,17 @@ export function ServicePageTemplate({ service }: ServicePageTemplateProps) {
               </Reveal>
             </div>
 
-            {/* Right Column: Dynamic Animation */}
+            {/* Right Column: Dynamic Animation / Graphic */}
             <div className="lg:col-span-7 w-full">
               <Reveal delay={250}>
                 {service.slug === 'digital-launch' ? (
                   <DigitalLaunchFlowAnimation />
                 ) : service.slug === 'automation-integration' ? (
                   <AutomationIntegrationAnimation />
-                ) : (
+                ) : service.slug === 'custom-software' ? (
                   <CustomSoftwareAnimation />
+                ) : (
+                  <AIWorkflowHeroGraphic />
                 )}
               </Reveal>
             </div>

@@ -14,7 +14,7 @@ const serviceLinks = [
 const companyLinks = [
   { label: 'Home', href: '/' },
   // { label: 'About', href: '/about' }, // Disabled
-  { label: 'Our Founder', href: '/founders' },
+  { label: 'Founders', href: '/founders' },
   { label: 'Contact', href: '/contact' },
 ];
 

@@ -1,16 +1,18 @@
 import React from 'react';
-import { LeadStatus } from '../types';
+import { LeadStatus, CommunityStatus } from '../types';
+
+type AnyStatus = LeadStatus | CommunityStatus;
 
 interface StatusBadgeProps {
-  status: LeadStatus;
+  status: AnyStatus;
 }
 
 const statusConfig: Record<
-  LeadStatus,
+  AnyStatus,
   { label: string; bg: string; text: string; border: string; dot: string }
 > = {
   New: {
-    label: 'New Lead',
+    label: 'New',
     bg: 'bg-emerald-500/10',
     text: 'text-emerald-400',
     border: 'border-emerald-500/30',
@@ -58,6 +60,13 @@ const statusConfig: Record<
     border: 'border-amber-500/40',
     dot: 'bg-amber-400',
   },
+  Resolved: {
+    label: 'Resolved',
+    bg: 'bg-teal-500/10',
+    text: 'text-teal-400',
+    border: 'border-teal-500/30',
+    dot: 'bg-teal-400',
+  },
 };
 
 export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(({ status }) => {
@@ -74,3 +83,4 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(({ status }) =
 });
 
 StatusBadge.displayName = 'StatusBadge';
+

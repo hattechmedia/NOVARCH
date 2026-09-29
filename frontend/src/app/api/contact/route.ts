@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 
-const BACKEND_API_URL = process.env.BACKEND_API_URL || 'http://localhost:5000/api';
+const rawUrl = (
+  process.env.BACKEND_API_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  'http://localhost:5000'
+).replace(/\/+$/, '');
+const BACKEND_API_URL = rawUrl.endsWith('/api') ? rawUrl : `${rawUrl}/api`;
 
 export async function POST(request: Request) {
   try {
@@ -53,6 +58,7 @@ export async function POST(request: Request) {
         (isServiceLead
           ? `Subscription booking for ${body.preferredService || 'Service'} - ${body.planName || 'Package'}`
           : 'Inquiry submitted via website contact form.'),
+      website_hp: body.website_hp || undefined,
     };
 
     // Forward to Express Backend Server
@@ -65,8 +71,9 @@ export async function POST(request: Request) {
         body: JSON.stringify(backendPayload),
       });
 
+      const backendData = await backendRes.json().catch(() => ({}));
+
       if (backendRes.ok) {
-        const backendData = await backendRes.json();
         return NextResponse.json({
           success: true,
           message: isServiceLead
@@ -74,6 +81,14 @@ export async function POST(request: Request) {
             : 'Project message received and synchronized with NOVARCH backend.',
           data: backendData.data,
         });
+      } else {
+        // If backend returned client validation error, return the actual error
+        if (backendRes.status >= 400 && backendRes.status < 500) {
+          return NextResponse.json(
+            { error: backendData.message || backendData.error || 'Submission validation failed on server.' },
+            { status: backendRes.status }
+          );
+        }
       }
     } catch (backendErr) {
       console.warn('[Backend Forwarding Warning]: Backend API unreachable, recorded locally.', backendErr);

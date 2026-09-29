@@ -99,6 +99,7 @@ export function ServicesSection() {
                         src={bgImage}
                         alt={service.name}
                         fill
+                        sizes="(max-width: 1024px) 100vw, 66vw"
                         priority={index < 2}
                         className="object-cover object-center
                                    transform transition-transform duration-700

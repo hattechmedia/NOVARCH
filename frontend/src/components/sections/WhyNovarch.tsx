@@ -16,69 +16,16 @@ import {
   CheckCircle2,
   Sparkles,
 } from 'lucide-react';
+import { DIFFERENTIATORS } from '@/data/whyNovarch';
 
-const DIFFERENTIATORS = [
-  {
-    num: '01',
-    title: 'Business context before complexity',
-    description:
-      'Connect the system to a customer, workflow and economic reason before writing any code.',
-    icon: Briefcase,
-    image: '/images/why-novarch/01-business-context.jpg',
-    tag: 'Strategic Alignment',
-    badgeText: '01 / BUSINESS CONTEXT',
-  },
-  {
-    num: '02',
-    title: 'Build, not only advise',
-    description:
-      'Strategy, interface, automation, integration and software can remain in one unified path.',
-    icon: Wrench,
-    image: '/images/why-novarch/02-build-not-advise.jpg',
-    tag: 'Unified Engineering',
-    badgeText: '02 / UNIFIED PATH',
-  },
-  {
-    num: '03',
-    title: 'Human control',
-    description:
-      'Sensitive decisions retain visible responsibility. AI operates with clear human gates.',
-    icon: ShieldCheck,
-    image: '/images/why-novarch/03-human-control.jpg',
-    tag: 'Governance & Safety',
-    badgeText: '03 / HUMAN GATES',
-  },
-  {
-    num: '04',
-    title: 'Ownership over dependency',
-    description:
-      'Design for understandable operations, access controls and deliberate offboarding.',
-    icon: KeyRound,
-    image: '/images/why-novarch/04-ownership.jpg',
-    tag: 'Data Sovereignty',
-    badgeText: '04 / FULL CONTROL',
-  },
-  {
-    num: '05',
-    title: 'Founder-led attention',
-    description:
-      'Commercial context and technical direction stay close throughout your engagement.',
-    icon: UserCheck,
-    image: '/images/why-novarch/05-founder-attention.jpg',
-    tag: 'Dedicated Leadership',
-    badgeText: '05 / FOUNDER LED',
-  },
-  {
-    num: '06',
-    title: 'Local + international',
-    description:
-      'Based in Ilmenau, Germany and engineered to serve local and global enterprises.',
-    icon: Globe2,
-    image: '/images/why-novarch/06-local-international.jpg',
-    tag: 'Global Standards',
-    badgeText: '06 / GERMAN QUALITY',
-  },
-];
+const WHY_ICON_MAP = {
+  Briefcase,
+  Wrench,
+  ShieldCheck,
+  KeyRound,
+  UserCheck,
+  Globe2,
+};
 
 export function WhyNovarchSection() {
   const [activeIndex, setActiveIndex] = React.useState(0);
@@ -217,7 +164,7 @@ export function WhyNovarchSection() {
           {/* Right Column: Scrollable Content List */}
           <div className="lg:col-span-7 space-y-6 lg:space-y-8 lg:pt-[100px] lg:pb-[180px]">
             {DIFFERENTIATORS.map((item, index) => {
-              const Icon = item.icon;
+              const Icon = WHY_ICON_MAP[item.iconName] || Briefcase;
               const isActive = index === activeIndex;
 
               return (

@@ -75,11 +75,9 @@ function PaymentSuccessContent() {
             If you completed a purchase, please contact our support team with your transaction reference.
           </p>
 
-          <Link href="/">
-            <Button variant="secondary" size="md" className="w-full sm:w-auto">
-              Return to Home
-            </Button>
-          </Link>
+          <Button href="/" variant="secondary" size="md" className="w-full sm:w-auto">
+            Return to Home
+          </Button>
         </div>
       </main>
     );
@@ -128,12 +126,10 @@ function PaymentSuccessContent() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/" className="w-full sm:w-auto">
-            <Button variant="primary" size="md" className="w-full flex items-center justify-center gap-2">
-              <span>Return to Home</span>
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+          <Button href="/" variant="primary" size="md" className="w-full sm:w-auto flex items-center justify-center gap-2">
+            <span>Return to Home</span>
+            <ArrowRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </main>

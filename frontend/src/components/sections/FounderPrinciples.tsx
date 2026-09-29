@@ -63,7 +63,7 @@ export function FounderPrinciples({ principles, promise }: FounderPrinciplesProp
               transition={{ duration: 0.4 }}
             >
               <Badge variant="default" className="mb-4">
-                WHAT THE FOUNDER BELIEVES
+                FOUNDING PRINCIPLES
               </Badge>
             </motion.div>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Container } from '@/components/ui/Container';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -14,37 +15,22 @@ import {
   Phone,
   MessageSquare,
   Sparkles,
-  Layers,
-  Shield,
-  FileCheck,
-  Server,
-  GraduationCap,
+  Globe,
+  GitBranch,
+  Cpu,
+  Code2,
+  ShieldCheck,
 } from 'lucide-react';
 import { ContactFormData, PerformanceOption } from '@/types/form';
+import { PERFORMANCE_OPTIONS, COUNTRY_CODES } from '@/data/contact';
 
-const PERFORMANCE_OPTIONS: { id: PerformanceOption; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: 'Technical Editorial Department', label: 'Technical Editorial Department', icon: FileCheck },
-  { id: 'CE conformity', label: 'CE conformity', icon: Shield },
-  { id: 'IT systems house', label: 'IT systems house', icon: Server },
-  { id: 'Information security', label: 'Information security', icon: Shield },
-  { id: 'Continuing education', label: 'Continuing education', icon: GraduationCap },
-];
-
-const COUNTRY_CODES = [
-  { code: '+49', country: 'Germany', flag: '🇩🇪' },
-  { code: '+1', country: 'United States', flag: '🇺🇸' },
-  { code: '+44', country: 'United Kingdom', flag: '🇬🇧' },
-  { code: '+41', country: 'Switzerland', flag: '🇨🇭' },
-  { code: '+43', country: 'Austria', flag: '🇦🇹' },
-  { code: '+971', country: 'UAE', flag: '🇦🇪' },
-  { code: '+33', country: 'France', flag: '🇫🇷' },
-  { code: '+31', country: 'Netherlands', flag: '🇳🇱' },
-  { code: '+39', country: 'Italy', flag: '🇮🇹' },
-  { code: '+34', country: 'Spain', flag: '🇪🇸' },
-  { code: '+92', country: 'Pakistan', flag: '🇵🇰' },
-  { code: '+91', country: 'India', flag: '🇮🇳' },
-  { code: '+61', country: 'Australia', flag: '🇦🇺' },
-];
+const CONTACT_ICON_MAP = {
+  Globe,
+  GitBranch,
+  Cpu,
+  Code2,
+  ShieldCheck,
+};
 
 const INITIAL_FORM: ContactFormData & { website_hp?: string } = {
   name: '',
@@ -57,11 +43,42 @@ const INITIAL_FORM: ContactFormData & { website_hp?: string } = {
   website_hp: '',
 };
 
-export default function ContactPage() {
-  const [formData, setFormData] = React.useState<ContactFormData>(INITIAL_FORM);
+function ContactFormContent() {
+  const searchParams = useSearchParams();
+  const [formData, setFormData] = React.useState<ContactFormData & { website_hp?: string }>(INITIAL_FORM);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState('');
+
+  // Handle URL query param preselection (?service=digital-launch, ?service=ai-workflow, etc.)
+  React.useEffect(() => {
+    const serviceParam = searchParams.get('service') || searchParams.get('category') || '';
+    if (!serviceParam) return;
+
+    const normalized = serviceParam.toLowerCase().trim();
+    let matchedOption: PerformanceOption | null = null;
+
+    if (normalized.includes('digital') || normalized.includes('launch')) {
+      matchedOption = 'Digital Launch';
+    } else if (normalized.includes('auto') || normalized.includes('integrat')) {
+      matchedOption = 'Automation & Integration';
+    } else if (normalized.includes('ai') || normalized.includes('workflow')) {
+      matchedOption = 'AI Workflow';
+    } else if (normalized.includes('custom') || normalized.includes('software')) {
+      matchedOption = 'Custom Software';
+    } else if (normalized.includes('advisory') || normalized.includes('consult')) {
+      matchedOption = 'Systems Advisory & Architecture Review';
+    }
+
+    if (matchedOption) {
+      setFormData((prev) => {
+        if (!prev.performances.includes(matchedOption!)) {
+          return { ...prev, performances: [...prev.performances, matchedOption!] };
+        }
+        return prev;
+      });
+    }
+  }, [searchParams]);
 
   const togglePerformance = (option: PerformanceOption) => {
     setFormData((prev) => {
@@ -77,6 +94,8 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     setErrorMsg('');
 
     const trimmedName = formData.name.trim();
@@ -108,7 +127,7 @@ export default function ContactPage() {
       });
 
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Submission failed');
+      if (!res.ok) throw new Error(json.error || json.message || 'Submission failed');
 
       setIsSubmitted(true);
     } catch (err: unknown) {
@@ -175,13 +194,13 @@ export default function ContactPage() {
         <div className="text-center max-w-2xl mx-auto mb-10">
           <Badge variant="default" className="mb-4 gap-1.5">
             <Sparkles className="h-3.5 w-3.5" />
-            Contact form
+            GET IN TOUCH
           </Badge>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-4">
-            Contact form
+            Let&apos;s build your system.
           </h1>
           <p className="text-base sm:text-lg text-text-muted leading-relaxed">
-            If you are interested in our services, please use our contact form to submit your inquiry. One of our team members will get in touch with you as soon as possible.
+            Tell us about your project or operational requirements. One of our team members will analyze your needs and respond with clear architectural feedback within 24 hours.
           </p>
         </div>
 
@@ -195,21 +214,21 @@ export default function ContactPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Anti-Spam Honeypot Trap (Hidden from human users) */}
-            <div className="hidden aria-hidden=true">
+            <div className="hidden" aria-hidden="true">
               <input
                 type="text"
                 name="website_hp"
                 tabIndex={-1}
                 autoComplete="off"
-                value={(formData as any).website_hp || ''}
-                onChange={(e) => setFormData((prev: any) => ({ ...prev, website_hp: e.target.value }))}
+                value={formData.website_hp || ''}
+                onChange={(e) => setFormData((prev) => ({ ...prev, website_hp: e.target.value }))}
               />
             </div>
 
             {/* 1. Name */}
             <div>
               <label htmlFor="name" className="block text-xs font-mono font-bold uppercase tracking-wider text-text-muted mb-2">
-                Name <span className="text-[#1E5FBF]">*</span>
+                Full Name <span className="text-[#1E5FBF]">*</span>
               </label>
               <div className="relative">
                 <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted/60" />
@@ -217,10 +236,11 @@ export default function ContactPage() {
                   type="text"
                   id="name"
                   required
+                  disabled={isSubmitting}
                   value={formData.name}
                   onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                   placeholder="Your full name"
-                  className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm"
+                  className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm disabled:opacity-50"
                 />
               </div>
             </div>
@@ -228,7 +248,7 @@ export default function ContactPage() {
             {/* 2. E-Mail */}
             <div>
               <label htmlFor="email" className="block text-xs font-mono font-bold uppercase tracking-wider text-text-muted mb-2">
-                E-mail <span className="text-[#1E5FBF]">*</span>
+                Work E-mail <span className="text-[#1E5FBF]">*</span>
               </label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted/60" />
@@ -236,10 +256,11 @@ export default function ContactPage() {
                   type="email"
                   id="email"
                   required
+                  disabled={isSubmitting}
                   value={formData.email}
                   onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                   placeholder="name@company.com"
-                  className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm"
+                  className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm disabled:opacity-50"
                 />
               </div>
             </div>
@@ -247,16 +268,17 @@ export default function ContactPage() {
             {/* 3. Phone (Country Selector + Phone Input) */}
             <div>
               <label htmlFor="phone" className="block text-xs font-mono font-bold uppercase tracking-wider text-text-muted mb-2">
-                Phone
+                Phone Number
               </label>
               <div className="flex gap-2">
                 {/* Country Code Select */}
                 <div className="relative w-28 sm:w-36 flex-shrink-0">
                   <select
                     value={formData.countryCode}
+                    disabled={isSubmitting}
                     onChange={(e) => setFormData((prev) => ({ ...prev, countryCode: e.target.value }))}
                     aria-label="Country Dial Code"
-                    className="w-full px-3 py-3 bg-surface border border-border rounded-xl text-white focus:border-[#1E5FBF] focus:outline-none transition-colors text-xs font-mono appearance-none cursor-pointer"
+                    className="w-full px-3 py-3 bg-surface border border-border rounded-xl text-white focus:border-[#1E5FBF] focus:outline-none transition-colors text-xs font-mono appearance-none cursor-pointer disabled:opacity-50"
                   >
                     {COUNTRY_CODES.map((c) => (
                       <option key={`${c.country}-${c.code}`} value={c.code} className="bg-[#0D1826] text-white">
@@ -275,10 +297,11 @@ export default function ContactPage() {
                   <input
                     type="tel"
                     id="phone"
+                    disabled={isSubmitting}
                     value={formData.phone}
                     onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
                     placeholder="01512 3456789"
-                    className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm font-mono"
+                    className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm font-mono disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -287,43 +310,47 @@ export default function ContactPage() {
             {/* 4. Company Name */}
             <div>
               <label htmlFor="company" className="block text-xs font-mono font-bold uppercase tracking-wider text-text-muted mb-2">
-                Company name
+                Company Name
               </label>
               <div className="relative">
                 <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted/60" />
                 <input
                   type="text"
                   id="company"
+                  disabled={isSubmitting}
                   value={formData.company}
                   onChange={(e) => setFormData((prev) => ({ ...prev, company: e.target.value }))}
                   placeholder="e.g. Acme Corp GmbH"
-                  className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm"
+                  className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm disabled:opacity-50"
                 />
               </div>
             </div>
 
-            {/* 5. Performance (Categories Selection) */}
+            {/* 5. Services & Systems of Interest (Categories Selection) */}
             <div>
-              <label className="block text-xs font-mono font-bold uppercase tracking-wider text-text-muted mb-3">
-                Performance:
-              </label>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-xs font-mono font-bold uppercase tracking-wider text-text-muted">
+                  Services &amp; Systems of Interest:
+                </label>
+                <span className="text-[11px] font-mono text-text-light">Select all that apply</span>
+              </div>
               <div className="space-y-2.5">
                 {PERFORMANCE_OPTIONS.map((opt) => {
                   const isSelected = formData.performances.includes(opt.id);
-                  const Icon = opt.icon;
+                  const Icon = CONTACT_ICON_MAP[opt.iconName] || Globe;
 
                   return (
                     <label
                       key={opt.id}
-                      onClick={() => togglePerformance(opt.id)}
-                      className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all duration-200 cursor-pointer ${
+                      onClick={() => !isSubmitting && togglePerformance(opt.id)}
+                      className={`flex items-start gap-3.5 p-3.5 rounded-xl border transition-all duration-200 cursor-pointer ${
                         isSelected
                           ? 'bg-[#1E5FBF]/15 border-[#38B2D8] text-white shadow-sm'
                           : 'bg-surface border-border text-text-muted hover:border-border/80 hover:text-white'
-                      }`}
+                      } ${isSubmitting ? 'pointer-events-none opacity-60' : ''}`}
                     >
                       <div
-                        className={`flex h-5 w-5 items-center justify-center rounded-md border transition-colors ${
+                        className={`flex h-5 w-5 mt-0.5 items-center justify-center rounded-md border transition-colors flex-shrink-0 ${
                           isSelected
                             ? 'bg-[#1E5FBF] border-[#38B2D8] text-white'
                             : 'border-border bg-[#0D1826]'
@@ -332,29 +359,33 @@ export default function ContactPage() {
                         {isSelected && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
                       </div>
 
-                      <Icon className={`h-4 w-4 ${isSelected ? 'text-[#38B2D8]' : 'text-text-muted/60'}`} />
+                      <Icon className={`h-4 w-4 mt-1 flex-shrink-0 ${isSelected ? 'text-[#38B2D8]' : 'text-text-muted/60'}`} />
 
-                      <span className="text-sm font-medium">{opt.label}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-semibold text-white block">{opt.label}</span>
+                        <span className="text-xs text-text-muted leading-tight block mt-0.5">{opt.description}</span>
+                      </div>
                     </label>
                   );
                 })}
               </div>
             </div>
 
-            {/* 6. News (Optional Message) */}
+            {/* 6. Message / Project Overview */}
             <div>
               <label htmlFor="news" className="block text-xs font-mono font-bold uppercase tracking-wider text-text-muted mb-2">
-                News:
+                Project Overview &amp; Requirements:
               </label>
               <div className="relative">
                 <MessageSquare className="absolute left-3.5 top-3.5 h-4 w-4 text-text-muted/60" />
                 <textarea
                   id="news"
                   rows={4}
+                  disabled={isSubmitting}
                   value={formData.news}
                   onChange={(e) => setFormData((prev) => ({ ...prev, news: e.target.value }))}
-                  placeholder="Optional"
-                  className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm resize-none"
+                  placeholder="Tell us about your systems, current operational friction, or desired deliverables..."
+                  className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm resize-none disabled:opacity-50"
                 />
               </div>
             </div>
@@ -366,7 +397,7 @@ export default function ContactPage() {
                 variant="primary"
                 size="lg"
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 font-bold py-3.5"
+                className="w-full flex items-center justify-center gap-2 font-bold py-3.5 disabled:opacity-60 cursor-pointer"
               >
                 {isSubmitting ? (
                   <>
@@ -385,5 +416,19 @@ export default function ContactPage() {
         </Card>
       </Container>
     </div>
+  );
+}
+
+export default function ContactPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="py-20 text-center text-text-muted font-mono text-sm">
+          Loading contact form...
+        </div>
+      }
+    >
+      <ContactFormContent />
+    </React.Suspense>
   );
 }

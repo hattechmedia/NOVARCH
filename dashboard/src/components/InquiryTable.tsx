@@ -96,10 +96,22 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
     return name.slice(0, 2).toUpperCase();
   };
 
-  // Color map for avatar
-  const getAvatarGradient = (type: string) => {
-    if (type === 'service_lead') return 'from-[#1E5FBF] to-[#38B2D8]';
-    return 'from-emerald-600 to-teal-400';
+  // Name-based unique gradient — lively but theme-matched
+  const getAvatarGradient = (name: string): string => {
+    const palettes = [
+      'linear-gradient(135deg,#6D28D9,#A78BFA)',  // violet
+      'linear-gradient(135deg,#B45309,#FCD34D)',  // amber
+      'linear-gradient(135deg,#9D174D,#FB7185)',  // rose
+      'linear-gradient(135deg,#0E7490,#67E8F9)',  // cyan
+      'linear-gradient(135deg,#3730A3,#818CF8)',  // indigo
+      'linear-gradient(135deg,#C2410C,#FB923C)',  // orange
+      'linear-gradient(135deg,#0F766E,#5EEAD4)',  // teal
+      'linear-gradient(135deg,#86198F,#E879F9)',  // fuchsia
+      'linear-gradient(135deg,#0369A1,#38BDF8)',  // sky
+      'linear-gradient(135deg,#92400E,#FDE68A)',  // gold
+    ];
+    const code = name.charCodeAt(0) + (name.charCodeAt(1) || 0);
+    return palettes[code % palettes.length];
   };
 
   return (
@@ -231,163 +243,175 @@ export const InquiryTable: React.FC<InquiryTableProps> = React.memo(({
         </div>
       </div>
 
-      {/* Table Content */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-[#060D17]/90 text-xs font-mono uppercase text-[#7A8FA6] border-b border-[#17304E]">
-            <tr>
-              <th className="px-5 py-3.5 font-semibold">Client / Company</th>
-              <th className="px-5 py-3.5 font-semibold">Category & Scope</th>
-              <th className="px-5 py-3.5 font-semibold">Service Line</th>
-              <th className="px-5 py-3.5 font-semibold">Est. Pipeline</th>
-              <th className="px-5 py-3.5 font-semibold">Status</th>
-              <th className="px-5 py-3.5 font-semibold">Submitted</th>
-              <th className="px-5 py-3.5 text-right font-semibold">Action</th>
-            </tr>
-          </thead>
+      {/* Card Grid */}
+      <div className="p-5">
+        {inquiries.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <Layers className="h-10 w-10 text-[#17304E]" />
+            <p className="text-sm font-semibold text-[#4A6080]">No submissions found</p>
+            <p className="text-xs font-mono text-[#2A3F58]">
+              {searchQuery
+                ? `No results matching "${searchQuery}"`
+                : 'New website leads will appear here in real-time.'}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {inquiries.map((inq) => {
+              const isServiceLead = inq.submissionType === 'service_lead';
+              const gradient = getAvatarGradient(inq.name);
+              const initials = getInitials(inq.name);
 
-          <tbody className="divide-y divide-[#17304E]/60 text-white/90">
-            {inquiries.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-5 py-16 text-center text-sm font-mono text-[#64748B]">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Layers className="h-8 w-8 text-[#17304E]" />
-                    <p className="font-semibold text-[#94A3B8]">No submissions found</p>
-                    <p className="text-xs text-[#64748B]">
-                      {searchQuery
-                        ? `No results matching "${searchQuery}" in ${selectedCategory} category.`
-                        : 'New website leads will populate here in real-time.'}
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              inquiries.map((inq) => {
-                const isServiceLead = inq.submissionType === 'service_lead';
-
-                return (
-                  <tr
-                    key={inq.id}
-                    onClick={() => handleRowClick(inq)}
-                    className="hover:bg-[#122238]/70 transition-colors cursor-pointer group"
-                  >
-                    {/* 1. Client / Company */}
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${getAvatarGradient(
-                            inq.submissionType
-                          )} text-white font-mono font-bold text-xs shadow-sm flex-shrink-0`}
-                        >
-                          {getInitials(inq.name)}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="font-bold text-white text-sm sm:text-base group-hover:text-[#38B2D8] transition-colors truncate">
-                            {inq.name}
-                          </div>
-                          <div className="text-xs text-[#7A8FA6] font-mono mt-0.5 flex items-center gap-1 truncate">
-                            {inq.company ? (
-                              <>
-                                <Building className="h-3.5 w-3.5 text-[#64748B] flex-shrink-0" />
-                                <span className="truncate">{inq.company}</span>
-                              </>
-                            ) : (
-                              <>
-                                <Mail className="h-3.5 w-3.5 text-[#64748B] flex-shrink-0" />
-                                <span className="truncate">{inq.email}</span>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* 2. Category & Scope */}
-                    <td className="px-5 py-4">
-                      {isServiceLead ? (
-                        <div className="flex flex-col gap-1">
-                          <span className="inline-flex items-center gap-1 w-fit rounded-full bg-[#1E5FBF]/25 border border-[#38B2D8]/50 px-2.5 py-0.5 text-xs font-mono font-bold text-[#38B2D8]">
-                            <Zap className="h-3.5 w-3.5" />
-                            SERVICE LEAD
-                          </span>
-                          <span className="text-sm font-semibold text-white">
-                            {inq.planName || 'Package Lead'} {inq.planPrice ? `(${inq.planPrice})` : ''}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-1">
-                          <span className="inline-flex items-center gap-1 w-fit rounded-full bg-emerald-500/15 border border-emerald-500/40 px-2.5 py-0.5 text-xs font-mono font-bold text-emerald-400">
-                            <MessageSquare className="h-3.5 w-3.5" />
-                            CONTACT MESSAGE
-                          </span>
-                          <span className="text-xs text-[#94A3B8] line-clamp-1 max-w-[220px]">
-                            {inq.news || inq.message || 'Direct Website Inquiry'}
-                          </span>
-                        </div>
-                      )}
-                    </td>
-
-                    {/* 3. Service Line */}
-                    <td className="px-5 py-4">
-                      <span className="inline-block rounded-lg bg-[#0E1B2C] border border-[#17304E] px-2.5 py-1 text-xs font-mono text-[#CBD5E1]">
-                        {inq.preferredService || inq.serviceType || 'General Inquiry'}
-                      </span>
-                    </td>
-
-                    {/* 4. Est. Pipeline */}
-                    <td className="px-5 py-4">
-                      {isServiceLead && (inq.estimatedValue || 0) > 0 ? (
-                        <div className="flex items-center gap-1 font-mono font-bold text-emerald-400 text-base">
-                          <DollarSign className="h-4 w-4 text-emerald-500" />
-                          <span>{(inq.estimatedValue || 0).toLocaleString()}</span>
-                        </div>
-                      ) : (
-                        <span className="text-xs font-mono text-[#64748B]">—</span>
-                      )}
-                    </td>
-
-                    {/* 5. Status */}
-                    <td className="px-5 py-4">
-                      <StatusBadge status={inq.status} />
-                    </td>
-
-                    {/* 6. Date */}
-                    <td className="px-5 py-4 text-xs font-mono text-[#7A8FA6]">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5 text-[#64748B]" />
-                        <span>
-                          {new Date(inq.createdAt).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* 7. Action */}
-                    <td className="px-5 py-4 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRowClick(inq);
-                        }}
-                        className="inline-flex items-center gap-1 rounded-lg bg-[#0E1B2C] border border-[#17304E] px-3 py-1.5 text-xs font-mono text-[#38B2D8] hover:bg-[#1E5FBF]/25 hover:border-[#38B2D8]/50 transition-all cursor-pointer font-bold"
-                      >
-                        <span>Inspect</span>
-                        <ChevronRight className="h-3.5 w-3.5" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+              return (
+                <InquiryCard
+                  key={inq.id}
+                  inq={inq}
+                  isServiceLead={isServiceLead}
+                  gradient={gradient}
+                  initials={initials}
+                  onClick={() => handleRowClick(inq)}
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
 });
 
 InquiryTable.displayName = 'InquiryTable';
+
+/* ── Inquiry Square Card ── */
+function InquiryCard({
+  inq,
+  isServiceLead,
+  gradient,
+  initials,
+  onClick,
+}: {
+  inq: ContactInquiry;
+  isServiceLead: boolean;
+  gradient: string;
+  initials: string;
+  onClick: () => void;
+}) {
+  const [hovered, setHovered] = React.useState(false);
+
+  return (
+    <div
+      className="relative flex flex-col rounded-2xl overflow-hidden cursor-pointer transition-all duration-300"
+      style={{
+        aspectRatio: '1 / 1',
+        background: hovered
+          ? 'linear-gradient(145deg,rgba(14,27,44,0.98),rgba(10,19,33,1))'
+          : 'linear-gradient(145deg,rgba(11,21,36,0.92),rgba(7,13,23,0.97))',
+        border: hovered
+          ? '1px solid rgba(56,178,216,0.28)'
+          : '1px solid rgba(23,48,78,0.6)',
+        boxShadow: hovered
+          ? '0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(56,178,216,0.07)'
+          : '0 2px 12px rgba(0,0,0,0.2)',
+        transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={onClick}
+    >
+      {/* Top shimmer bar */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[2px] transition-opacity duration-300"
+        style={{ background: gradient, opacity: hovered ? 0.75 : 0 }}
+      />
+
+      {/* Body */}
+      <div className="flex flex-col items-center justify-center flex-1 px-3 pt-4 pb-2 gap-2 text-center">
+        {/* Avatar */}
+        <div className="relative flex-shrink-0">
+          <div
+            className="flex items-center justify-center rounded-2xl text-white font-bold font-mono text-base transition-transform duration-300"
+            style={{
+              background: gradient,
+              width: '52px',
+              height: '52px',
+              boxShadow: hovered ? '0 0 18px rgba(56,178,216,0.25)' : 'none',
+              transform: hovered ? 'scale(1.07)' : 'scale(1)',
+            }}
+          >
+            {initials}
+          </div>
+          {/* Type dot */}
+          <span
+            className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2"
+            style={{
+              borderColor: '#07101E',
+              backgroundColor: isServiceLead ? '#38B2D8' : '#34D399',
+            }}
+          />
+        </div>
+
+        {/* Name */}
+        <p className="text-sm font-semibold text-white leading-tight truncate w-full px-1">
+          {inq.name}
+        </p>
+
+        {/* Company / Email */}
+        <p className="text-[10px] font-mono text-[#3A5070] truncate w-full flex items-center justify-center gap-1">
+          {inq.company ? (
+            <><Building className="h-2.5 w-2.5 flex-shrink-0" />{inq.company}</>
+          ) : (
+            <><Mail className="h-2.5 w-2.5 flex-shrink-0" />{inq.email}</>
+          )}
+        </p>
+
+        {/* Type badge */}
+        {isServiceLead ? (
+          <span
+            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-mono font-bold text-[#38B2D8]"
+            style={{ background: 'rgba(30,95,191,0.2)', border: '1px solid rgba(56,178,216,0.3)' }}
+          >
+            <Zap className="h-2.5 w-2.5" />SERVICE
+          </span>
+        ) : (
+          <span
+            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-mono font-bold text-emerald-400"
+            style={{ background: 'rgba(5,150,105,0.15)', border: '1px solid rgba(52,211,153,0.3)' }}
+          >
+            <MessageSquare className="h-2.5 w-2.5" />MESSAGE
+          </span>
+        )}
+
+        {/* Status badge */}
+        <div className="scale-75 origin-center -my-1">
+          <StatusBadge status={inq.status} />
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div
+        className="flex items-center justify-between px-3 pb-3 gap-1 transition-opacity duration-300"
+        style={{ opacity: hovered ? 1 : 0.4 }}
+      >
+        {/* Pipeline value / date */}
+        <span className="flex items-center gap-0.5 text-[9px] font-mono text-[#2A3F58] truncate">
+          {isServiceLead && (inq.estimatedValue || 0) > 0 ? (
+            <><DollarSign className="h-2.5 w-2.5 text-emerald-500 flex-shrink-0" />
+            <span className="text-emerald-400 font-bold">{(inq.estimatedValue || 0).toLocaleString()}</span></>
+          ) : (
+            <><Calendar className="h-2.5 w-2.5 flex-shrink-0" />
+            {new Date(inq.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</>
+          )}
+        </span>
+
+        {/* Inspect button */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onClick(); }}
+          className="flex items-center gap-0.5 rounded-lg px-2 py-1 text-[9px] font-mono font-bold text-[#38B2D8] cursor-pointer flex-shrink-0"
+          style={{ background: 'rgba(30,95,191,0.15)', border: '1px solid rgba(56,178,216,0.2)' }}
+        >
+          Inspect <ChevronRight className="h-2.5 w-2.5" />
+        </button>
+      </div>
+    </div>
+  );
+}

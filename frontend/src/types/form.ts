@@ -1,4 +1,9 @@
 export type PerformanceOption =
+  | 'Digital Launch'
+  | 'Automation & Integration'
+  | 'AI Workflow'
+  | 'Custom Software'
+  | 'Systems Advisory & Architecture Review'
   | 'Technical Editorial Department'
   | 'CE conformity'
   | 'IT systems house'
