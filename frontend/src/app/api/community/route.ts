@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 const rawUrl = (
   process.env.BACKEND_API_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
-  'http://localhost:5000'
+  'https://novarch-backend.vercel.app'
 ).replace(/\/+$/, '');
 const BACKEND_API_URL = rawUrl.endsWith('/api') ? rawUrl : `${rawUrl}/api`;
 
