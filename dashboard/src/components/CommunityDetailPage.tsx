@@ -1,10 +1,9 @@
-﻿import React from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   User,
   Mail,
-  Phone,
   Building,
   Briefcase,
   MessageSquare,
@@ -131,6 +130,12 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
                   {member.organization}
                 </span>
               )}
+              {member.country && (
+                <span className="flex items-center gap-1.5">
+                  <Globe className="h-3.5 w-3.5 text-[#38B2D8]" />
+                  {member.country}
+                </span>
+              )}
               <span className="flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5 text-[#38B2D8]" />
                 {joinedDate}
@@ -174,16 +179,19 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <InfoTile icon={User} label="Full Name" value={member.fullName} />
               <InfoTile icon={Mail} label="Email" value={member.email} isEmail />
-              {member.contactNumber && (
-                <InfoTile icon={Phone} label="Phone" value={member.contactNumber} />
+              {member.country && (
+                <InfoTile icon={Globe} label="Country / Location" value={member.country} />
               )}
               {member.organization && (
-                <InfoTile icon={Building} label="Organization" value={member.organization} />
+                <InfoTile icon={Building} label="Company" value={member.organization} />
               )}
               {member.role && (
                 <InfoTile icon={Briefcase} label="Role" value={member.role} />
               )}
               <InfoTile icon={Calendar} label="Joined" value={joinedDate} />
+              {member.referral && (
+                <InfoTile icon={Globe} label="Source / Referral" value={member.referral} />
+              )}
             </div>
           </section>
 
@@ -233,15 +241,6 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
                 <Mail className="h-4 w-4 text-[#38B2D8] group-hover:scale-110 transition-transform" />
                 Send Email
               </a>
-              {member.contactNumber && (
-                <a
-                  href={`tel:${member.contactNumber}`}
-                  className="flex items-center gap-3 w-full rounded-xl border border-[#17304E] bg-[#0B1524]/50 px-4 py-3 text-sm font-mono text-[#94A3B8] hover:border-[#38B2D8]/40 hover:text-white hover:bg-[#0B1524] transition-all group"
-                >
-                  <Phone className="h-4 w-4 text-[#38B2D8] group-hover:scale-110 transition-transform" />
-                  Call Member
-                </a>
-              )}
               <button
                 onClick={handleDelete}
                 className="flex items-center gap-3 w-full rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm font-mono text-red-400 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-300 transition-all cursor-pointer group"

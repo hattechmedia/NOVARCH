@@ -29,12 +29,12 @@ export interface CommunityMember {
   id: string;
   fullName: string;
   email: string;
-  contactNumber?: string;
-  countryCode?: string;
+  country?: string;
   organization?: string;
   role?: string;
   interests?: string[];
   message?: string;
+  referral?: string;
   status: CommunityStatus;
   source: 'Website Form';
   createdAt: string;

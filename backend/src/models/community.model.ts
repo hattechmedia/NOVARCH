@@ -9,12 +9,12 @@ const CommunitySchema = new Schema<CommunityDocument>(
   {
     fullName: { type: String, required: true, trim: true },
     email: { type: String, required: true, trim: true, lowercase: true },
-    contactNumber: { type: String, trim: true },
-    countryCode: { type: String, trim: true },
+    country: { type: String, trim: true },
     organization: { type: String, trim: true },
     role: { type: String, trim: true },
     interests: [{ type: String, trim: true }],
     message: { type: String, trim: true },
+    referral: { type: String, trim: true },
     status: {
       type: String,
       enum: ['New', 'Contacted', 'Resolved'],

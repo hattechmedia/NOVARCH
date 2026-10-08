@@ -5,6 +5,7 @@ import {
   Users,
   Building,
   Briefcase,
+  Globe,
   Calendar,
   ArrowUpRight,
   ChevronDown,
@@ -85,6 +86,7 @@ export const CommunityTable: React.FC<CommunityTableProps> = React.memo(({ membe
       return (
         m.fullName.toLowerCase().includes(query) ||
         m.email.toLowerCase().includes(query) ||
+        (m.country && m.country.toLowerCase().includes(query)) ||
         (m.organization && m.organization.toLowerCase().includes(query)) ||
         (m.role && m.role.toLowerCase().includes(query))
       );
@@ -287,16 +289,16 @@ function MemberCard({
         {/* Name */}
         <div className="text-center min-w-0 w-full">
           <p className="text-sm font-semibold text-white truncate leading-tight">{member.fullName}</p>
-          {member.organization && (
-            <p className="text-[10px] font-mono text-[#3A5070] truncate mt-0.5 flex items-center justify-center gap-1">
-              <Building className="h-2.5 w-2.5 flex-shrink-0" />
-              {member.organization}
-            </p>
-          )}
           {member.role && (
-            <p className="text-[10px] font-mono text-[#3A5070] truncate flex items-center justify-center gap-1">
+            <p className="text-[10px] font-mono text-[#3A5070] truncate mt-0.5 flex items-center justify-center gap-1">
               <Briefcase className="h-2.5 w-2.5 flex-shrink-0" />
               {member.role}
+            </p>
+          )}
+          {member.country && (
+            <p className="text-[10px] font-mono text-[#3A5070] truncate flex items-center justify-center gap-1">
+              <Globe className="h-2.5 w-2.5 flex-shrink-0" />
+              {member.country}
             </p>
           )}
         </div>

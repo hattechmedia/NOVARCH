@@ -21,20 +21,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Combine phone with country code if provided
-    const formattedContactNumber = body.contactNumber
-      ? `${body.countryCode ? body.countryCode + ' ' : ''}${body.contactNumber}`
-      : undefined;
-
     const backendPayload = {
       fullName: body.fullName,
       email: body.email,
-      contactNumber: formattedContactNumber,
-      countryCode: body.countryCode,
+      country: body.country || undefined,
       organization: body.organization || undefined,
       role: body.role || undefined,
       interests: Array.isArray(body.interests) ? body.interests : [],
       message: body.message || undefined,
+      referral: body.referral || undefined,
       website_hp: body.website_hp || undefined,
     };
 
