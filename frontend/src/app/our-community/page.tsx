@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { Container } from '@/components/ui/Container';
-import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import {
@@ -14,7 +13,6 @@ import {
   Sparkles,
   Building,
   Briefcase,
-  Users,
   Zap,
   Globe,
   Code2,
