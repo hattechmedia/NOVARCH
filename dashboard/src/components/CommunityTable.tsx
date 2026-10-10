@@ -374,7 +374,9 @@ function MemberCard({
               <span className="text-[#38B2D8]">
                 {typeof member.referral === 'string'
                   ? member.referral
-                  : member.referral.utmSource || member.referral.referrer || 'Campaign'}
+                  : (typeof member.referral === 'object' && member.referral !== null
+                      ? member.referral.utmSource || member.referral.referrer || 'Campaign'
+                      : 'Campaign')}
               </span>
             </p>
           )}

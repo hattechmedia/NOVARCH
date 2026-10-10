@@ -98,6 +98,11 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
     day: 'numeric',
   });
 
+  const utmReferral =
+    typeof member.referral === 'object' && member.referral !== null
+      ? member.referral
+      : null;
+
   return (
     <div className="min-h-screen bg-[#050A12] text-white">
       {/* Header */}
@@ -268,7 +273,7 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
                   value={
                     typeof member.referral === 'string'
                       ? member.referral
-                      : member.referral.utmSource || member.referral.referrer || 'Campaign / Referral'
+                      : utmReferral?.utmSource || utmReferral?.referrer || 'Campaign / Referral'
                   }
                 />
               )}
@@ -370,38 +375,38 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
           )}
 
           {/* Referral & Attribution Info */}
-          {member.referral && Object.values(member.referral).some(Boolean) && (
+          {utmReferral && Object.values(utmReferral).some(Boolean) && (
             <section>
               <SectionHeader icon={Share2} label="Campaign Attribution" />
               <div className="mt-4 rounded-2xl border border-[#17304E]/60 bg-[#070D17] p-4 space-y-2 text-xs font-mono">
-                {member.referral.utmSource && (
+                {utmReferral.utmSource && (
                   <div className="flex justify-between items-center py-1 border-b border-[#17304E]/40">
                     <span className="text-[#64748B]">utm_source</span>
-                    <span className="text-cyan-300 font-bold">{member.referral.utmSource}</span>
+                    <span className="text-cyan-300 font-bold">{utmReferral.utmSource}</span>
                   </div>
                 )}
-                {member.referral.utmMedium && (
+                {utmReferral.utmMedium && (
                   <div className="flex justify-between items-center py-1 border-b border-[#17304E]/40">
                     <span className="text-[#64748B]">utm_medium</span>
-                    <span className="text-slate-300">{member.referral.utmMedium}</span>
+                    <span className="text-slate-300">{utmReferral.utmMedium}</span>
                   </div>
                 )}
-                {member.referral.utmCampaign && (
+                {utmReferral.utmCampaign && (
                   <div className="flex justify-between items-center py-1 border-b border-[#17304E]/40">
                     <span className="text-[#64748B]">utm_campaign</span>
-                    <span className="text-slate-300">{member.referral.utmCampaign}</span>
+                    <span className="text-slate-300">{utmReferral.utmCampaign}</span>
                   </div>
                 )}
-                {member.referral.utmContent && (
+                {utmReferral.utmContent && (
                   <div className="flex justify-between items-center py-1 border-b border-[#17304E]/40">
                     <span className="text-[#64748B]">utm_content</span>
-                    <span className="text-slate-300">{member.referral.utmContent}</span>
+                    <span className="text-slate-300">{utmReferral.utmContent}</span>
                   </div>
                 )}
-                {member.referral.referrer && (
+                {utmReferral.referrer && (
                   <div className="py-1">
                     <span className="text-[#64748B] block mb-0.5">referrer</span>
-                    <span className="text-slate-400 break-all">{member.referral.referrer}</span>
+                    <span className="text-slate-400 break-all">{utmReferral.referrer}</span>
                   </div>
                 )}
               </div>
