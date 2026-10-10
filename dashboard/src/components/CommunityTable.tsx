@@ -5,7 +5,6 @@ import {
   Users,
   Building,
   Briefcase,
-  Globe,
   Calendar,
   ArrowUpRight,
   ChevronDown,
