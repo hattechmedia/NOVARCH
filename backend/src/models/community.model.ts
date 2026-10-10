@@ -14,13 +14,10 @@ const CommunitySchema = new Schema<CommunityDocument>(
     },
     fullName: { type: String, required: true, trim: true },
     email: { type: String, required: true, trim: true, lowercase: true },
-<<<<<<< HEAD
+    country: { type: String, trim: true },
     city: { type: String, trim: true },
     contactNumber: { type: String, trim: true },
     countryCode: { type: String, trim: true },
-=======
-    country: { type: String, trim: true },
->>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
     organization: { type: String, trim: true },
     role: { type: String, trim: true },
     whatYouDo: { type: String, trim: true },
@@ -31,7 +28,6 @@ const CommunitySchema = new Schema<CommunityDocument>(
     proposedGuest: { type: String, trim: true },
     interests: [{ type: String, trim: true }],
     message: { type: String, trim: true },
-    referral: { type: String, trim: true },
     status: {
       type: String,
       enum: ['New', 'Contacted', 'Resolved', 'Pending', 'Reviewing', 'Selected', 'Rejected'],
@@ -42,11 +38,7 @@ const CommunitySchema = new Schema<CommunityDocument>(
       default: 'Website Form',
     },
     referral: {
-      utmSource: { type: String, trim: true },
-      utmMedium: { type: String, trim: true },
-      utmCampaign: { type: String, trim: true },
-      utmContent: { type: String, trim: true },
-      referrer: { type: String, trim: true },
+      type: Schema.Types.Mixed,
     },
   },
   {

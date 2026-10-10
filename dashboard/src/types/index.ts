@@ -47,13 +47,10 @@ export interface CommunityMember {
   applicationType?: ApplicationType;
   fullName: string;
   email: string;
-<<<<<<< HEAD
+  country?: string;
   city?: string;
   contactNumber?: string;
   countryCode?: string;
-=======
-  country?: string;
->>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
   organization?: string;
   role?: string;
   whatYouDo?: string;
@@ -64,10 +61,9 @@ export interface CommunityMember {
   proposedGuest?: string;
   interests?: string[];
   message?: string;
-  referral?: string;
   status: CommunityStatus;
   source: string;
-  referral?: ApplicationReferral;
+  referral?: string | ApplicationReferral;
   createdAt: string;
   updatedAt: string;
 }

@@ -24,13 +24,10 @@ export interface CommunityMember {
   applicationType: ApplicationType;
   fullName: string;
   email: string;
-<<<<<<< HEAD
+  country?: string;
   city?: string;
   contactNumber?: string;
   countryCode?: string;
-=======
-  country?: string;
->>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
   organization?: string;
   role?: string;
   whatYouDo?: string;
@@ -41,10 +38,9 @@ export interface CommunityMember {
   proposedGuest?: string;
   interests?: string[];
   message?: string;
-  referral?: string;
   status: CommunityStatus;
   source: string;
-  referral?: ApplicationReferral;
+  referral?: string | ApplicationReferral;
   createdAt: string;
   updatedAt: string;
 }
@@ -73,10 +69,10 @@ export const ReferralSchema = z
 
 // PUBLIC schema for standard Community joining
 export const CreatePublicCommunitySchema = z.object({
-<<<<<<< HEAD
   applicationType: z.literal('community').default('community').optional(),
   fullName: z.string().trim().min(2, 'Full name must be at least 2 characters').max(100),
   email: z.string().trim().email('Invalid email address').toLowerCase(),
+  country: z.string().trim().max(100).optional(),
   city: z.string().trim().max(100).optional(),
   contactNumber: z.string().trim().max(50).optional(),
   countryCode: z.string().trim().max(10).optional(),
@@ -84,18 +80,8 @@ export const CreatePublicCommunitySchema = z.object({
   role: z.string().trim().max(150).optional(),
   interests: z.array(z.string().trim().max(100)).max(10).optional(),
   message: z.string().trim().max(3000).optional(),
-  referral: ReferralSchema,
+  referral: z.union([z.string().max(200), ReferralSchema]).optional(),
   source: z.string().max(100).optional(),
-=======
-  fullName: z.string().min(2, 'Full name must be at least 2 characters').max(100),
-  email: z.string().email('Invalid email address').toLowerCase(),
-  country: z.string().max(100).optional(),
-  organization: z.string().max(100).optional(),
-  role: z.string().max(100).optional(),
-  interests: z.array(z.string().max(100)).max(10).optional(),
-  message: z.string().max(3000).optional(),
-  referral: z.string().max(200).optional(),
->>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
   website_hp: z.string().max(0, 'Spam detected').optional(), // Anti-spam honeypot
 });
 
@@ -135,6 +121,7 @@ export interface CreateCommunityDTO {
   applicationType?: ApplicationType;
   fullName: string;
   email: string;
+  country?: string;
   city?: string;
   contactNumber?: string;
   countryCode?: string;
@@ -150,7 +137,7 @@ export interface CreateCommunityDTO {
   message?: string;
   status?: CommunityStatus;
   source?: string;
-  referral?: ApplicationReferral;
+  referral?: string | ApplicationReferral;
 }
 
 export const UpdateCommunityStatusSchema = z.object({

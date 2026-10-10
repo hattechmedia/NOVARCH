@@ -77,13 +77,10 @@ export class MongoCommunityRepository implements ICommunityRepository {
           applicationType: appType,
           fullName: dto.fullName,
           email: dto.email,
-<<<<<<< HEAD
+          country: dto.country || undefined,
           city: dto.city || undefined,
           contactNumber: dto.contactNumber || undefined,
           countryCode: dto.countryCode || undefined,
-=======
-          country: dto.country || undefined,
->>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
           organization: dto.organization || undefined,
           role: dto.role || undefined,
           whatYouDo: dto.whatYouDo || undefined,
@@ -97,7 +94,6 @@ export class MongoCommunityRepository implements ICommunityRepository {
           referral: dto.referral || undefined,
           status: dto.status || 'New',
           source: source,
-          referral: dto.referral || undefined,
         });
 
         console.log(`💾 Saved ${appType} application to MongoDB: ${doc.fullName} (${doc._id})`);
@@ -113,13 +109,10 @@ export class MongoCommunityRepository implements ICommunityRepository {
       applicationType: appType,
       fullName: dto.fullName,
       email: dto.email,
-<<<<<<< HEAD
+      country: dto.country || undefined,
       city: dto.city || undefined,
       contactNumber: dto.contactNumber || undefined,
       countryCode: dto.countryCode || undefined,
-=======
-      country: dto.country || undefined,
->>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
       organization: dto.organization || undefined,
       role: dto.role || undefined,
       whatYouDo: dto.whatYouDo || undefined,
@@ -133,7 +126,6 @@ export class MongoCommunityRepository implements ICommunityRepository {
       referral: dto.referral || undefined,
       status: dto.status || 'New',
       source: source,
-      referral: dto.referral || undefined,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
