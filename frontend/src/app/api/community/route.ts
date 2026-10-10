@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 const rawUrl = (
   process.env.BACKEND_API_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
-  'http://localhost:5000'
+  'https://novarch-backend.vercel.app'
 ).replace(/\/+$/, '');
 const BACKEND_API_URL = rawUrl.endsWith('/api') ? rawUrl : `${rawUrl}/api`;
 
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
       );
     }
 
+<<<<<<< HEAD
     if (isWinterArc) {
       if (!body.city) {
         return NextResponse.json(
@@ -85,6 +86,17 @@ export async function POST(request: Request) {
       message: body.message ? String(body.message).trim() : undefined,
       referral: body.referral || undefined,
       source: body.source || undefined,
+=======
+    const backendPayload = {
+      fullName: body.fullName,
+      email: body.email,
+      country: body.country || undefined,
+      organization: body.organization || undefined,
+      role: body.role || undefined,
+      interests: Array.isArray(body.interests) ? body.interests : [],
+      message: body.message || undefined,
+      referral: body.referral || undefined,
+>>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
       website_hp: body.website_hp || undefined,
     };
 

@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Users,
-  Building,
   Briefcase,
+  Globe,
   Calendar,
   ArrowUpRight,
   ChevronDown,
@@ -115,7 +115,11 @@ export const CommunityTable: React.FC<CommunityTableProps> = React.memo(({
       return (
         m.fullName.toLowerCase().includes(query) ||
         m.email.toLowerCase().includes(query) ||
+<<<<<<< HEAD
         (m.city && m.city.toLowerCase().includes(query)) ||
+=======
+        (m.country && m.country.toLowerCase().includes(query)) ||
+>>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
         (m.organization && m.organization.toLowerCase().includes(query)) ||
         (m.role && m.role.toLowerCase().includes(query)) ||
         (m.whatYouDo && m.whatYouDo.toLowerCase().includes(query)) ||
@@ -340,6 +344,7 @@ function MemberCard({
           </div>
         </div>
 
+<<<<<<< HEAD
         {/* Details snippet */}
         <div className="space-y-1 text-xs font-mono text-[#7A8FA6] bg-[#070E1A]/60 rounded-xl p-3 border border-[#17304E]/40">
           {member.city && (
@@ -355,6 +360,24 @@ function MemberCard({
               <span>{member.organization}</span>
             </p>
           )}
+=======
+        {/* Name */}
+        <div className="text-center min-w-0 w-full">
+          <p className="text-sm font-semibold text-white truncate leading-tight">{member.fullName}</p>
+          {member.role && (
+            <p className="text-[10px] font-mono text-[#3A5070] truncate mt-0.5 flex items-center justify-center gap-1">
+              <Briefcase className="h-2.5 w-2.5 flex-shrink-0" />
+              {member.role}
+            </p>
+          )}
+          {member.country && (
+            <p className="text-[10px] font-mono text-[#3A5070] truncate flex items-center justify-center gap-1">
+              <Globe className="h-2.5 w-2.5 flex-shrink-0" />
+              {member.country}
+            </p>
+          )}
+        </div>
+>>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
 
           {(member.whatYouDo || member.role) && (
             <p className="flex items-center gap-1.5 truncate">

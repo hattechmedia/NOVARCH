@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   User,
   Mail,
-  Phone,
   Building,
   Briefcase,
   MessageSquare,
@@ -175,10 +174,17 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
                   {member.organization}
                 </span>
               )}
+<<<<<<< HEAD
               {(member.whatYouDo || member.role) && (
                 <span className="flex items-center gap-1.5">
                   <Briefcase className="h-3.5 w-3.5 text-amber-400" />
                   {member.whatYouDo || member.role}
+=======
+              {member.country && (
+                <span className="flex items-center gap-1.5">
+                  <Globe className="h-3.5 w-3.5 text-[#38B2D8]" />
+                  {member.country}
+>>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
                 </span>
               )}
               <span className="flex items-center gap-1.5">
@@ -223,6 +229,7 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
             <SectionHeader icon={User} label="Contact & Profile" />
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <InfoTile icon={User} label="Full Name" value={member.fullName} />
+<<<<<<< HEAD
               <InfoTile icon={Mail} label="Email Address" value={member.email} isEmail />
               {member.city && <InfoTile icon={MapPin} label="City / Location" value={member.city} />}
               {member.contactNumber && (
@@ -234,6 +241,14 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
                   label="Business / Project / Community"
                   value={member.organization}
                 />
+=======
+              <InfoTile icon={Mail} label="Email" value={member.email} isEmail />
+              {member.country && (
+                <InfoTile icon={Globe} label="Country / Location" value={member.country} />
+              )}
+              {member.organization && (
+                <InfoTile icon={Building} label="Company" value={member.organization} />
+>>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
               )}
               {(member.whatYouDo || member.role) && (
                 <InfoTile
@@ -242,6 +257,13 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
                   value={member.whatYouDo || member.role || ''}
                 />
               )}
+<<<<<<< HEAD
+=======
+              <InfoTile icon={Calendar} label="Joined" value={joinedDate} />
+              {member.referral && (
+                <InfoTile icon={Globe} label="Source / Referral" value={member.referral} />
+              )}
+>>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
             </div>
           </section>
 
@@ -407,6 +429,7 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
                 <Mail className="h-4 w-4 text-[#38B2D8] group-hover:scale-110 transition-transform" />
                 Send Email
               </a>
+<<<<<<< HEAD
               {member.contactNumber && (
                 <a
                   href={`tel:${member.contactNumber}`}
@@ -416,6 +439,8 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
                   Call Applicant
                 </a>
               )}
+=======
+>>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
               <button
                 onClick={handleDelete}
                 className="flex items-center gap-3 w-full rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm font-mono text-red-400 hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-300 transition-all cursor-pointer group"

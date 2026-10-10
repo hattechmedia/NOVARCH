@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { Container } from '@/components/ui/Container';
-import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import {
@@ -10,19 +9,16 @@ import {
   Send,
   User,
   Mail,
-  Phone,
   MessageSquare,
   Sparkles,
   Building,
   Briefcase,
-  Users,
   Zap,
   Globe,
   Code2,
   Shield,
   ArrowRight,
 } from 'lucide-react';
-import { COUNTRY_CODES } from '@/data/contact';
 
 const INTEREST_OPTIONS = [
   { id: 'AI & Automation', label: 'AI & Automation', description: 'Applied AI, automated workflows, intelligent pipelines' },
@@ -59,24 +55,24 @@ const BENEFITS = [
 interface CommunityFormData {
   fullName: string;
   email: string;
-  countryCode: string;
-  contactNumber: string;
+  country: string;
   organization: string;
   role: string;
   interests: string[];
   message: string;
+  referral: string;
   website_hp: string;
 }
 
 const INITIAL_FORM: CommunityFormData = {
   fullName: '',
   email: '',
-  countryCode: '+49',
-  contactNumber: '',
+  country: '',
   organization: '',
   role: '',
   interests: [],
   message: '',
+  referral: '',
   website_hp: '',
 };
 
@@ -379,40 +375,22 @@ function CommunityFormContent() {
                   </div>
                 </div>
 
-                {/* Row 2: Phone */}
+                {/* Row 2: Country/Location */}
                 <div>
-                  <label htmlFor="contactNumber" className="block text-xs font-mono font-bold uppercase tracking-wider text-text-muted mb-2">
-                    Phone Number
+                  <label htmlFor="country" className="block text-xs font-mono font-bold uppercase tracking-wider text-text-muted mb-2">
+                    Country / Location
                   </label>
-                  <div className="flex gap-2">
-                    <div className="relative w-28 sm:w-36 flex-shrink-0">
-                      <select
-                        value={formData.countryCode}
-                        disabled={isSubmitting}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, countryCode: e.target.value }))}
-                        aria-label="Country Dial Code"
-                        className="w-full px-3 py-3 bg-surface border border-border rounded-xl text-white focus:border-[#1E5FBF] focus:outline-none transition-colors text-xs font-mono appearance-none cursor-pointer disabled:opacity-50"
-                      >
-                        {COUNTRY_CODES.map((c) => (
-                          <option key={`${c.country}-${c.code}`} value={c.code} className="bg-[#0D1826] text-white">
-                            {c.flag} {c.country} ({c.code})
-                          </option>
-                        ))}
-                      </select>
-                      <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text-muted/60 text-xs">▼</div>
-                    </div>
-                    <div className="relative flex-1">
-                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted/60" />
-                      <input
-                        type="tel"
-                        id="contactNumber"
-                        disabled={isSubmitting}
-                        value={formData.contactNumber}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, contactNumber: e.target.value }))}
-                        placeholder="01512 3456789"
-                        className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm font-mono disabled:opacity-50"
-                      />
-                    </div>
+                  <div className="relative">
+                    <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted/60" />
+                    <input
+                      type="text"
+                      id="country"
+                      disabled={isSubmitting}
+                      value={formData.country}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, country: e.target.value }))}
+                      placeholder="e.g. Germany, Pakistan, UAE..."
+                      className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm disabled:opacity-50"
+                    />
                   </div>
                 </div>
 
@@ -510,6 +488,25 @@ function CommunityFormContent() {
                       onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
                       placeholder="Tell us about yourself, your background, or what you'd like to build with NOVARCH..."
                       className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm resize-none disabled:opacity-50"
+                    />
+                  </div>
+                </div>
+
+                {/* Source / Referral */}
+                <div>
+                  <label htmlFor="referral" className="block text-xs font-mono font-bold uppercase tracking-wider text-text-muted mb-2">
+                    How did you find us?
+                  </label>
+                  <div className="relative">
+                    <ArrowRight className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted/60" />
+                    <input
+                      type="text"
+                      id="referral"
+                      disabled={isSubmitting}
+                      value={formData.referral}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, referral: e.target.value }))}
+                      placeholder="e.g. LinkedIn, Google, Referred by a friend..."
+                      className="w-full pl-10 pr-4 py-3 bg-surface border border-border rounded-xl text-white placeholder-text-muted/40 focus:border-[#1E5FBF] focus:outline-none transition-colors text-sm disabled:opacity-50"
                     />
                   </div>
                 </div>

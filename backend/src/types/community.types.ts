@@ -24,9 +24,13 @@ export interface CommunityMember {
   applicationType: ApplicationType;
   fullName: string;
   email: string;
+<<<<<<< HEAD
   city?: string;
   contactNumber?: string;
   countryCode?: string;
+=======
+  country?: string;
+>>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
   organization?: string;
   role?: string;
   whatYouDo?: string;
@@ -37,6 +41,7 @@ export interface CommunityMember {
   proposedGuest?: string;
   interests?: string[];
   message?: string;
+  referral?: string;
   status: CommunityStatus;
   source: string;
   referral?: ApplicationReferral;
@@ -68,6 +73,7 @@ export const ReferralSchema = z
 
 // PUBLIC schema for standard Community joining
 export const CreatePublicCommunitySchema = z.object({
+<<<<<<< HEAD
   applicationType: z.literal('community').default('community').optional(),
   fullName: z.string().trim().min(2, 'Full name must be at least 2 characters').max(100),
   email: z.string().trim().email('Invalid email address').toLowerCase(),
@@ -80,6 +86,16 @@ export const CreatePublicCommunitySchema = z.object({
   message: z.string().trim().max(3000).optional(),
   referral: ReferralSchema,
   source: z.string().max(100).optional(),
+=======
+  fullName: z.string().min(2, 'Full name must be at least 2 characters').max(100),
+  email: z.string().email('Invalid email address').toLowerCase(),
+  country: z.string().max(100).optional(),
+  organization: z.string().max(100).optional(),
+  role: z.string().max(100).optional(),
+  interests: z.array(z.string().max(100)).max(10).optional(),
+  message: z.string().max(3000).optional(),
+  referral: z.string().max(200).optional(),
+>>>>>>> 0012bb70fb6e204fdc1908085e0044bf69df976b
   website_hp: z.string().max(0, 'Spam detected').optional(), // Anti-spam honeypot
 });
 
