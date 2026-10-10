@@ -1,27 +1,25 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   LayoutDashboard,
   Zap,
   MessageSquare,
-  ExternalLink,
   LogOut,
   ShieldCheck,
-  Globe,
   Users,
   ChevronRight,
-  Wifi,
-  WifiOff,
+  Flame,
 } from 'lucide-react';
 
 interface SidebarProps {
   currentTab: string;
   setCurrentTab: (tab: string) => void;
-  frontendUrl: string;
+  frontendUrl?: string;
   serviceLeadsCount: number;
   messagesCount: number;
   communityCount: number;
+  winterArcCount: number;
   totalInquiriesCount: number;
-  isBackendConnected: boolean;
+  isBackendConnected?: boolean;
   adminEmail: string;
   onLogout: () => void;
 }
@@ -29,12 +27,11 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = React.memo(({
   currentTab,
   setCurrentTab,
-  frontendUrl,
   serviceLeadsCount,
   messagesCount,
   communityCount,
+  winterArcCount,
   totalInquiriesCount,
-  isBackendConnected,
   adminEmail,
   onLogout,
 }) => {
@@ -62,6 +59,14 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
       badge: messagesCount,
       sublabel: 'General Inquiries',
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
+    },
+    {
+      id: 'winter_arc',
+      label: 'Winter Arc',
+      icon: Flame,
+      badge: winterArcCount,
+      sublabel: 'Treffen 01 Applications',
+      badgeColor: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
     },
     {
       id: 'community',
@@ -127,24 +132,6 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
           >
             v1.0
           </span>
-        </div>
-
-        {/* Connection status pill */}
-        <div
-          className="mt-3 flex items-center gap-2 rounded-lg px-3 py-2"
-          style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(23,48,78,0.6)' }}
-        >
-          {isBackendConnected ? (
-            <Wifi className="h-3 w-3 text-emerald-400 flex-shrink-0" />
-          ) : (
-            <WifiOff className="h-3 w-3 text-amber-400 flex-shrink-0" />
-          )}
-          <span className={`text-[11px] font-mono font-medium ${isBackendConnected ? 'text-emerald-400' : 'text-amber-400'}`}>
-            {isBackendConnected ? 'Engine Live' : 'Local Mode'}
-          </span>
-          <span
-            className={`ml-auto h-1.5 w-1.5 rounded-full flex-shrink-0 ${isBackendConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}
-          />
         </div>
       </div>
 
@@ -251,35 +238,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
       <div className="mx-4 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(56,178,216,0.12), transparent)' }} />
 
       {/* ── Footer ── */}
-      <div className="px-3 py-4 space-y-2">
-        {/* Live Website */}
-        <a
-          href={frontendUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex w-full items-center justify-between rounded-xl px-3 py-2.5 transition-all duration-200 cursor-pointer"
-          style={{
-            background: 'rgba(14,27,44,0.5)',
-            border: '1px solid rgba(23,48,78,0.5)',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(56,178,216,0.3)';
-            (e.currentTarget as HTMLElement).style.background = 'rgba(14,27,44,0.9)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(23,48,78,0.5)';
-            (e.currentTarget as HTMLElement).style.background = 'rgba(14,27,44,0.5)';
-          }}
-        >
-          <div className="flex items-center gap-2.5">
-            <Globe className="h-4 w-4 text-[#38B2D8]" />
-            <span className="text-sm font-medium text-[#7A8FA6] group-hover:text-white transition-colors">
-              Live Website
-            </span>
-          </div>
-          <ExternalLink className="h-3.5 w-3.5 text-[#2A3F58] group-hover:text-[#38B2D8] transition-colors" />
-        </a>
-
+      <div className="px-3 py-4">
         {/* User Card */}
         <div
           className="flex items-center gap-3 rounded-xl p-2.5"
@@ -300,9 +259,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
               {adminInitials}
             </div>
             <span
-              className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 ${
-                isBackendConnected ? 'bg-emerald-400' : 'bg-amber-400'
-              }`}
+              className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 bg-emerald-400"
               style={{ borderColor: '#07101E' }}
             />
           </div>

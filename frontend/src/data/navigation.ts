@@ -28,8 +28,12 @@ export const navigation: NavItem[] = [
       },
     ],
   },
-  // { label: 'About', href: '/about' }, // Disabled
+  { label: 'Community', href: '/our-community' },
+  {
+    label: 'Winter Arc',
+    href: '/winter-arc',
+    highlight: true,
+    badge: 'Oct 16',
+  },
   { label: 'Founders', href: '/founders' },
-  { label: 'Our Community', href: '/our-community' },
-  // { label: 'Contact', href: '/contact' },
 ];

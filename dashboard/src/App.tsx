@@ -17,6 +17,8 @@ import {
   AlertCircle,
   RefreshCw,
   Clock,
+  Flame,
+  Users,
 } from 'lucide-react';
 
 function DashboardView({
@@ -248,6 +250,7 @@ function DashboardView({
 function MainLayout({
   inquiries,
   communityCount,
+  winterArcCount,
   isBackendConnected,
   adminEmail,
   onLogout,
@@ -255,6 +258,7 @@ function MainLayout({
 }: {
   inquiries: ContactInquiry[];
   communityCount: number;
+  winterArcCount: number;
   isBackendConnected: boolean;
   adminEmail: string;
   onLogout: () => void;
@@ -266,6 +270,7 @@ function MainLayout({
   const currentTab = useMemo(() => {
     if (location.pathname.startsWith('/service-leads')) return 'service_leads';
     if (location.pathname.startsWith('/messages')) return 'messages';
+    if (location.pathname.startsWith('/winter-arc')) return 'winter_arc';
     if (location.pathname.startsWith('/community')) return 'community';
     return 'overview';
   }, [location.pathname]);
@@ -273,6 +278,7 @@ function MainLayout({
   const handleTabChange = (tabId: string) => {
     if (tabId === 'service_leads') navigate('/service-leads');
     else if (tabId === 'messages') navigate('/messages');
+    else if (tabId === 'winter_arc') navigate('/winter-arc');
     else if (tabId === 'community') navigate('/community');
     else navigate('/');
   };
@@ -290,6 +296,7 @@ function MainLayout({
         serviceLeadsCount={serviceLeads.length}
         messagesCount={contactMessages.length}
         communityCount={communityCount}
+        winterArcCount={winterArcCount}
         totalInquiriesCount={inquiries.length}
         isBackendConnected={isBackendConnected}
         adminEmail={adminEmail}
@@ -474,6 +481,15 @@ export function App() {
     }
   }, []);
 
+  const generalCommunityMembers = useMemo(
+    () => communityMembers.filter((m) => m.applicationType !== 'winter-arc'),
+    [communityMembers]
+  );
+  const winterArcMembers = useMemo(
+    () => communityMembers.filter((m) => m.applicationType === 'winter-arc'),
+    [communityMembers]
+  );
+
   if (!isAuthenticated) {
     return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
@@ -489,6 +505,18 @@ export function App() {
               inquiries={inquiries}
               onUpdateStatus={handleUpdateStatus}
               onDelete={handleDelete}
+            />
+          }
+        />
+
+        {/* Full-Page Route for Winter Arc Application by ID (/winter-arc/:id) */}
+        <Route
+          path="/winter-arc/:id"
+          element={
+            <CommunityDetailPage
+              members={communityMembers}
+              onUpdateStatus={handleUpdateCommunityStatus}
+              onDelete={handleDeleteCommunityMember}
             />
           }
         />
@@ -511,7 +539,8 @@ export function App() {
           element={
             <MainLayout
               inquiries={inquiries}
-              communityCount={communityMembers.length}
+              communityCount={generalCommunityMembers.length}
+              winterArcCount={winterArcMembers.length}
               isBackendConnected={isBackendConnected}
               adminEmail={adminEmail}
               onLogout={handleLogout}
@@ -537,7 +566,8 @@ export function App() {
           element={
             <MainLayout
               inquiries={inquiries}
-              communityCount={communityMembers.length}
+              communityCount={generalCommunityMembers.length}
+              winterArcCount={winterArcMembers.length}
               isBackendConnected={isBackendConnected}
               adminEmail={adminEmail}
               onLogout={handleLogout}
@@ -563,7 +593,8 @@ export function App() {
           element={
             <MainLayout
               inquiries={inquiries}
-              communityCount={communityMembers.length}
+              communityCount={generalCommunityMembers.length}
+              winterArcCount={winterArcMembers.length}
               isBackendConnected={isBackendConnected}
               adminEmail={adminEmail}
               onLogout={handleLogout}
@@ -583,49 +614,107 @@ export function App() {
           }
         />
 
+        {/* Dedicated Winter Arc Applications */}
+        <Route
+          path="/winter-arc"
+          element={
+            <MainLayout
+              inquiries={inquiries}
+              communityCount={generalCommunityMembers.length}
+              winterArcCount={winterArcMembers.length}
+              isBackendConnected={isBackendConnected}
+              adminEmail={adminEmail}
+              onLogout={handleLogout}
+            >
+              <div className="flex-1 flex flex-col min-w-0">
+                <header
+                  className="sticky top-0 z-30 flex items-center justify-between px-6 py-3 backdrop-blur-xl"
+                  style={{
+                    background: 'rgba(5,10,18,0.85)',
+                    borderBottom: '1px solid rgba(23,48,78,0.6)',
+                    boxShadow: '0 1px 0 rgba(56,178,216,0.04)',
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 text-sm font-mono">
+                      <span style={{ color: '#38B2D8', textShadow: '0 0 12px rgba(56,178,216,0.4)', fontWeight: 700 }}>NOVARCH</span>
+                      <span className="text-[#1E3A5F]">/</span>
+                      <span className="text-white font-semibold">Winter Arc</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => loadData(true)}
+                      disabled={isRefreshing}
+                      className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-mono font-semibold cursor-pointer disabled:opacity-50 transition-all"
+                      style={{ background: 'rgba(30,95,191,0.12)', border: '1px solid rgba(56,178,216,0.2)', color: '#38B2D8' }}
+                    >
+                      <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                      <span className="hidden md:inline">Refresh</span>
+                    </button>
+                  </div>
+                </header>
+                <main className="relative flex-1 p-6 sm:p-8 max-w-7xl w-full mx-auto z-10">
+                  <CommunityTable
+                    members={winterArcMembers}
+                    onUpdateStatus={handleUpdateCommunityStatus}
+                    isWinterArc={true}
+                    pageTitle="Winter Arc · Treffen 01 Applications"
+                    icon={Flame}
+                  />
+                </main>
+              </div>
+            </MainLayout>
+          }
+        />
+
         {/* Community Members */}
         <Route
           path="/community"
           element={
             <MainLayout
               inquiries={inquiries}
-              communityCount={communityMembers.length}
+              communityCount={generalCommunityMembers.length}
+              winterArcCount={winterArcMembers.length}
               isBackendConnected={isBackendConnected}
               adminEmail={adminEmail}
               onLogout={handleLogout}
             >
               <div className="flex-1 flex flex-col min-w-0">
-              <header
-                className="sticky top-0 z-30 flex items-center justify-between px-6 py-3 backdrop-blur-xl"
-                style={{
-                  background: 'rgba(5,10,18,0.85)',
-                  borderBottom: '1px solid rgba(23,48,78,0.6)',
-                  boxShadow: '0 1px 0 rgba(56,178,216,0.04)',
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 text-sm font-mono">
-                    <span style={{ color: '#38B2D8', textShadow: '0 0 12px rgba(56,178,216,0.4)', fontWeight: 700 }}>NOVARCH</span>
-                    <span className="text-[#1E3A5F]">/</span>
-                    <span className="text-white font-semibold">Community</span>
+                <header
+                  className="sticky top-0 z-30 flex items-center justify-between px-6 py-3 backdrop-blur-xl"
+                  style={{
+                    background: 'rgba(5,10,18,0.85)',
+                    borderBottom: '1px solid rgba(23,48,78,0.6)',
+                    boxShadow: '0 1px 0 rgba(56,178,216,0.04)',
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 text-sm font-mono">
+                      <span style={{ color: '#38B2D8', textShadow: '0 0 12px rgba(56,178,216,0.4)', fontWeight: 700 }}>NOVARCH</span>
+                      <span className="text-[#1E3A5F]">/</span>
+                      <span className="text-white font-semibold">Community</span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => loadData(true)}
-                    disabled={isRefreshing}
-                    className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-mono font-semibold cursor-pointer disabled:opacity-50 transition-all"
-                    style={{ background: 'rgba(30,95,191,0.12)', border: '1px solid rgba(56,178,216,0.2)', color: '#38B2D8' }}
-                  >
-                    <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                    <span className="hidden md:inline">Refresh</span>
-                  </button>
-                </div>
-              </header>
-              <main className="relative flex-1 p-6 sm:p-8 max-w-7xl w-full mx-auto z-10">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => loadData(true)}
+                      disabled={isRefreshing}
+                      className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-mono font-semibold cursor-pointer disabled:opacity-50 transition-all"
+                      style={{ background: 'rgba(30,95,191,0.12)', border: '1px solid rgba(56,178,216,0.2)', color: '#38B2D8' }}
+                    >
+                      <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                      <span className="hidden md:inline">Refresh</span>
+                    </button>
+                  </div>
+                </header>
+                <main className="relative flex-1 p-6 sm:p-8 max-w-7xl w-full mx-auto z-10">
                   <CommunityTable
-                    members={communityMembers}
+                    members={generalCommunityMembers}
                     onUpdateStatus={handleUpdateCommunityStatus}
+                    isWinterArc={false}
+                    pageTitle="Community Member Applications"
+                    icon={Users}
                   />
                 </main>
               </div>
@@ -641,4 +730,3 @@ export function App() {
 }
 
 export default App;
-

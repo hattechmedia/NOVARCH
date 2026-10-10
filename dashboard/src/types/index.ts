@@ -1,6 +1,23 @@
 export type LeadStatus = 'New' | 'Contacted' | 'Proposal Sent' | 'Closed' | 'Paid' | 'Payment Declined' | 'Payment Pending';
 export type SubmissionType = 'service_lead' | 'message';
-export type CommunityStatus = 'New' | 'Contacted' | 'Resolved';
+export type CommunityStatus =
+  | 'New'
+  | 'Contacted'
+  | 'Resolved'
+  | 'Pending'
+  | 'Reviewing'
+  | 'Selected'
+  | 'Rejected';
+
+export type ApplicationType = 'community' | 'winter-arc';
+
+export interface ApplicationReferral {
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmContent?: string;
+  referrer?: string;
+}
 
 export interface ContactInquiry {
   id: string;
@@ -27,16 +44,25 @@ export interface ContactInquiry {
 
 export interface CommunityMember {
   id: string;
+  applicationType?: ApplicationType;
   fullName: string;
   email: string;
+  city?: string;
   contactNumber?: string;
   countryCode?: string;
   organization?: string;
   role?: string;
+  whatYouDo?: string;
+  whatCanYouOffer?: string;
+  whatAreYouLookingFor?: string;
+  linkedinUrl?: string;
+  portfolioUrl?: string;
+  proposedGuest?: string;
   interests?: string[];
   message?: string;
   status: CommunityStatus;
-  source: 'Website Form';
+  source: string;
+  referral?: ApplicationReferral;
   createdAt: string;
   updatedAt: string;
 }

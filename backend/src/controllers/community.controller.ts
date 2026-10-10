@@ -1,11 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import { communityService } from '../services/community.service.js';
-import { CreatePublicCommunitySchema, UpdateCommunityStatusSchema } from '../types/community.types.js';
+import {
+  CreatePublicCommunitySchema,
+  CreateWinterArcPublicSchema,
+  UpdateCommunityStatusSchema,
+  ApplicationType,
+} from '../types/community.types.js';
 
 export const communityController = {
-  getMembers: async (_req: Request, res: Response, next: NextFunction) => {
+  getMembers: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const members = await communityService.getAllMembers();
+      const applicationType = req.query.applicationType as ApplicationType | undefined;
+      const members = await communityService.getAllMembers(applicationType ? { applicationType } : undefined);
       return res.status(200).json({
         success: true,
         count: members.length,
@@ -24,7 +30,7 @@ export const communityController = {
       if (!member) {
         return res.status(404).json({
           success: false,
-          message: 'Community member not found',
+          message: 'Application/member record not found',
         });
       }
 
@@ -39,16 +45,33 @@ export const communityController = {
 
   createMember: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Validate against public schema — drops any internal fields
-      const validatedData = CreatePublicCommunitySchema.parse(req.body);
-      const newMember = await communityService.submitMember(validatedData);
+      const isWinterArc =
+        req.body?.applicationType === 'winter-arc' ||
+        Boolean(req.body?.whatYouDo || req.body?.whatCanYouOffer || req.body?.whatAreYouLookingFor);
 
-      console.log(`[Community Join]: ${newMember.fullName} (${newMember.email})`);
+      let validatedData: any;
+      if (isWinterArc) {
+        validatedData = CreateWinterArcPublicSchema.parse(req.body);
+      } else {
+        validatedData = CreatePublicCommunitySchema.parse(req.body);
+      }
+
+      const { member, emailResult } = await communityService.submitMember(validatedData);
+
+      const isWinterArcApp = member.applicationType === 'winter-arc';
+      console.log(
+        `[${isWinterArcApp ? 'Winter Arc Treffen 01 Application' : 'Community Join'}]: ${member.fullName} (${member.email}) — Status: ${member.status}`
+      );
+
+      const message = isWinterArcApp
+        ? "Thank you for applying to Winter Arc. Your application has been received. We'll review it and contact you if you're selected. Thanks for your interest in Treffen 01."
+        : 'Community application received successfully. Welcome to NOVARCH!';
 
       return res.status(201).json({
         success: true,
-        message: 'Community application received successfully. Welcome to NOVARCH!',
-        data: newMember,
+        message,
+        data: member,
+        emailStatus: emailResult.status,
       });
     } catch (error) {
       return next(error);
@@ -60,12 +83,12 @@ export const communityController = {
       const { id } = req.params;
       const { status } = UpdateCommunityStatusSchema.parse(req.body);
 
-      const updated = await communityService.updateMemberStatus(id, status);
+      const updated = await communityService.updateMemberStatus(id, status as any);
 
       if (!updated) {
         return res.status(404).json({
           success: false,
-          message: 'Community member not found',
+          message: 'Application/member record not found',
         });
       }
 
@@ -87,13 +110,13 @@ export const communityController = {
       if (!deleted) {
         return res.status(404).json({
           success: false,
-          message: 'Community member not found',
+          message: 'Application/member record not found',
         });
       }
 
       return res.status(200).json({
         success: true,
-        message: 'Community member deleted successfully',
+        message: 'Record deleted successfully',
       });
     } catch (error) {
       return next(error);

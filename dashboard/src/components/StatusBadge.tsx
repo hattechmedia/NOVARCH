@@ -18,6 +18,34 @@ const statusConfig: Record<
     border: 'border-emerald-500/30',
     dot: 'bg-emerald-400',
   },
+  Pending: {
+    label: 'Pending',
+    bg: 'bg-amber-500/10',
+    text: 'text-amber-400',
+    border: 'border-amber-500/30',
+    dot: 'bg-amber-400',
+  },
+  Reviewing: {
+    label: 'Reviewing',
+    bg: 'bg-cyan-500/10',
+    text: 'text-cyan-400',
+    border: 'border-cyan-500/30',
+    dot: 'bg-cyan-400',
+  },
+  Selected: {
+    label: 'Selected',
+    bg: 'bg-indigo-500/15',
+    text: 'text-indigo-300',
+    border: 'border-indigo-500/40',
+    dot: 'bg-indigo-400',
+  },
+  Rejected: {
+    label: 'Rejected',
+    bg: 'bg-rose-500/10',
+    text: 'text-rose-400',
+    border: 'border-rose-500/30',
+    dot: 'bg-rose-400',
+  },
   Contacted: {
     label: 'Contacted',
     bg: 'bg-blue-500/10',
@@ -83,4 +111,3 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(({ status }) =
 });
 
 StatusBadge.displayName = 'StatusBadge';
-

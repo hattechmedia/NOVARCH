@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { ChevronDown, ArrowRight, Menu, Globe, GitBranch, Cpu, Code2 } from 'lucide-react';
+import { ChevronDown, ArrowRight, Menu, Globe, GitBranch, Cpu, Code2, Flame } from 'lucide-react';
 import { navigation } from '@/data/navigation';
 import { cn } from '@/lib/utils';
 import { MobileMenu } from './MobileMenu';
@@ -65,10 +65,10 @@ export function Navbar() {
       {/* ── Background Navbar Header ──────────────────────── */}
       <header
         suppressHydrationWarning
-        className="fixed top-0 left-0 right-0 z-50 h-20 bg-[#030712]/80 backdrop-blur-md border-b border-white/[0.06]"
+        className="fixed top-0 left-0 right-0 z-50 h-20 bg-[#030712]/85 backdrop-blur-md border-b border-white/[0.06]"
       >
         <div className="relative mx-auto h-full max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          {/* ── Logo (Aligned with left edge of container) ── */}
+          {/* ── Logo ── */}
           <div className="flex items-center">
             <Link
               href="/"
@@ -81,6 +81,7 @@ export function Navbar() {
                 width={120}
                 height={120}
                 priority
+                loading="eager"
                 className="h-10 sm:h-11 lg:h-12 w-auto object-contain transition-transform duration-200 group-hover:scale-105 drop-shadow-[0_0_14px_rgba(56,178,216,0.45)]"
               />
               <Image
@@ -89,17 +90,18 @@ export function Navbar() {
                 width={220}
                 height={40}
                 priority
+                loading="eager"
                 className="h-6 sm:h-7 lg:h-[30px] w-auto object-contain transition-opacity duration-200 group-hover:opacity-95 drop-shadow-[0_0_8px_rgba(56,178,216,0.25)]"
               />
             </Link>
           </div>
 
-          {/* ── Floating Center Glass NavPill (Desktop, perfectly centered) ───────────── */}
+          {/* ── Floating Center Glass NavPill (Desktop) ───────────── */}
           <nav
             aria-label="Main navigation"
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:flex items-center"
           >
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#081224]/85 backdrop-blur-md border border-white/15 shadow-xl shadow-black/50">
+            <div className="flex items-center gap-1 p-1.5 rounded-full bg-[#081224]/90 backdrop-blur-md border border-white/15 shadow-xl shadow-black/50">
               {navigation.map((item) => {
                 const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
 
@@ -117,12 +119,12 @@ export function Navbar() {
                         aria-expanded={dropdownOpen}
                         aria-haspopup="true"
                         className={cn(
-                          'inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200',
+                          'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200 whitespace-nowrap',
                           'text-slate-300 hover:text-white hover:bg-white/10',
                           dropdownOpen && 'text-cyan-400 bg-white/10'
                         )}
                       >
-                        {item.label}
+                        <span>{item.label}</span>
                         <ChevronDown
                           className={cn(
                             'h-3.5 w-3.5 transition-transform duration-200 text-slate-400',
@@ -178,20 +180,43 @@ export function Navbar() {
                   );
                 }
 
+                if (item.highlight) {
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        'relative inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200 whitespace-nowrap',
+                        isActive
+                          ? 'bg-gradient-to-r from-blue-600/35 to-cyan-500/35 text-white border border-cyan-400/50 shadow-[0_0_12px_rgba(56,178,216,0.3)]'
+                          : 'bg-cyan-500/10 text-cyan-300 border border-cyan-400/30 hover:bg-cyan-500/20 hover:border-cyan-400/50 hover:text-white'
+                      )}
+                    >
+                      <Flame className="h-3.5 w-3.5 text-amber-400 flex-shrink-0" />
+                      <span>{item.label}</span>
+                      {item.badge && (
+                        <span className="rounded-full bg-cyan-400/20 px-1.5 py-0.5 text-[10px] font-mono font-bold text-cyan-300 border border-cyan-400/30 whitespace-nowrap">
+                          {item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                }
+
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      'relative rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200',
+                      'relative inline-flex items-center justify-center rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200 whitespace-nowrap',
                       isActive
                         ? 'text-white'
                         : 'text-slate-300 hover:text-white hover:bg-white/10'
                     )}
                   >
-                    {item.label}
+                    <span>{item.label}</span>
                     {isActive && (
-                      <span className="absolute bottom-1 left-4 right-4 h-[2px] bg-cyan-400 rounded-full shadow-[0_0_8px_#38bdf8]" />
+                      <span className="absolute bottom-1 left-3.5 right-3.5 h-[2px] bg-cyan-400 rounded-full shadow-[0_0_6px_#38bdf8]" />
                     )}
                   </Link>
                 );

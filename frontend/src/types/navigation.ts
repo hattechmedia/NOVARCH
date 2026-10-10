@@ -8,4 +8,6 @@ export interface NavItem {
   label: string;
   href: string;
   children?: NavChild[];
+  highlight?: boolean;
+  badge?: string;
 }

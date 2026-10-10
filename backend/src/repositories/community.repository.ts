@@ -1,9 +1,9 @@
-import { CommunityMember, CreateCommunityDTO, CommunityStatus } from '../types/community.types.js';
+import { CommunityMember, CreateCommunityDTO, CommunityStatus, ApplicationType } from '../types/community.types.js';
 import { CommunityModel } from '../models/community.model.js';
 import { connectDatabase } from '../config/database.js';
 
 export interface ICommunityRepository {
-  findAll(): Promise<CommunityMember[]>;
+  findAll(filter?: { applicationType?: ApplicationType }): Promise<CommunityMember[]>;
   findById(id: string): Promise<CommunityMember | null>;
   create(dto: CreateCommunityDTO): Promise<CommunityMember>;
   updateStatus(id: string, status: CommunityStatus): Promise<CommunityMember | null>;
@@ -20,6 +20,9 @@ function formatCommunityDoc(doc: any): CommunityMember {
   return {
     ...rest,
     id: _id ? _id.toString() : (doc.id ? doc.id.toString() : ''),
+    applicationType: rest.applicationType || (rest.whatYouDo || rest.whatCanYouOffer ? 'winter-arc' : 'community'),
+    status: rest.status || 'New',
+    source: rest.source || 'Website Form',
     createdAt: rest.createdAt instanceof Date ? rest.createdAt.toISOString() : (rest.createdAt || new Date().toISOString()),
     updatedAt: rest.updatedAt instanceof Date ? rest.updatedAt.toISOString() : (rest.updatedAt || new Date().toISOString()),
   } as CommunityMember;
@@ -28,20 +31,24 @@ function formatCommunityDoc(doc: any): CommunityMember {
 export class MongoCommunityRepository implements ICommunityRepository {
   private inMemoryFallback: CommunityMember[] = [];
 
-  async findAll(): Promise<CommunityMember[]> {
+  async findAll(filter?: { applicationType?: ApplicationType }): Promise<CommunityMember[]> {
     const connected = await connectDatabase();
     if (connected) {
       try {
-        const docs = await CommunityModel.find().sort({ createdAt: -1 }).lean();
+        const query: any = {};
+        if (filter?.applicationType) {
+          query.applicationType = filter.applicationType;
+        }
+        const docs = await CommunityModel.find(query).sort({ createdAt: -1 }).lean();
         return docs.map(formatCommunityDoc);
       } catch (err) {
         console.error('Error in MongoCommunityRepository.findAll:', err);
       }
     }
 
-    return [...this.inMemoryFallback].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    return [...this.inMemoryFallback]
+      .filter((m) => (!filter?.applicationType ? true : m.applicationType === filter.applicationType))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
   async findById(id: string): Promise<CommunityMember | null> {
@@ -60,42 +67,63 @@ export class MongoCommunityRepository implements ICommunityRepository {
   }
 
   async create(dto: CreateCommunityDTO): Promise<CommunityMember> {
+    const appType: ApplicationType = dto.applicationType || (dto.whatYouDo || dto.whatCanYouOffer ? 'winter-arc' : 'community');
+    const source = dto.source || (dto.referral?.utmSource ? `Campaign: ${dto.referral.utmSource}` : 'Website Form');
+
     const connected = await connectDatabase();
     if (connected) {
       try {
         const doc = await CommunityModel.create({
+          applicationType: appType,
           fullName: dto.fullName,
           email: dto.email,
+          city: dto.city || undefined,
           contactNumber: dto.contactNumber || undefined,
           countryCode: dto.countryCode || undefined,
           organization: dto.organization || undefined,
           role: dto.role || undefined,
+          whatYouDo: dto.whatYouDo || undefined,
+          whatCanYouOffer: dto.whatCanYouOffer || undefined,
+          whatAreYouLookingFor: dto.whatAreYouLookingFor || undefined,
+          linkedinUrl: dto.linkedinUrl || undefined,
+          portfolioUrl: dto.portfolioUrl || undefined,
+          proposedGuest: dto.proposedGuest || undefined,
           interests: Array.isArray(dto.interests) ? dto.interests : [],
           message: dto.message || undefined,
           status: dto.status || 'New',
-          source: 'Website Form',
+          source: source,
+          referral: dto.referral || undefined,
         });
 
-        console.log(`💾 Saved community member to MongoDB Atlas: ${doc.fullName} (${doc._id})`);
+        console.log(`💾 Saved ${appType} application to MongoDB: ${doc.fullName} (${doc._id})`);
         return formatCommunityDoc(doc.toJSON ? doc.toJSON() : doc);
       } catch (err) {
-        console.error('Error saving community member to MongoDB:', err);
+        console.error('Error saving community/winter-arc application to MongoDB:', err);
       }
     }
 
     // In-memory fallback
     const newMember: CommunityMember = {
-      id: `cm-${Date.now()}`,
+      id: `app-${Date.now()}`,
+      applicationType: appType,
       fullName: dto.fullName,
       email: dto.email,
+      city: dto.city || undefined,
       contactNumber: dto.contactNumber || undefined,
       countryCode: dto.countryCode || undefined,
       organization: dto.organization || undefined,
       role: dto.role || undefined,
+      whatYouDo: dto.whatYouDo || undefined,
+      whatCanYouOffer: dto.whatCanYouOffer || undefined,
+      whatAreYouLookingFor: dto.whatAreYouLookingFor || undefined,
+      linkedinUrl: dto.linkedinUrl || undefined,
+      portfolioUrl: dto.portfolioUrl || undefined,
+      proposedGuest: dto.proposedGuest || undefined,
       interests: Array.isArray(dto.interests) ? dto.interests : [],
       message: dto.message || undefined,
       status: dto.status || 'New',
-      source: 'Website Form',
+      source: source,
+      referral: dto.referral || undefined,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -111,7 +139,7 @@ export class MongoCommunityRepository implements ICommunityRepository {
         const doc = await CommunityModel.findByIdAndUpdate(
           id,
           { status, updatedAt: new Date() },
-          { new: true }
+          { returnDocument: 'after' }
         ).lean();
         if (doc) return formatCommunityDoc(doc);
       } catch (err) {
