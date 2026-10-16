@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
-
-const rawUrl = (
-  process.env.BACKEND_API_URL ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  'https://novarch-backend.vercel.app'
-).replace(/\/+$/, '');
-const BACKEND_API_URL = rawUrl.endsWith('/api') ? rawUrl : `${rawUrl}/api`;
+import { BACKEND_UNAVAILABLE_MESSAGE, guardPublicForm } from '@/lib/formGuard';
+import { BACKEND_API_URL, backendForwardHeaders } from '@/lib/backend';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const blocked = guardPublicForm(request, body);
+    if (blocked) return blocked;
 
-    console.log('[NOVARCH Intake Received]:', JSON.stringify(body, null, 2));
+    console.log('[NOVARCH Intake Received]');
 
     // Validation
     if (!body.name || !body.email) {
@@ -38,8 +35,6 @@ export async function POST(request: Request) {
       company: body.company || undefined,
       planName: body.planName || undefined,
       planTier: body.planTier || undefined,
-      planPrice: body.planPrice || undefined,
-      estimatedValue: body.estimatedValue || undefined,
       performances: Array.isArray(body.performances) ? body.performances : [],
       serviceType:
         body.serviceType ||
@@ -58,16 +53,12 @@ export async function POST(request: Request) {
         (isServiceLead
           ? `Subscription booking for ${body.preferredService || 'Service'} - ${body.planName || 'Package'}`
           : 'Inquiry submitted via website contact form.'),
-      website_hp: body.website_hp || undefined,
     };
 
-    // Forward to Express Backend Server
     try {
       const backendRes = await fetch(`${BACKEND_API_URL}/contact`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: backendForwardHeaders(),
         body: JSON.stringify(backendPayload),
       });
 
@@ -81,25 +72,22 @@ export async function POST(request: Request) {
             : 'Project message received and synchronized with NOVARCH backend.',
           data: backendData.data,
         });
-      } else {
-        // If backend returned client validation error, return the actual error
-        if (backendRes.status >= 400 && backendRes.status < 500) {
-          return NextResponse.json(
-            { error: backendData.message || backendData.error || 'Submission validation failed on server.' },
-            { status: backendRes.status }
-          );
-        }
       }
-    } catch (backendErr) {
-      console.warn('[Backend Forwarding Warning]: Backend API unreachable, recorded locally.', backendErr);
-    }
 
-    return NextResponse.json({
-      success: true,
-      message: isServiceLead
-        ? 'Subscription request received successfully. The NOVARCH team will reach out within 24 hours.'
-        : 'Message received successfully. The NOVARCH team will reach out within 24 hours.',
-    });
+      const status = backendRes.status >= 400 && backendRes.status < 500 ? backendRes.status : 502;
+      return NextResponse.json(
+        {
+          error:
+            backendData.message ||
+            backendData.error ||
+            (status === 502 ? BACKEND_UNAVAILABLE_MESSAGE : 'Submission validation failed on server.'),
+        },
+        { status }
+      );
+    } catch (backendErr) {
+      console.warn('[Backend Forwarding Warning]: Backend API unreachable.', backendErr);
+      return NextResponse.json({ error: BACKEND_UNAVAILABLE_MESSAGE }, { status: 502 });
+    }
   } catch (error) {
     console.error('[NOVARCH Intake Error]:', error);
     return NextResponse.json(

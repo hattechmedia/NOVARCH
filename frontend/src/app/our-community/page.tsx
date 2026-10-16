@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Container } from '@/components/ui/Container';
+import { useFormToken } from '@/hooks/useFormToken';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import {
@@ -77,6 +78,7 @@ const INITIAL_FORM: CommunityFormData = {
 };
 
 function CommunityFormContent() {
+  const formToken = useFormToken();
   const [formData, setFormData] = React.useState<CommunityFormData>(INITIAL_FORM);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSubmitted, setIsSubmitted] = React.useState(false);
@@ -114,6 +116,11 @@ function CommunityFormContent() {
       return;
     }
 
+    if (!formToken) {
+      setErrorMsg('This form is still loading. Please wait a moment and try again.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -124,6 +131,7 @@ function CommunityFormContent() {
           ...formData,
           fullName: trimmedName,
           email: trimmedEmail,
+          form_token: formToken,
         }),
       });
 

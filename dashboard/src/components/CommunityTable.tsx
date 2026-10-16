@@ -11,9 +11,11 @@ import {
   Inbox,
   MapPin,
   Flame,
+  Reply,
 } from 'lucide-react';
 import { CommunityMember, CommunityStatus } from '../types';
 import { StatusBadge } from './StatusBadge';
+import { ReplyModal } from './ReplyModal';
 
 const COMMUNITY_STATUSES: CommunityStatus[] = [
   'New',
@@ -100,6 +102,7 @@ export const CommunityTable: React.FC<CommunityTableProps> = React.memo(({
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('All');
+  const [replyMember, setReplyMember] = useState<CommunityMember | null>(null);
 
   const newCount = useMemo(() => members.filter((m) => m.status === 'New').length, [members]);
 
@@ -235,12 +238,17 @@ export const CommunityTable: React.FC<CommunityTableProps> = React.memo(({
                   gradient={gradient}
                   onNavigate={() => navigate(member.applicationType === 'winter-arc' ? `/winter-arc/${member.id}` : `/community/${member.id}`)}
                   onUpdateStatus={onUpdateStatus}
+                  onReply={isWinterArc ? () => setReplyMember(member) : undefined}
                 />
               );
             })}
           </div>
         )}
       </div>
+
+      {replyMember && (
+        <ReplyModal member={replyMember} onClose={() => setReplyMember(null)} />
+      )}
     </div>
   );
 });
@@ -254,12 +262,14 @@ function MemberCard({
   gradient,
   onNavigate,
   onUpdateStatus,
+  onReply,
 }: {
   member: CommunityMember;
   initials: string;
   gradient: string;
   onNavigate: () => void;
   onUpdateStatus: (id: string, status: CommunityStatus) => void;
+  onReply?: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const isWinterArc = member.applicationType === 'winter-arc';
@@ -399,6 +409,17 @@ function MemberCard({
 
         {/* Status quick-change + open arrow */}
         <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          {onReply && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onReply(); }}
+              className="flex h-6 items-center gap-1 rounded-md px-2 text-[11px] font-mono text-[#38B2D8] transition-all cursor-pointer hover:bg-[#1E5FBF]/30"
+              style={{ background: 'rgba(30,95,191,0.15)', border: '1px solid rgba(56,178,216,0.25)' }}
+              title="Reply via email"
+            >
+              <Reply className="h-3 w-3" />
+              Reply
+            </button>
+          )}
           <div className="relative">
             <select
               value={member.status}

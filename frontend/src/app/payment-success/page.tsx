@@ -36,8 +36,8 @@ function PaymentSuccessContent() {
         }
       })
       .catch(() => {
-        // Fallback: If network issue connecting to backend, allow optimistic view with warning
-        setIsVerified(true);
+        setIsVerified(false);
+        setErrorMsg('Could not verify payment. Please try again or contact support with your session reference.');
       })
       .finally(() => {
         setVerifying(false);

@@ -88,10 +88,10 @@ export interface DashboardStats {
 export interface HealthResponse {
   success: boolean;
   status: string;
-  service: string;
-  version: string;
+  service?: string;
+  version?: string;
   database?: string;
   databaseType?: string;
-  uptime: number;
-  timestamp: string;
+  uptime?: number;
+  timestamp?: string;
 }

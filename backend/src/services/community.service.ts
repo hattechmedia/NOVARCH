@@ -13,6 +13,10 @@ export class CommunityService {
     return this.repo.findById(id);
   }
 
+  async findRecentByEmail(email: string, applicationType: ApplicationType, withinMs: number) {
+    return this.repo.findRecentByEmail(email, applicationType, withinMs);
+  }
+
   async submitMember(dto: CreateCommunityDTO): Promise<{ member: CommunityMember; emailResult: { sent: boolean; status: string } }> {
     const member = await this.repo.create(dto);
 

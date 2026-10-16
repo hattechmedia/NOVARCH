@@ -4,13 +4,18 @@ import {
   CreatePublicCommunitySchema,
   CreateWinterArcPublicSchema,
   UpdateCommunityStatusSchema,
+  ReplyWinterArcSchema,
   ApplicationType,
 } from '../types/community.types.js';
+import { emailService } from '../services/email.service.js';
+import { isValidResourceId } from '../utils/ids.js';
 
 export const communityController = {
   getMembers: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const applicationType = req.query.applicationType as ApplicationType | undefined;
+      const rawType = req.query.applicationType;
+      const applicationType: ApplicationType | undefined =
+        rawType === 'winter-arc' || rawType === 'community' ? rawType : undefined;
       const members = await communityService.getAllMembers(applicationType ? { applicationType } : undefined);
       return res.status(200).json({
         success: true,
@@ -25,6 +30,9 @@ export const communityController = {
   getMemberById: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
+      if (!isValidResourceId(id)) {
+        return res.status(400).json({ success: false, message: 'Invalid record id' });
+      }
       const member = await communityService.getMemberById(id);
 
       if (!member) {
@@ -56,11 +64,28 @@ export const communityController = {
         validatedData = CreatePublicCommunitySchema.parse(req.body);
       }
 
+      const recent = await communityService.findRecentByEmail(
+        validatedData.email,
+        validatedData.applicationType === 'winter-arc' ? 'winter-arc' : 'community',
+        10 * 60 * 1000
+      );
+      if (recent) {
+        const isWinterArcApp = recent.applicationType === 'winter-arc';
+        const dupMessage = isWinterArcApp
+          ? "Thank you for applying to Winter Arc. Your application has been received. We'll review it and contact you if you're selected. Thanks for your interest in Treffen 01."
+          : 'Community application received successfully. Welcome to NOVARCH!';
+        return res.status(200).json({
+          success: true,
+          message: dupMessage,
+          data: { id: recent.id },
+        });
+      }
+
       const { member, emailResult } = await communityService.submitMember(validatedData);
 
       const isWinterArcApp = member.applicationType === 'winter-arc';
       console.log(
-        `[${isWinterArcApp ? 'Winter Arc Treffen 01 Application' : 'Community Join'}]: ${member.fullName} (${member.email}) — Status: ${member.status}`
+        `[${isWinterArcApp ? 'Winter Arc Treffen 01 Application' : 'Community Join'}]: ${member.id} — Status: ${member.status}`
       );
 
       const message = isWinterArcApp
@@ -70,7 +95,7 @@ export const communityController = {
       return res.status(201).json({
         success: true,
         message,
-        data: member,
+        data: { id: member.id },
         emailStatus: emailResult.status,
       });
     } catch (error) {
@@ -81,6 +106,9 @@ export const communityController = {
   updateMemberStatus: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
+      if (!isValidResourceId(id)) {
+        return res.status(400).json({ success: false, message: 'Invalid record id' });
+      }
       const { status } = UpdateCommunityStatusSchema.parse(req.body);
 
       const updated = await communityService.updateMemberStatus(id, status as any);
@@ -102,9 +130,65 @@ export const communityController = {
     }
   },
 
+  replyWinterArc: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      if (!isValidResourceId(id)) {
+        return res.status(400).json({ success: false, message: 'Invalid record id' });
+      }
+      const { subject, message } = ReplyWinterArcSchema.parse(req.body);
+      const member = await communityService.getMemberById(id);
+
+      if (!member) {
+        return res.status(404).json({
+          success: false,
+          message: 'Application/member record not found',
+        });
+      }
+
+      if (member.applicationType !== 'winter-arc') {
+        return res.status(400).json({
+          success: false,
+          message: 'Replies can only be sent for Winter Arc applications.',
+        });
+      }
+
+      const result = await emailService.sendWinterArcReply({
+        to: member.email,
+        fullName: member.fullName,
+        subject,
+        message,
+      });
+
+      if (result.status === 'unconfigured') {
+        return res.status(503).json({
+          success: false,
+          message: result.message || 'Email delivery is not configured.',
+        });
+      }
+
+      if (!result.sent) {
+        return res.status(502).json({
+          success: false,
+          message: 'Failed to send reply email. Please try again.',
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: 'Reply sent',
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+
   deleteMember: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
+      if (!isValidResourceId(id)) {
+        return res.status(400).json({ success: false, message: 'Invalid record id' });
+      }
       const deleted = await communityService.deleteMember(id);
 
       if (!deleted) {

@@ -35,5 +35,10 @@ export const navigation: NavItem[] = [
     highlight: true,
     badge: 'Oct 16',
   },
+  {
+    label: 'HackTheFlag',
+    href: '/hacktheflag',
+  },
   { label: 'Founders', href: '/founders' },
 ];
+

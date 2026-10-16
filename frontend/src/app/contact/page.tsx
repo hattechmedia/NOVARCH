@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { ContactFormData, PerformanceOption } from '@/types/form';
 import { PERFORMANCE_OPTIONS, COUNTRY_CODES } from '@/data/contact';
+import { useFormToken } from '@/hooks/useFormToken';
 
 const CONTACT_ICON_MAP = {
   Globe,
@@ -45,6 +46,7 @@ const INITIAL_FORM: ContactFormData & { website_hp?: string } = {
 
 function ContactFormContent() {
   const searchParams = useSearchParams();
+  const formToken = useFormToken();
   const [formData, setFormData] = React.useState<ContactFormData & { website_hp?: string }>(INITIAL_FORM);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSubmitted, setIsSubmitted] = React.useState(false);
@@ -112,6 +114,11 @@ function ContactFormContent() {
       return;
     }
 
+    if (!formToken) {
+      setErrorMsg('This form is still loading. Please wait a moment and try again.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -123,6 +130,7 @@ function ContactFormContent() {
           submissionType: 'message',
           name: trimmedName,
           email: trimmedEmail,
+          form_token: formToken,
         }),
       });
 

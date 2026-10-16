@@ -98,7 +98,10 @@ async function runTests() {
   console.log(`✅ Retrieved record: ${retrieved?.fullName} (${retrieved?.email})`);
   console.log(`   City: ${retrieved?.city}`);
   console.log(`   What they can offer: ${retrieved?.whatCanYouOffer}`);
-  console.log(`   Campaign Source: ${retrieved?.referral?.utmSource}`);
+  const referral = retrieved?.referral;
+  const campaignSource =
+    referral && typeof referral === 'object' && 'utmSource' in referral ? referral.utmSource : undefined;
+  console.log(`   Campaign Source: ${campaignSource}`);
 
   // Cleanup test records
   console.log('\nCleaning up test records...');

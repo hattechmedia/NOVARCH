@@ -10,4 +10,6 @@ export interface NavItem {
   children?: NavChild[];
   highlight?: boolean;
   badge?: string;
+  icon?: 'flame' | 'terminal';
 }
+

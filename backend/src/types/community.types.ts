@@ -140,6 +140,13 @@ export interface CreateCommunityDTO {
   referral?: string | ApplicationReferral;
 }
 
+export const ReplyWinterArcSchema = z.object({
+  subject: z.string().trim().min(1, 'Subject is required').max(200),
+  message: z.string().trim().min(1, 'Message is required').max(10000),
+});
+
+export type ReplyWinterArcDTO = z.infer<typeof ReplyWinterArcSchema>;
+
 export const UpdateCommunityStatusSchema = z.object({
   status: z.preprocess(
     (val) => {

@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { contactController } from '../controllers/contact.controller.js';
 import { verifyAdminToken } from '../middleware/jwt.middleware.js';
+import { publicFormLimiter } from '../middleware/publicFormLimiter.js';
+import { requireInternalApiSecret } from '../middleware/internalApi.middleware.js';
 
 const router = Router();
 
 // Public submission route
-router.post('/', contactController.createContact);
+router.post('/', requireInternalApiSecret, publicFormLimiter, contactController.createContact);
 
 // Protected Admin Routes (Require Authorization Header: Bearer <jwt>)
 router.get('/', verifyAdminToken as any, contactController.getContacts);

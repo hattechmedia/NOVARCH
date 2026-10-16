@@ -20,11 +20,21 @@ const app = express();
 
 // Disable x-powered-by header for security
 app.disable('x-powered-by');
+app.set('trust proxy', 1);
 
-// Security HTTP Headers with Helmet
+// Security HTTP Headers with Helmet.
+// CSP applies to documents loaded from this API origin (JSON), not to the Next.js/Vite apps.
 app.use(
   helmet({
-    contentSecurityPolicy: false, // Disabled to prevent interfering with Next.js/Vite assets
+    contentSecurityPolicy: {
+      useDefaults: false,
+      directives: {
+        defaultSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'none'"],
+        formAction: ["'none'"],
+      },
+    },
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
@@ -57,12 +67,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      const isAllowed = config.corsOrigins.some((allowed) => {
-        if (allowed === '*') return true;
-        if (allowed === origin) return true;
-        if (origin.endsWith('.vercel.app') && allowed.includes('.vercel.app')) return true;
-        return false;
-      });
+      const isAllowed = config.corsOrigins.includes(origin);
       if (isAllowed) {
         return callback(null, origin);
       }
@@ -85,8 +90,6 @@ app.use(
   })
 );
 
-app.options('*', cors());
-
 // Stripe raw body parser for signature verification
 app.use('/checkout/webhook', express.raw({ type: 'application/json' }));
 app.use('/api/checkout/webhook', express.raw({ type: 'application/json' }));
@@ -94,11 +97,11 @@ app.use('/api/checkout/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-// Apply rate limiting to sensitive routes
+// Apply rate limiting to login and checkout only.
+// Public form POSTs use publicFormLimiter on those routes so dashboard GETs stay usable.
 app.use('/api/auth/login', sensitiveOpsLimiter);
-app.use('/api/contact', sensitiveOpsLimiter);
-app.use('/api/community', sensitiveOpsLimiter);
 app.use('/api/checkout/create-session', sensitiveOpsLimiter);
+app.use('/checkout/create-session', sensitiveOpsLimiter);
 
 // API Routes
 app.use('/health', healthRoutes);

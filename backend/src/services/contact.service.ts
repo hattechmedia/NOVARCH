@@ -13,6 +13,10 @@ export class ContactService {
     return this.repo.findById(id);
   }
 
+  async findRecentByEmail(email: string, submissionType: 'service_lead' | 'message', withinMs: number) {
+    return this.repo.findRecentByEmail(email, submissionType, withinMs);
+  }
+
   async submitInquiry(dto: CreateContactDTO, actor = 'public_client'): Promise<ContactInquiry> {
     const inquiry = await this.repo.create(dto);
 

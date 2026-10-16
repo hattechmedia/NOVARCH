@@ -23,10 +23,13 @@ export function verifyAdminToken(req: AdminAuthRequest, res: Response, next: Nex
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, config.jwtSecret) as { username: string; role: string };
+    const decoded = jwt.verify(token, config.jwtSecret, { algorithms: ['HS256'] }) as {
+      username: string;
+      role: string;
+    };
     req.adminUser = decoded;
     next();
-  } catch (err: any) {
+  } catch {
     res.status(401).json({
       error: 'Unauthorized',
       message: 'Invalid or expired authentication token. Please log in again.',

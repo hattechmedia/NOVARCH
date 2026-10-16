@@ -18,6 +18,7 @@ export const ROUTES = {
   home: '/',
   about: '/about',
   contact: '/contact',
+  hacktheflag: '/hacktheflag',
   services: {
     digitalLaunch: '/services/digital-launch',
     automationIntegration: '/services/automation-integration',
@@ -25,6 +26,9 @@ export const ROUTES = {
     customSoftware: '/services/custom-software',
   },
 } as const;
+
+export const HACKTHEFLAG_CHALLENGE_URL = 'https://34f9fabd0dc1.ngrok.app/' as const;
+
 
 export const BRAND_PRINCIPLES = [
   'Your data is not our product.',

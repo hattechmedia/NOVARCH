@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from './Button';
 import { ServicePackage } from '@/types/service';
+import { useFormToken } from '@/hooks/useFormToken';
 
 interface ServicePackageModalProps {
   isOpen: boolean;
@@ -43,6 +44,7 @@ export function ServicePackageModal({
   serviceName,
   pkg,
 }: ServicePackageModalProps) {
+  const formToken = useFormToken();
   const [formData, setFormData] = React.useState({
     name: '',
     email: '',
@@ -50,6 +52,7 @@ export function ServicePackageModal({
     phone: '',
     company: '',
     notes: '',
+    website_hp: '',
   });
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -64,6 +67,11 @@ export function ServicePackageModal({
 
     if (!formData.name.trim() || !formData.email.trim()) {
       setErrorMsg('Please enter your name and e-mail address.');
+      return;
+    }
+
+    if (!formToken) {
+      setErrorMsg('This form is still loading. Please wait a moment and try again.');
       return;
     }
 
@@ -106,6 +114,8 @@ export function ServicePackageModal({
           phone: formattedPhone,
           company: formData.company || undefined,
           message: formData.notes || `${isImplementationScope ? 'Scope qualification request' : 'Package booking'} for ${serviceName} - ${pkg.name} (${pkg.price})`,
+          website_hp: formData.website_hp || undefined,
+          form_token: formToken,
         }),
       });
 
@@ -206,6 +216,16 @@ export function ServicePackageModal({
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="hidden" aria-hidden="true">
+                <input
+                  type="text"
+                  name="website_hp"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={formData.website_hp}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, website_hp: e.target.value }))}
+                />
+              </div>
               {/* Name */}
               <div>
                 <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-[#7A8FA6] mb-1.5">

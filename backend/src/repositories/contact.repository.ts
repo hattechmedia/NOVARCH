@@ -6,6 +6,7 @@ import { connectDatabase } from '../config/database.js';
 export interface IContactRepository {
   findAll(): Promise<ContactInquiry[]>;
   findById(id: string): Promise<ContactInquiry | null>;
+  findRecentByEmail(email: string, submissionType: SubmissionType, withinMs: number): Promise<ContactInquiry | null>;
   create(dto: CreateContactDTO): Promise<ContactInquiry>;
   updateStatus(id: string, status: LeadStatus): Promise<ContactInquiry | null>;
   delete(id: string): Promise<boolean>;
@@ -66,6 +67,39 @@ export class MongoContactRepository implements IContactRepository {
     }
 
     const item = this.inMemoryFallback.find((i) => i.id === id);
+    return item ? { ...item } : null;
+  }
+
+  async findRecentByEmail(
+    email: string,
+    submissionType: SubmissionType,
+    withinMs: number
+  ): Promise<ContactInquiry | null> {
+    const normalized = email.trim().toLowerCase();
+    const cutoff = new Date(Date.now() - withinMs);
+
+    const connected = await connectDatabase();
+    if (connected) {
+      try {
+        const doc = await ContactModel.findOne({
+          email: normalized,
+          submissionType,
+          createdAt: { $gte: cutoff },
+        })
+          .sort({ createdAt: -1 })
+          .lean();
+        if (doc) return formatContactDoc(doc);
+      } catch (err) {
+        console.error('Error in MongoContactRepository.findRecentByEmail:', err);
+      }
+    }
+
+    const item = this.inMemoryFallback.find(
+      (i) =>
+        i.email === normalized &&
+        i.submissionType === submissionType &&
+        new Date(i.createdAt).getTime() >= cutoff.getTime()
+    );
     return item ? { ...item } : null;
   }
 

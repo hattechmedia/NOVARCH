@@ -1,11 +1,26 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { config } from '../config/index.js';
+import { timingSafeEqualString } from '../utils/crypto.js';
+
+async function passwordMatches(inputPassword: string, storedPassword: string): Promise<boolean> {
+  if (!storedPassword) return false;
+  if (storedPassword.startsWith('$2')) {
+    return bcrypt.compare(inputPassword, storedPassword);
+  }
+  return timingSafeEqualString(inputPassword, storedPassword);
+}
 
 export const authController = {
   async login(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
+
+      if (!config.jwtSecret || !config.adminPassword) {
+        res.status(503).json({ error: 'Authentication is not configured' });
+        return;
+      }
 
       if (!email || !password) {
         res.status(400).json({ error: 'Email and password are required' });
@@ -15,14 +30,10 @@ export const authController = {
       const inputEmail = String(email).trim().toLowerCase();
       const inputPassword = String(password);
 
-      // Validate against configured server-side admin credentials
-      const validUsername = config.adminUsername.toLowerCase();
-      const isValidEmail = inputEmail === validUsername || inputEmail === 'admin@novarch.com' || inputEmail === 'admin@novarch.io';
-      const isValidPassword = inputPassword === config.adminPassword || inputPassword === 'Novarch@Admin2026!';
+      const isValidEmail = timingSafeEqualString(inputEmail, config.adminUsername);
+      const isValidPassword = await passwordMatches(inputPassword, config.adminPassword);
 
       if (!isValidEmail || !isValidPassword) {
-        // Prevent timing attacks by delaying response slightly
-        await new Promise((r) => setTimeout(r, 200));
         res.status(401).json({ error: 'Invalid admin credentials' });
         return;
       }
@@ -31,10 +42,10 @@ export const authController = {
       const token = jwt.sign(
         {
           username: inputEmail,
-          role: 'superadmin',
+          role: 'admin',
         },
         config.jwtSecret,
-        { expiresIn: '24h' }
+        { expiresIn: '24h', algorithm: 'HS256' }
       );
 
       res.json({
@@ -42,7 +53,7 @@ export const authController = {
         token,
         user: {
           email: inputEmail,
-          role: 'superadmin',
+          role: 'admin',
         },
       });
     } catch (err: any) {
@@ -58,7 +69,7 @@ export const authController = {
     }
     const token = authHeader.split(' ')[1];
     try {
-      const decoded = jwt.verify(token, config.jwtSecret);
+      const decoded = jwt.verify(token, config.jwtSecret, { algorithms: ['HS256'] });
       res.json({ valid: true, user: decoded });
     } catch (err) {
       res.status(401).json({ valid: false });

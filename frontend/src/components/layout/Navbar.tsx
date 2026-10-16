@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { ChevronDown, ArrowRight, Menu, Globe, GitBranch, Cpu, Code2, Flame } from 'lucide-react';
+import { ChevronDown, ArrowRight, Menu, Globe, GitBranch, Cpu, Code2, Flame, Terminal } from 'lucide-react';
 import { navigation } from '@/data/navigation';
 import { cn } from '@/lib/utils';
 import { MobileMenu } from './MobileMenu';
@@ -208,13 +208,21 @@ export function Navbar() {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      'relative inline-flex items-center justify-center rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200 whitespace-nowrap',
+                      'relative inline-flex items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200 whitespace-nowrap',
                       isActive
                         ? 'text-white'
                         : 'text-slate-300 hover:text-white hover:bg-white/10'
                     )}
                   >
+                    {item.icon === 'terminal' && (
+                      <Terminal className="h-3.5 w-3.5 text-cyan-400 flex-shrink-0" />
+                    )}
                     <span>{item.label}</span>
+                    {item.badge && (
+                      <span className="rounded-full bg-emerald-400/20 px-1.5 py-0.5 text-[10px] font-mono font-bold text-emerald-300 border border-emerald-400/30 whitespace-nowrap">
+                        {item.badge}
+                      </span>
+                    )}
                     {isActive && (
                       <span className="absolute bottom-1 left-3.5 right-3.5 h-[2px] bg-cyan-400 rounded-full shadow-[0_0_6px_#38bdf8]" />
                     )}

@@ -29,7 +29,7 @@ export interface ContactInquiry {
 }
 
 // PUBLIC Customer Submission Schema (Strictly Whitelisted)
-// Cannot submit internal fields like status, estimatedValue, source, planPrice
+// status/source cannot be set by clients. Price fields are overwritten from the server catalog when a known package is sent.
 export const CreatePublicContactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
   email: z.string().email('Invalid email address').toLowerCase(),

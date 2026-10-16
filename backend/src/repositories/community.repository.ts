@@ -5,6 +5,11 @@ import { connectDatabase } from '../config/database.js';
 export interface ICommunityRepository {
   findAll(filter?: { applicationType?: ApplicationType }): Promise<CommunityMember[]>;
   findById(id: string): Promise<CommunityMember | null>;
+  findRecentByEmail(
+    email: string,
+    applicationType: ApplicationType,
+    withinMs: number
+  ): Promise<CommunityMember | null>;
   create(dto: CreateCommunityDTO): Promise<CommunityMember>;
   updateStatus(id: string, status: CommunityStatus): Promise<CommunityMember | null>;
   delete(id: string): Promise<boolean>;
@@ -66,9 +71,44 @@ export class MongoCommunityRepository implements ICommunityRepository {
     return item ? { ...item } : null;
   }
 
+  async findRecentByEmail(
+    email: string,
+    applicationType: ApplicationType,
+    withinMs: number
+  ): Promise<CommunityMember | null> {
+    const normalized = email.trim().toLowerCase();
+    const cutoff = new Date(Date.now() - withinMs);
+
+    const connected = await connectDatabase();
+    if (connected) {
+      try {
+        const doc = await CommunityModel.findOne({
+          email: normalized,
+          applicationType,
+          createdAt: { $gte: cutoff },
+        })
+          .sort({ createdAt: -1 })
+          .lean();
+        if (doc) return formatCommunityDoc(doc);
+      } catch (err) {
+        console.error('Error in MongoCommunityRepository.findRecentByEmail:', err);
+      }
+    }
+
+    const item = this.inMemoryFallback.find(
+      (i) =>
+        i.email === normalized &&
+        i.applicationType === applicationType &&
+        new Date(i.createdAt).getTime() >= cutoff.getTime()
+    );
+    return item ? { ...item } : null;
+  }
+
   async create(dto: CreateCommunityDTO): Promise<CommunityMember> {
     const appType: ApplicationType = dto.applicationType || (dto.whatYouDo || dto.whatCanYouOffer ? 'winter-arc' : 'community');
-    const source = dto.source || (dto.referral?.utmSource ? `Campaign: ${dto.referral.utmSource}` : 'Website Form');
+    const referralSource =
+      dto.referral && typeof dto.referral === 'object' ? dto.referral.utmSource : undefined;
+    const source = dto.source || (referralSource ? `Campaign: ${referralSource}` : 'Website Form');
 
     const connected = await connectDatabase();
     if (connected) {

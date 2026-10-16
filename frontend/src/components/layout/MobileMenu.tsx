@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { X, ChevronDown, ArrowRight, Flame } from 'lucide-react';
+import { X, ChevronDown, ArrowRight, Flame, Terminal } from 'lucide-react';
 import { navigation } from '@/data/navigation';
 import { cn } from '@/lib/utils';
 
@@ -169,9 +169,19 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                     <Link
                       href={item.href}
                       onClick={handleClose}
-                      className="flex items-center rounded-xl px-3.5 py-2.5 text-base font-semibold text-slate-200 hover:bg-white/10 hover:text-cyan-400 transition-colors"
+                      className="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-base font-semibold text-slate-200 hover:bg-white/10 hover:text-cyan-400 transition-colors"
                     >
-                      {item.label}
+                      <span className="flex items-center gap-2">
+                        {item.icon === 'terminal' && (
+                          <Terminal className="h-4 w-4 text-cyan-400" />
+                        )}
+                        {item.label}
+                      </span>
+                      {item.badge && (
+                        <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-xs font-mono font-bold text-emerald-300 border border-emerald-400/30">
+                          {item.badge}
+                        </span>
+                      )}
                     </Link>
                   </li>
                 );

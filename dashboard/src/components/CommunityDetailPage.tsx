@@ -21,9 +21,11 @@ import {
   Users2,
   Share2,
   Phone,
+  Reply,
 } from 'lucide-react';
 import { CommunityMember, CommunityStatus } from '../types';
 import { StatusBadge } from './StatusBadge';
+import { ReplyModal } from './ReplyModal';
 
 interface CommunityDetailPageProps {
   members: CommunityMember[];
@@ -48,6 +50,7 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
 }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [showReply, setShowReply] = React.useState(false);
 
   const member = members.find((m) => m.id === id);
 
@@ -123,13 +126,24 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
           </span>
         </div>
 
-        <button
-          onClick={handleDelete}
-          className="flex items-center gap-1.5 rounded-xl bg-red-500/10 border border-red-500/25 px-3 py-1.5 text-xs font-mono text-red-400 hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-300 transition-all cursor-pointer"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-          Remove
-        </button>
+        <div className="flex items-center gap-2">
+          {isWinterArc && (
+            <button
+              onClick={() => setShowReply(true)}
+              className="flex items-center gap-1.5 rounded-xl bg-[#1E5FBF]/20 border border-[#38B2D8]/30 px-3 py-1.5 text-xs font-mono text-[#38B2D8] hover:bg-[#1E5FBF]/30 hover:text-white transition-all cursor-pointer"
+            >
+              <Reply className="h-3.5 w-3.5" />
+              Reply
+            </button>
+          )}
+          <button
+            onClick={handleDelete}
+            className="flex items-center gap-1.5 rounded-xl bg-red-500/10 border border-red-500/25 px-3 py-1.5 text-xs font-mono text-red-400 hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-300 transition-all cursor-pointer"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Remove
+          </button>
+        </div>
       </header>
 
       {/* Hero Banner */}
@@ -435,13 +449,23 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
           <section>
             <SectionHeader icon={Globe} label="Quick Actions" />
             <div className="mt-4 rounded-2xl border border-[#17304E]/60 bg-[#070D17] p-4 space-y-2">
-              <a
-                href={`mailto:${member.email}`}
-                className="flex items-center gap-3 w-full rounded-xl border border-[#17304E] bg-[#0B1524]/50 px-4 py-3 text-sm font-mono text-[#94A3B8] hover:border-[#38B2D8]/40 hover:text-white hover:bg-[#0B1524] transition-all group"
-              >
-                <Mail className="h-4 w-4 text-[#38B2D8] group-hover:scale-110 transition-transform" />
-                Send Email
-              </a>
+              {isWinterArc ? (
+                <button
+                  onClick={() => setShowReply(true)}
+                  className="flex items-center gap-3 w-full rounded-xl border border-[#38B2D8]/30 bg-[#1E5FBF]/15 px-4 py-3 text-sm font-mono text-[#38B2D8] hover:border-[#38B2D8]/50 hover:text-white hover:bg-[#1E5FBF]/25 transition-all cursor-pointer group"
+                >
+                  <Reply className="h-4 w-4 group-hover:scale-110 transition-transform" />
+                  Reply
+                </button>
+              ) : (
+                <a
+                  href={`mailto:${member.email}`}
+                  className="flex items-center gap-3 w-full rounded-xl border border-[#17304E] bg-[#0B1524]/50 px-4 py-3 text-sm font-mono text-[#94A3B8] hover:border-[#38B2D8]/40 hover:text-white hover:bg-[#0B1524] transition-all group"
+                >
+                  <Mail className="h-4 w-4 text-[#38B2D8] group-hover:scale-110 transition-transform" />
+                  Send Email
+                </a>
+              )}
               {member.contactNumber && (
                 <a
                   href={`tel:${member.contactNumber}`}
@@ -480,6 +504,10 @@ export const CommunityDetailPage: React.FC<CommunityDetailPageProps> = ({
           </div>
         </div>
       </main>
+
+      {isWinterArc && showReply && (
+        <ReplyModal member={member} onClose={() => setShowReply(false)} />
+      )}
     </div>
   );
 };

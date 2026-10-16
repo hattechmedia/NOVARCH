@@ -4,6 +4,7 @@ import * as React from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Container } from '@/components/ui/Container';
+import { useFormToken } from '@/hooks/useFormToken';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import {
@@ -276,6 +277,7 @@ function CountdownCard({
 
 export function WinterArcContent() {
   const formRef = React.useRef<HTMLDivElement>(null);
+  const formToken = useFormToken();
   const [formData, setFormData] = React.useState<WinterArcFormData>(INITIAL_FORM);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isSubmitted, setIsSubmitted] = React.useState(false);
@@ -422,6 +424,11 @@ export function WinterArcContent() {
       return;
     }
 
+    if (!formToken) {
+      setErrorMsg('This form is still loading. Please wait a moment and try again.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -438,6 +445,7 @@ export function WinterArcContent() {
         portfolioUrl: trimmedPortfolio || undefined,
         proposedGuest: trimmedGuest || undefined,
         website_hp: formData.website_hp || undefined,
+        form_token: formToken,
         referral: referralParams,
         source: referralParams.utmSource ? `Campaign: ${referralParams.utmSource}` : 'Website Form',
       };

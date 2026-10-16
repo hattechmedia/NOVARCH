@@ -1,13 +1,25 @@
 import { Router, Request, Response } from 'express';
 import Stripe from 'stripe';
+import { z } from 'zod';
 import { config } from '../config/index.js';
 import { getPackageBySlugOrId } from '../config/packageCatalog.js';
 import { contactRepository } from '../repositories/contact.repository.js';
 import { ContactModel } from '../models/contact.model.js';
 import { connectDatabase } from '../config/database.js';
 
+const CreateCheckoutSessionSchema = z.object({
+  serviceSlug: z.string().trim().max(200).optional(),
+  packageId: z.string().trim().max(200).optional(),
+  packageName: z.string().trim().max(200).optional(),
+  userName: z.string().trim().min(2).max(100),
+  userEmail: z.string().trim().email().toLowerCase(),
+  userPhone: z.string().trim().max(50).optional(),
+  userCompany: z.string().trim().max(100).optional(),
+  userNotes: z.string().trim().max(2000).optional(),
+});
+
 const router = Router();
-const stripe = new Stripe(config.stripeSecretKey || 'sk_test_mock_dummy_key_for_init_123', {
+const stripe = new Stripe(config.stripeSecretKey || 'sk_test_placeholder_unconfigured', {
   apiVersion: '2025-02-24.acacia' as any,
 });
 
@@ -17,6 +29,17 @@ const stripe = new Stripe(config.stripeSecretKey || 'sk_test_mock_dummy_key_for_
  */
 router.post('/create-session', async (req: Request, res: Response) => {
   try {
+    if (!config.stripeSecretKey || config.stripeSecretKey.startsWith('sk_test_placeholder')) {
+      res.status(503).json({ error: 'Checkout is not configured' });
+      return;
+    }
+
+    const parsed = CreateCheckoutSessionSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'Name and a valid email are required' });
+      return;
+    }
+
     const {
       serviceSlug,
       packageId,
@@ -26,12 +49,7 @@ router.post('/create-session', async (req: Request, res: Response) => {
       userPhone,
       userCompany,
       userNotes,
-    } = req.body;
-
-    if (!userEmail || !userName) {
-      res.status(400).json({ error: 'Name and email are required' });
-      return;
-    }
+    } = parsed.data;
 
     // SERVER-SIDE CANONICAL PACKAGE LOOKUP
     const catalogItem = getPackageBySlugOrId(packageId || serviceSlug || packageName);
@@ -113,7 +131,7 @@ router.post('/create-session', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Stripe Checkout Error:', error);
     res.status(500).json({
-      error: error.message || 'Failed to create Stripe Checkout session',
+      error: 'Failed to create Stripe Checkout session',
     });
   }
 });
@@ -124,7 +142,7 @@ router.post('/create-session', async (req: Request, res: Response) => {
  */
 router.get('/verify-session', async (req: Request, res: Response) => {
   const sessionId = req.query.session_id as string;
-  if (!sessionId || typeof sessionId !== 'string') {
+  if (!sessionId || typeof sessionId !== 'string' || !sessionId.startsWith('cs_') || sessionId.length > 200) {
     res.status(400).json({ verified: false, message: 'Missing session_id parameter' });
     return;
   }
@@ -134,7 +152,6 @@ router.get('/verify-session', async (req: Request, res: Response) => {
     if (session && session.payment_status === 'paid') {
       res.json({
         verified: true,
-        customerEmail: session.customer_email || session.customer_details?.email,
         amountTotal: session.amount_total ? session.amount_total / 100 : 0,
         currency: session.currency?.toUpperCase() || 'EUR',
       });

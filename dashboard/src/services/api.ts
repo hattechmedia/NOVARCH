@@ -124,4 +124,28 @@ export const api = {
     });
     return true;
   },
+
+  async replyWinterArc(id: string, subject: string, message: string): Promise<{ success: boolean; message: string }> {
+    const token = getAdminToken();
+    const res = await fetch(`${API_BASE}/community/${id}/reply`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ subject, message }),
+    });
+
+    const json = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+      localStorage.removeItem('novarch_admin_token');
+      sessionStorage.removeItem('novarch_admin_token');
+      window.location.reload();
+      throw new Error('Unauthorized');
+    }
+    if (!res.ok) {
+      throw new Error(json.message || json.error || 'Failed to send reply');
+    }
+    return json;
+  },
 };
