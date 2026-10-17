@@ -1,6 +1,7 @@
 import { contactRepository, IContactRepository } from '../repositories/contact.repository.js';
 import { ContactInquiry, CreateContactDTO, LeadStatus } from '../types/contact.types.js';
 import { auditService } from './audit.service.js';
+import { emailService } from './email.service.js';
 
 export class ContactService {
   constructor(private repo: IContactRepository = contactRepository) {}
@@ -28,6 +29,16 @@ export class ContactService {
       status: 'SUCCESS',
       metadata: { submissionType: inquiry.submissionType, serviceType: inquiry.serviceType },
     });
+
+    // Send instant alert to admin email and acknowledgment to submitter
+    try {
+      await Promise.allSettled([
+        emailService.sendContactLeadNotification(inquiry),
+        emailService.sendContactAcknowledgment(inquiry),
+      ]);
+    } catch (emailErr) {
+      console.warn('[ContactService]: Email dispatch warning:', emailErr);
+    }
 
     return inquiry;
   }

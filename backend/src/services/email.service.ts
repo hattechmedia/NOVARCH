@@ -1,16 +1,26 @@
 /**
  * NOVARCH Email Service
- * Handles transactional acknowledgment emails for Community & Winter Arc submissions.
- * If credentials are not configured, it safely reports unconfigured status without failing submissions.
+ * Handles transactional emails, customer acknowledgments, and instant admin lead notifications
+ * for all website contact inquiries, service subscriptions, Winter Arc, and community applications.
  */
 
 import nodemailer from 'nodemailer';
 import { getSmtpConfig } from '../config/smtp.js';
+import { ContactInquiry } from '../types/contact.types.js';
+import { CommunityMember } from '../types/community.types.js';
 
 export interface SendAcknowledgmentParams {
   to: string;
   fullName: string;
   applicationType: 'winter-arc' | 'community';
+}
+
+export interface SendEmailOptions {
+  to: string | string[];
+  replyTo?: string;
+  subject: string;
+  text: string;
+  html?: string;
 }
 
 export interface EmailSendResult {
@@ -20,73 +30,68 @@ export interface EmailSendResult {
   error?: string;
 }
 
+export function getAdminNotificationEmail(): string {
+  return (
+    process.env.ADMIN_NOTIFICATION_EMAIL ||
+    process.env.NOTIFICATION_EMAIL ||
+    process.env.SMTP_FROM_EMAIL ||
+    'mesum@novarch.eu'
+  );
+}
+
 export class EmailService {
   private isConfigured(): boolean {
     return Boolean(process.env.RESEND_API_KEY || getSmtpConfig());
   }
 
-  async sendAcknowledgmentEmail(params: SendAcknowledgmentParams): Promise<EmailSendResult> {
-    const { to, fullName, applicationType } = params;
+  /**
+   * Generic unified email sender supporting Resend API & SMTP (with HTML, text & reply-to)
+   */
+  async sendEmail(options: SendEmailOptions): Promise<EmailSendResult> {
+    const { to, replyTo, subject, text, html } = options;
+    const recipientStr = Array.isArray(to) ? to.join(', ') : to;
 
     if (!this.isConfigured()) {
-      const msg = `[Email Service]: Email delivery not configured in environment (RESEND_API_KEY / SMTP missing). Application saved successfully, acknowledgment email skipped for ${to}.`;
+      const msg = `[Email Service]: Neither RESEND_API_KEY nor SMTP credentials configured. Email skipped for ${recipientStr}.`;
       console.log(msg);
-      return {
-        sent: false,
-        status: 'unconfigured',
-        message: msg,
-      };
+      return { sent: false, status: 'unconfigured', message: msg };
     }
 
     try {
+      // Option A: Resend API
       if (process.env.RESEND_API_KEY) {
-        const subject =
-          applicationType === 'winter-arc'
-            ? 'Application Received: Winter Arc · Treffen 01 | NOVARCH'
-            : 'Welcome to NOVARCH Community — Application Received';
-
-        const textBody =
-          applicationType === 'winter-arc'
-            ? `Hello ${fullName},\n\nThank you for applying to Winter Arc · Treffen 01 in Ilmenau. We have received your application and will review it individually. If selected, we will reach out to you directly with event and venue details.\n\nBest regards,\nNOVARCH Team\nIlmenau, Germany\nhttps://novarch.eu`
-            : `Hello ${fullName},\n\nThank you for joining the NOVARCH community. We have received your details and look forward to connecting.\n\nBest regards,\nNOVARCH Team\nhttps://novarch.eu`;
-
+        const toList = Array.isArray(to) ? to : [to];
         const res = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             from: process.env.EMAIL_FROM || 'NOVARCH <hello@novarch.eu>',
-            to: [to],
-            subject: subject,
-            text: textBody,
+            to: toList,
+            reply_to: replyTo,
+            subject,
+            text,
+            html,
           }),
         });
 
         if (res.ok) {
-          console.log(`✉️ Acknowledgment email sent via Resend to ${to}`);
+          console.log(`✉️ Email successfully dispatched via Resend to ${recipientStr}`);
           return { sent: true, status: 'sent' };
         } else {
           const errData = await res.text();
-          console.warn(`⚠️ Resend API responded with error for ${to}:`, errData);
+          console.warn(`⚠️ Resend API error for ${recipientStr}:`, errData);
           return { sent: false, status: 'failed', error: errData };
         }
       }
 
+      // Option B: Encrypted SMTP via Nodemailer
       const smtp = getSmtpConfig();
       if (!smtp) {
         return { sent: false, status: 'unconfigured' };
       }
-
-      const subject =
-        applicationType === 'winter-arc'
-          ? 'Application Received: Winter Arc · Treffen 01 | NOVARCH'
-          : 'Welcome to NOVARCH Community — Application Received';
-      const textBody =
-        applicationType === 'winter-arc'
-          ? `Hello ${fullName},\n\nThank you for applying to Winter Arc · Treffen 01 in Ilmenau. We have received your application and will review it individually. If selected, we will reach out to you directly with event and venue details.\n\nBest regards,\nNOVARCH Team\nIlmenau, Germany\nhttps://novarch.eu`
-          : `Hello ${fullName},\n\nThank you for joining the NOVARCH community. We have received your details and look forward to connecting.\n\nBest regards,\nNOVARCH Team\nhttps://novarch.eu`;
 
       const transporter = nodemailer.createTransport({
         host: smtp.host,
@@ -104,60 +109,399 @@ export class EmailService {
       await transporter.sendMail({
         from: `"${smtp.fromName}" <${smtp.fromEmail}>`,
         to,
+        replyTo: replyTo || smtp.fromEmail,
         subject,
-        text: textBody,
+        text,
+        html,
       });
 
-      console.log(`✉️ Acknowledgment email sent via SMTP to ${to}`);
+      console.log(`✉️ Email successfully dispatched via SMTP to ${recipientStr}`);
       return { sent: true, status: 'sent' };
     } catch (err: any) {
-      console.error(`❌ Failed to dispatch acknowledgment email to ${to}:`, err.message || err);
+      console.error(`❌ Failed to dispatch email to ${recipientStr}:`, err.message || err);
       return { sent: false, status: 'failed', error: err.message || String(err) };
     }
   }
 
+  /**
+   * Alert the website owner / admin whenever a new Contact inquiry or Service Lead is submitted
+   */
+  async sendContactLeadNotification(inquiry: ContactInquiry): Promise<EmailSendResult> {
+    const adminEmail = getAdminNotificationEmail();
+    const isServiceLead = inquiry.submissionType === 'service_lead';
+    const title = isServiceLead ? 'New Service Package Lead' : 'New Contact Inquiry';
+    const subject = isServiceLead
+      ? `[NOVARCH Lead] ${inquiry.planName || 'Package Subscription'} — ${inquiry.name}`
+      : `[NOVARCH Contact] New Inquiry from ${inquiry.name}`;
+
+    const textBody = `
+========================================
+🔔 NOVARCH: ${title.toUpperCase()}
+========================================
+
+Name: ${inquiry.name}
+Email: ${inquiry.email}
+Phone: ${inquiry.phone || 'Not provided'}
+Company: ${inquiry.company || 'Not provided'}
+
+Submission Type: ${isServiceLead ? 'Service Package Lead' : 'Contact Message'}
+Service: ${inquiry.serviceType || 'General'}
+${inquiry.planName ? `Plan / Package: ${inquiry.planName}` : ''}
+${inquiry.planTier ? `Tier: ${inquiry.planTier}` : ''}
+${inquiry.planPrice ? `Estimated Value: ${inquiry.planPrice}` : ''}
+
+Message / Details:
+${inquiry.message || inquiry.news || 'No additional message.'}
+
+Received At: ${new Date(inquiry.createdAt || Date.now()).toLocaleString()}
+Lead ID: ${inquiry.id}
+
+---
+Direct Dashboard: https://novarch-dashboard.vercel.app/inquiry/${inquiry.id}
+    `.trim();
+
+    const htmlBody = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #050A12; color: #FFFFFF; margin: 0; padding: 24px 12px; }
+    .card { max-width: 620px; margin: 0 auto; background: #0B1524; border: 1px solid #17304E; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .header { background: linear-gradient(135deg, #07101E 0%, #0F233D 100%); padding: 24px 28px; border-bottom: 1px solid #1E3A5F; }
+    .badge { display: inline-block; padding: 4px 10px; font-size: 11px; font-family: monospace; font-weight: bold; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.08em; background: rgba(56,178,216,0.15); color: #38B2D8; border: 1px solid rgba(56,178,216,0.3); margin-bottom: 8px; }
+    .title { margin: 0; font-size: 22px; font-weight: 700; color: #FFFFFF; }
+    .body-content { padding: 28px; }
+    .data-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px; }
+    .data-table td { padding: 10px 12px; border-bottom: 1px solid rgba(23,48,78,0.7); }
+    .data-table td.label { width: 35%; color: #7A8FA6; font-family: monospace; font-size: 12px; text-transform: uppercase; }
+    .data-table td.value { color: #F1F5F9; font-weight: 500; }
+    .message-box { background: #07101E; border: 1px solid #17304E; border-radius: 10px; padding: 16px; font-size: 14px; line-height: 1.6; color: #CBD5E1; white-space: pre-wrap; margin-bottom: 24px; }
+    .cta-container { text-align: center; padding-top: 8px; }
+    .btn { display: inline-block; background: #1E5FBF; color: #FFFFFF !important; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 600; font-size: 14px; letter-spacing: 0.02em; }
+    .footer { text-align: center; padding: 20px; font-size: 12px; color: #4A6080; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <span class="badge">NOVARCH INTAKE ALERT</span>
+      <h1 class="title">${title}</h1>
+    </div>
+    <div class="body-content">
+      <table class="data-table">
+        <tr>
+          <td class="label">Full Name</td>
+          <td class="value"><strong>${inquiry.name}</strong></td>
+        </tr>
+        <tr>
+          <td class="label">Work Email</td>
+          <td class="value"><a href="mailto:${inquiry.email}" style="color: #38B2D8; text-decoration: none;">${inquiry.email}</a></td>
+        </tr>
+        ${inquiry.phone ? `<tr><td class="label">Phone</td><td class="value">${inquiry.phone}</td></tr>` : ''}
+        ${inquiry.company ? `<tr><td class="label">Company</td><td class="value">${inquiry.company}</td></tr>` : ''}
+        <tr>
+          <td class="label">Service / Scope</td>
+          <td class="value">${inquiry.serviceType || 'General Inquiry'}</td>
+        </tr>
+        ${inquiry.planName ? `<tr><td class="label">Package Plan</td><td class="value" style="color: #38B2D8;"><strong>${inquiry.planName}</strong> (${inquiry.planTier || 'Standard'})</td></tr>` : ''}
+        ${inquiry.planPrice ? `<tr><td class="label">Estimated Value</td><td class="value" style="color: #34D399; font-weight: bold;">${inquiry.planPrice}</td></tr>` : ''}
+        <tr>
+          <td class="label">Submission Date</td>
+          <td class="value">${new Date(inquiry.createdAt || Date.now()).toLocaleString()}</td>
+        </tr>
+      </table>
+
+      <div style="font-size: 12px; font-family: monospace; color: #7A8FA6; text-transform: uppercase; margin-bottom: 8px;">
+        Inquiry Message / Notes:
+      </div>
+      <div class="message-box">
+        ${inquiry.message || inquiry.news || 'No additional note provided.'}
+      </div>
+
+      <div class="cta-container">
+        <a href="https://novarch-dashboard.vercel.app/inquiry/${inquiry.id}" class="btn">
+          Open in Command Dashboard &rarr;
+        </a>
+      </div>
+    </div>
+    <div class="footer">
+      NOVARCH Command Portal &bull; Automated Lead Notification &bull; Reply directly to reach client
+    </div>
+  </div>
+</body>
+</html>
+    `.trim();
+
+    return this.sendEmail({
+      to: adminEmail,
+      replyTo: inquiry.email,
+      subject,
+      text: textBody,
+      html: htmlBody,
+    });
+  }
+
+  /**
+   * Confirmation email sent directly to client after submitting website contact form
+   */
+  async sendContactAcknowledgment(inquiry: ContactInquiry): Promise<EmailSendResult> {
+    const isServiceLead = inquiry.submissionType === 'service_lead';
+    const subject = isServiceLead
+      ? `We have received your request for ${inquiry.planName || 'NOVARCH Blueprint'}`
+      : 'Thank you for reaching out to NOVARCH';
+
+    const textBody = `
+Hello ${inquiry.name},
+
+Thank you for contacting NOVARCH. We have received your ${isServiceLead ? `inquiry for ${inquiry.planName || 'our engineering packages'}` : 'message'}.
+
+Our technical architecture team will review your requirements and follow up with you within 24 hours.
+
+Your Submission Summary:
+- Service: ${inquiry.serviceType || 'General Inquiry'}
+${inquiry.planName ? `- Package: ${inquiry.planName}` : ''}
+${inquiry.company ? `- Company: ${inquiry.company}` : ''}
+
+Best regards,
+The NOVARCH Team
+https://novarch.eu
+    `.trim();
+
+    const htmlBody = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #050A12; color: #FFFFFF; margin: 0; padding: 24px 12px; }
+    .card { max-width: 600px; margin: 0 auto; background: #0B1524; border: 1px solid #17304E; border-radius: 16px; padding: 32px 28px; }
+    .title { font-size: 20px; font-weight: 700; color: #FFFFFF; margin: 0 0 16px 0; }
+    p { font-size: 14px; line-height: 1.6; color: #CBD5E1; margin: 0 0 16px 0; }
+    .highlight-box { background: #07101E; border-left: 3px solid #38B2D8; border-radius: 4px; padding: 14px 18px; margin: 20px 0; font-size: 13px; color: #94A3B8; }
+    .footer { border-top: 1px solid #17304E; padding-top: 20px; margin-top: 28px; font-size: 12px; color: #64748B; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 class="title">Thank you for connecting with NOVARCH</h1>
+    <p>Hello <strong>${inquiry.name}</strong>,</p>
+    <p>We have successfully logged your inquiry. Our engineering and architecture team will review your requirements and respond directly to this email within 24 hours.</p>
+    
+    <div class="highlight-box">
+      <strong>Scope:</strong> ${inquiry.serviceType || 'General Inquiry'}<br/>
+      ${inquiry.planName ? `<strong>Package:</strong> ${inquiry.planName}<br/>` : ''}
+      <strong>Status:</strong> Under Architecture Review
+    </div>
+
+    <p>If you have additional technical specifications or context to share, simply reply to this email.</p>
+
+    <div class="footer">
+      <strong>NOVARCH</strong> &bull; Next-Generation Engineering Systems<br/>
+      <a href="https://novarch.eu" style="color: #38B2D8; text-decoration: none;">https://novarch.eu</a>
+    </div>
+  </div>
+</body>
+</html>
+    `.trim();
+
+    return this.sendEmail({
+      to: inquiry.email,
+      subject,
+      text: textBody,
+      html: htmlBody,
+    });
+  }
+
+  /**
+   * Alert the website owner / admin whenever a new Community or Winter Arc application is received
+   */
+  async sendCommunityAdminNotification(member: CommunityMember): Promise<EmailSendResult> {
+    const adminEmail = getAdminNotificationEmail();
+    const isWinterArc = member.applicationType === 'winter-arc';
+    const title = isWinterArc
+      ? 'Winter Arc · Treffen 01 Application'
+      : 'New Community Member Application';
+    const subject = isWinterArc
+      ? `[NOVARCH Winter Arc] Treffen 01 Application — ${member.fullName}`
+      : `[NOVARCH Community] New Application — ${member.fullName}`;
+
+    const referralText =
+      typeof member.referral === 'string'
+        ? member.referral
+        : member.referral
+        ? [member.referral.utmSource, member.referral.utmMedium, member.referral.utmCampaign, member.referral.referrer]
+            .filter(Boolean)
+            .join(' | ')
+        : 'Direct / Website';
+
+    const textBody = `
+========================================
+🔥 NOVARCH: ${title.toUpperCase()}
+========================================
+
+Full Name: ${member.fullName}
+Email: ${member.email}
+Country / Location: ${member.country || 'Not provided'}
+Role: ${member.role || 'Not provided'}
+Company / Org: ${member.organization || 'Not provided'}
+
+${isWinterArc ? `
+[Winter Arc Details]
+- What You Do: ${member.whatYouDo || 'N/A'}
+- What You Can Offer: ${member.whatCanYouOffer || 'N/A'}
+- What You Are Looking For: ${member.whatAreYouLookingFor || 'N/A'}
+- LinkedIn: ${member.linkedinUrl || 'N/A'}
+- Portfolio / GitHub: ${member.portfolioUrl || 'N/A'}
+` : `
+[Community Details]
+- Interests: ${member.interests?.join(', ') || 'N/A'}
+- Introduction / Message: ${member.message || 'N/A'}
+- Source / Referral: ${referralText}
+`}
+
+Submission Date: ${new Date(member.createdAt || Date.now()).toLocaleString()}
+Application ID: ${member.id}
+
+---
+View in Dashboard: https://novarch-dashboard.vercel.app/${isWinterArc ? 'winter-arc' : 'community'}/${member.id}
+    `.trim();
+
+    const htmlBody = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #050A12; color: #FFFFFF; margin: 0; padding: 24px 12px; }
+    .card { max-width: 620px; margin: 0 auto; background: #0B1524; border: 1px solid #17304E; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .header { background: linear-gradient(135deg, #07101E 0%, #152238 100%); padding: 24px 28px; border-bottom: 1px solid #1E3A5F; }
+    .badge { display: inline-block; padding: 4px 10px; font-size: 11px; font-family: monospace; font-weight: bold; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.08em; background: ${isWinterArc ? 'rgba(6,182,212,0.15)' : 'rgba(245,158,11,0.15)'}; color: ${isWinterArc ? '#22D3EE' : '#FBBF24'}; border: 1px solid ${isWinterArc ? 'rgba(6,182,212,0.3)' : 'rgba(245,158,11,0.3)'}; margin-bottom: 8px; }
+    .title { margin: 0; font-size: 22px; font-weight: 700; color: #FFFFFF; }
+    .body-content { padding: 28px; }
+    .data-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px; }
+    .data-table td { padding: 10px 12px; border-bottom: 1px solid rgba(23,48,78,0.7); }
+    .data-table td.label { width: 35%; color: #7A8FA6; font-family: monospace; font-size: 12px; text-transform: uppercase; }
+    .data-table td.value { color: #F1F5F9; font-weight: 500; }
+    .section-title { font-size: 12px; font-family: monospace; color: #7A8FA6; text-transform: uppercase; margin: 16px 0 8px 0; }
+    .content-box { background: #07101E; border: 1px solid #17304E; border-radius: 10px; padding: 14px 16px; font-size: 14px; line-height: 1.6; color: #CBD5E1; margin-bottom: 16px; white-space: pre-wrap; }
+    .cta-container { text-align: center; padding-top: 16px; }
+    .btn { display: inline-block; background: #1E5FBF; color: #FFFFFF !important; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: 600; font-size: 14px; }
+    .footer { text-align: center; padding: 20px; font-size: 12px; color: #4A6080; font-family: monospace; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <span class="badge">${isWinterArc ? 'TREFFEN 01 APPLICATION' : 'COMMUNITY JOIN APPLICATION'}</span>
+      <h1 class="title">${title}</h1>
+    </div>
+    <div class="body-content">
+      <table class="data-table">
+        <tr>
+          <td class="label">Full Name</td>
+          <td class="value"><strong>${member.fullName}</strong></td>
+        </tr>
+        <tr>
+          <td class="label">Email Address</td>
+          <td class="value"><a href="mailto:${member.email}" style="color: #38B2D8; text-decoration: none;">${member.email}</a></td>
+        </tr>
+        ${member.country ? `<tr><td class="label">Country / Location</td><td class="value">${member.country}</td></tr>` : ''}
+        ${member.organization ? `<tr><td class="label">Organization / Company</td><td class="value">${member.organization}</td></tr>` : ''}
+        ${member.role ? `<tr><td class="label">Role</td><td class="value">${member.role}</td></tr>` : ''}
+        ${!isWinterArc && referralText ? `<tr><td class="label">Source / Referral</td><td class="value">${referralText}</td></tr>` : ''}
+        <tr>
+          <td class="label">Submitted</td>
+          <td class="value">${new Date(member.createdAt || Date.now()).toLocaleString()}</td>
+        </tr>
+      </table>
+
+      ${isWinterArc ? `
+        ${member.whatYouDo ? `
+          <div class="section-title">What You Do</div>
+          <div class="content-box">${member.whatYouDo}</div>
+        ` : ''}
+        ${member.whatCanYouOffer ? `
+          <div class="section-title">What You Can Offer</div>
+          <div class="content-box">${member.whatCanYouOffer}</div>
+        ` : ''}
+        ${member.whatAreYouLookingFor ? `
+          <div class="section-title">What You Are Looking For</div>
+          <div class="content-box">${member.whatAreYouLookingFor}</div>
+        ` : ''}
+        ${member.linkedinUrl ? `<p style="font-size: 13px; color: #94A3B8;">LinkedIn: <a href="${member.linkedinUrl}" style="color: #38B2D8;">${member.linkedinUrl}</a></p>` : ''}
+        ${member.portfolioUrl ? `<p style="font-size: 13px; color: #94A3B8;">Portfolio / GitHub: <a href="${member.portfolioUrl}" style="color: #38B2D8;">${member.portfolioUrl}</a></p>` : ''}
+      ` : `
+        ${member.interests && member.interests.length > 0 ? `
+          <div class="section-title">Interests</div>
+          <p style="color: #38B2D8; font-family: monospace; font-size: 13px; margin: 0 0 16px 0;">${member.interests.join(' &bull; ')}</p>
+        ` : ''}
+        ${member.message ? `
+          <div class="section-title">Introduction / Message</div>
+          <div class="content-box">${member.message}</div>
+        ` : ''}
+      `}
+
+      <div class="cta-container">
+        <a href="https://novarch-dashboard.vercel.app/${isWinterArc ? 'winter-arc' : 'community'}/${member.id}" class="btn">
+          View Application in Dashboard &rarr;
+        </a>
+      </div>
+    </div>
+    <div class="footer">
+      NOVARCH Command Portal &bull; Automated Community Alert &bull; Reply directly to reach applicant
+    </div>
+  </div>
+</body>
+</html>
+    `.trim();
+
+    return this.sendEmail({
+      to: adminEmail,
+      replyTo: member.email,
+      subject,
+      text: textBody,
+      html: htmlBody,
+    });
+  }
+
+  /**
+   * Existing acknowledgment method for Community / Winter Arc applicants
+   */
+  async sendAcknowledgmentEmail(params: SendAcknowledgmentParams): Promise<EmailSendResult> {
+    const { to, fullName, applicationType } = params;
+
+    const subject =
+      applicationType === 'winter-arc'
+        ? 'Application Received: Winter Arc · Treffen 01 | NOVARCH'
+        : 'Welcome to NOVARCH Community — Application Received';
+
+    const textBody =
+      applicationType === 'winter-arc'
+        ? `Hello ${fullName},\n\nThank you for applying to Winter Arc · Treffen 01 in Ilmenau. We have received your application and will review it individually. If selected, we will reach out to you directly with event and venue details.\n\nBest regards,\nNOVARCH Team\nIlmenau, Germany\nhttps://novarch.eu`
+        : `Hello ${fullName},\n\nThank you for joining the NOVARCH community. We have received your details and look forward to connecting.\n\nBest regards,\nNOVARCH Team\nhttps://novarch.eu`;
+
+    return this.sendEmail({
+      to,
+      subject,
+      text: textBody,
+    });
+  }
+
+  /**
+   * Existing method for admin replying to a Winter Arc applicant
+   */
   async sendWinterArcReply(params: {
     to: string;
     fullName: string;
     subject: string;
     message: string;
   }): Promise<EmailSendResult> {
-    const smtp = getSmtpConfig();
-    if (!smtp) {
-      return {
-        sent: false,
-        status: 'unconfigured',
-        message: 'SMTP credentials are not configured or could not be decrypted.',
-      };
-    }
-
-    try {
-      const transporter = nodemailer.createTransport({
-        host: smtp.host,
-        port: smtp.port,
-        secure: smtp.useSsl,
-        auth: {
-          user: smtp.username,
-          pass: smtp.password,
-        },
-        connectionTimeout: smtp.timeoutSeconds * 1000,
-        greetingTimeout: smtp.timeoutSeconds * 1000,
-        socketTimeout: smtp.timeoutSeconds * 1000,
-      });
-
-      await transporter.sendMail({
-        from: `"${smtp.fromName}" <${smtp.fromEmail}>`,
-        to: params.to,
-        subject: params.subject,
-        text: params.message,
-      });
-
-      console.log(`✉️ Winter Arc reply sent via SMTP to ${params.to} (${params.fullName})`);
-      return { sent: true, status: 'sent' };
-    } catch (err: any) {
-      console.error(`❌ Failed to send Winter Arc reply to ${params.to}:`, err.message || err);
-      return { sent: false, status: 'failed', error: err.message || String(err) };
-    }
+    return this.sendEmail({
+      to: params.to,
+      subject: params.subject,
+      text: params.message,
+    });
   }
 }
 

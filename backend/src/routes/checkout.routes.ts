@@ -6,6 +6,7 @@ import { getPackageBySlugOrId } from '../config/packageCatalog.js';
 import { contactRepository } from '../repositories/contact.repository.js';
 import { ContactModel } from '../models/contact.model.js';
 import { connectDatabase } from '../config/database.js';
+import { emailService } from '../services/email.service.js';
 
 const CreateCheckoutSessionSchema = z.object({
   serviceSlug: z.string().trim().max(200).optional(),
@@ -240,8 +241,31 @@ router.post('/webhook', async (req: Request, res: Response) => {
         existing.message = `✅ Stripe Payment ACCEPTED! Session: ${sessionId}. Notes: ${metadata.userNotes || 'None'}`;
         await existing.save();
         console.log('📥 Updated existing lead status to Paid:', sessionId);
+
+        try {
+          await emailService.sendContactLeadNotification({
+            id: existing.id,
+            name: existing.name,
+            email: existing.email,
+            phone: existing.phone,
+            company: existing.company,
+            submissionType: 'service_lead',
+            serviceType: existing.serviceType,
+            planName: existing.planName,
+            planTier: existing.planTier,
+            planPrice: existing.planPrice,
+            estimatedValue: existing.estimatedValue,
+            status: 'Paid',
+            source: 'Service Package',
+            message: existing.message,
+            createdAt: existing.createdAt.toISOString(),
+            updatedAt: existing.updatedAt.toISOString(),
+          });
+        } catch (emailErr) {
+          console.warn('Webhook email notification warning:', emailErr);
+        }
       } else {
-        await contactRepository.create({
+        const createdInquiry = await contactRepository.create({
           name: metadata.userName || session.customer_details?.name || 'Valued Client',
           email: metadata.userEmail || session.customer_email || 'client@novarch.io',
           phone: metadata.userPhone || undefined,
@@ -260,6 +284,12 @@ router.post('/webhook', async (req: Request, res: Response) => {
           message: `✅ Stripe Payment ACCEPTED! Session: ${sessionId}. Notes: ${metadata.userNotes || 'None'}`,
         });
         console.log('📥 Created new Paid inquiry in DB:', sessionId);
+
+        try {
+          await emailService.sendContactLeadNotification(createdInquiry);
+        } catch (emailErr) {
+          console.warn('Webhook email notification warning:', emailErr);
+        }
       }
     } catch (dbErr) {
       console.error('❌ Database processing error during webhook handling:', dbErr);

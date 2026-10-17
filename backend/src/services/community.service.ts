@@ -20,14 +20,21 @@ export class CommunityService {
   async submitMember(dto: CreateCommunityDTO): Promise<{ member: CommunityMember; emailResult: { sent: boolean; status: string } }> {
     const member = await this.repo.create(dto);
 
-    // Trigger transactional acknowledgment email safely in the background
+    // Trigger transactional acknowledgment email and admin notification safely in the background
     let emailResult = { sent: false, status: 'unconfigured' };
     try {
-      emailResult = await emailService.sendAcknowledgmentEmail({
-        to: member.email,
-        fullName: member.fullName,
-        applicationType: member.applicationType,
-      });
+      const [ackRes] = await Promise.allSettled([
+        emailService.sendAcknowledgmentEmail({
+          to: member.email,
+          fullName: member.fullName,
+          applicationType: member.applicationType,
+        }),
+        emailService.sendCommunityAdminNotification(member),
+      ]);
+
+      if (ackRes.status === 'fulfilled') {
+        emailResult = ackRes.value;
+      }
     } catch (err) {
       console.error('Email dispatch error caught in communityService:', err);
     }
