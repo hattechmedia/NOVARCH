@@ -8,6 +8,7 @@ import {
   Users,
   ChevronRight,
   Flame,
+  X,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -22,6 +23,8 @@ interface SidebarProps {
   isBackendConnected?: boolean;
   adminEmail: string;
   onLogout: () => void;
+  isOpenMobile?: boolean;
+  onCloseMobile?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = React.memo(({
@@ -34,6 +37,8 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
   totalInquiriesCount,
   adminEmail,
   onLogout,
+  isOpenMobile = false,
+  onCloseMobile,
 }) => {
   const navItems = [
     {
@@ -87,53 +92,75 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
     .slice(0, 2) || 'AD';
 
   return (
-    <aside
-      style={{
-        background: 'linear-gradient(180deg, #07101E 0%, #050D19 60%, #040B16 100%)',
-        borderRight: '1px solid rgba(23,48,78,0.7)',
-      }}
-      className="fixed left-0 top-0 bottom-0 z-40 w-64 flex flex-col select-none"
-    >
-      {/* Top glow orb */}
-      <div
-        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-32 w-40 rounded-full opacity-30 blur-3xl"
-        style={{ background: 'radial-gradient(circle, #1E5FBF 0%, transparent 70%)' }}
-      />
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {isOpenMobile && (
+        <div
+          onClick={onCloseMobile}
+          className="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm lg:hidden transition-opacity"
+        />
+      )}
 
-      {/* ── Brand ── */}
-      <div className="relative px-5 pt-5 pb-4">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="relative">
-            <img
-              src="/images/logo/logo4F.png"
-              alt="NOVARCH Mark"
-              className="h-9 w-auto object-contain"
-              style={{ filter: 'drop-shadow(0 0 10px rgba(56,178,216,0.5))' }}
-            />
+      <aside
+        style={{
+          background: 'linear-gradient(180deg, #07101E 0%, #050D19 60%, #040B16 100%)',
+          borderRight: '1px solid rgba(23,48,78,0.7)',
+        }}
+        className={`fixed left-0 top-0 bottom-0 z-50 w-64 flex flex-col select-none transition-transform duration-300 ease-in-out ${
+          isOpenMobile ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
+        {/* Top glow orb */}
+        <div
+          className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-32 w-40 rounded-full opacity-30 blur-3xl"
+          style={{ background: 'radial-gradient(circle, #1E5FBF 0%, transparent 70%)' }}
+        />
+
+        {/* ── Brand ── */}
+        <div className="relative px-5 pt-5 pb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <img
+                  src="/images/logo/logo4F.png"
+                  alt="NOVARCH Mark"
+                  className="h-9 w-auto object-contain"
+                  style={{ filter: 'drop-shadow(0 0 10px rgba(56,178,216,0.5))' }}
+                />
+              </div>
+              <img
+                src="/images/logo/ovarch-text.png"
+                alt="OVARCH"
+                className="h-4 w-auto object-contain -ml-0.5"
+              />
+            </div>
+
+            {/* Mobile Close Button */}
+            <button
+              onClick={onCloseMobile}
+              className="lg:hidden p-1.5 rounded-lg text-[#7A8FA6] hover:text-white hover:bg-[#17304E]/50 transition-colors"
+              aria-label="Close menu"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          <img
-            src="/images/logo/ovarch-text.png"
-            alt="OVARCH"
-            className="h-4 w-auto object-contain -ml-0.5"
-          />
-        </div>
 
-        {/* Portal tag */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <ShieldCheck className="h-3 w-3 text-[#38B2D8]" />
-            <span className="text-[10px] font-mono font-bold uppercase tracking-[0.15em] text-[#4A6080]">
-              Command Portal
+          {/* Portal tag */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="h-3 w-3 text-[#38B2D8]" />
+              <span className="text-[10px] font-mono font-bold uppercase tracking-[0.15em] text-[#4A6080]">
+                Command Portal
+              </span>
+            </div>
+            <span
+              className="rounded px-1.5 py-0.5 text-[10px] font-mono font-bold text-[#38B2D8]"
+              style={{ background: 'rgba(56,178,216,0.1)', border: '1px solid rgba(56,178,216,0.2)' }}
+            >
+              v1.0
             </span>
           </div>
-          <span
-            className="rounded px-1.5 py-0.5 text-[10px] font-mono font-bold text-[#38B2D8]"
-            style={{ background: 'rgba(56,178,216,0.1)', border: '1px solid rgba(56,178,216,0.2)' }}
-          >
-            v1.0
-          </span>
         </div>
-      </div>
 
       {/* ── Divider ── */}
       <div className="mx-4 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(56,178,216,0.15), transparent)' }} />
@@ -281,6 +308,7 @@ export const Sidebar: React.FC<SidebarProps> = React.memo(({
         </div>
       </div>
     </aside>
+    </>
   );
 });
 

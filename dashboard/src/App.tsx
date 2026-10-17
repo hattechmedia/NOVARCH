@@ -19,6 +19,7 @@ import {
   Clock,
   Flame,
   Users,
+  Menu,
 } from 'lucide-react';
 
 function DashboardView({
@@ -31,6 +32,7 @@ function DashboardView({
   error,
   currentTime,
   isBackendConnected: _isBackendConnected,
+  onOpenMobileMenu,
 }: {
   tab: 'overview' | 'service_leads' | 'messages';
   stats: DashboardStats | null;
@@ -41,6 +43,7 @@ function DashboardView({
   error: string | null;
   currentTime: string;
   isBackendConnected: boolean;
+  onOpenMobileMenu?: () => void;
 }) {
   const [selectedStatus, setSelectedStatus] = useState<string>('All');
   const [selectedCategory, setSelectedCategory] = useState<string>(
@@ -116,6 +119,17 @@ function DashboardView({
         }}
       >
         <div className="flex items-center gap-3">
+          {/* Mobile Menu Trigger */}
+          {onOpenMobileMenu && (
+            <button
+              onClick={onOpenMobileMenu}
+              className="lg:hidden p-1.5 -ml-1.5 rounded-lg text-[#7A8FA6] hover:text-white hover:bg-[#17304E]/50 transition-colors"
+              aria-label="Open navigation menu"
+            >
+              <Menu className="h-5 w-5 text-[#38B2D8]" />
+            </button>
+          )}
+
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm font-mono">
             <span
@@ -262,10 +276,16 @@ function MainLayout({
   isBackendConnected: boolean;
   adminEmail: string;
   onLogout: () => void;
-  children: React.ReactNode;
+  children: React.ReactNode | ((props: { onOpenMobileMenu: () => void }) => React.ReactNode);
 }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const currentTab = useMemo(() => {
     if (location.pathname.startsWith('/service-leads')) return 'service_leads';
@@ -276,6 +296,7 @@ function MainLayout({
   }, [location.pathname]);
 
   const handleTabChange = (tabId: string) => {
+    setMobileMenuOpen(false);
     if (tabId === 'service_leads') navigate('/service-leads');
     else if (tabId === 'messages') navigate('/messages');
     else if (tabId === 'winter_arc') navigate('/winter-arc');
@@ -301,8 +322,14 @@ function MainLayout({
         isBackendConnected={isBackendConnected}
         adminEmail={adminEmail}
         onLogout={onLogout}
+        isOpenMobile={mobileMenuOpen}
+        onCloseMobile={() => setMobileMenuOpen(false)}
       />
-      <div className="flex-1 pl-64 flex flex-col min-w-0">{children}</div>
+      <div className="flex-1 w-full lg:pl-64 flex flex-col min-w-0">
+        {typeof children === 'function'
+          ? children({ onOpenMobileMenu: () => setMobileMenuOpen(true) })
+          : children}
+      </div>
     </div>
   );
 }
@@ -545,17 +572,20 @@ export function App() {
               adminEmail={adminEmail}
               onLogout={handleLogout}
             >
-              <DashboardView
-                tab="overview"
-                stats={stats}
-                inquiries={inquiries}
-                onUpdateStatus={handleUpdateStatus}
-                loadData={loadData}
-                isRefreshing={isRefreshing}
-                error={error}
-                currentTime={currentTime}
-                isBackendConnected={isBackendConnected}
-              />
+              {({ onOpenMobileMenu }) => (
+                <DashboardView
+                  tab="overview"
+                  stats={stats}
+                  inquiries={inquiries}
+                  onUpdateStatus={handleUpdateStatus}
+                  loadData={loadData}
+                  isRefreshing={isRefreshing}
+                  error={error}
+                  currentTime={currentTime}
+                  isBackendConnected={isBackendConnected}
+                  onOpenMobileMenu={onOpenMobileMenu}
+                />
+              )}
             </MainLayout>
           }
         />
@@ -572,17 +602,20 @@ export function App() {
               adminEmail={adminEmail}
               onLogout={handleLogout}
             >
-              <DashboardView
-                tab="service_leads"
-                stats={stats}
-                inquiries={inquiries}
-                onUpdateStatus={handleUpdateStatus}
-                loadData={loadData}
-                isRefreshing={isRefreshing}
-                error={error}
-                currentTime={currentTime}
-                isBackendConnected={isBackendConnected}
-              />
+              {({ onOpenMobileMenu }) => (
+                <DashboardView
+                  tab="service_leads"
+                  stats={stats}
+                  inquiries={inquiries}
+                  onUpdateStatus={handleUpdateStatus}
+                  loadData={loadData}
+                  isRefreshing={isRefreshing}
+                  error={error}
+                  currentTime={currentTime}
+                  isBackendConnected={isBackendConnected}
+                  onOpenMobileMenu={onOpenMobileMenu}
+                />
+              )}
             </MainLayout>
           }
         />
@@ -599,17 +632,20 @@ export function App() {
               adminEmail={adminEmail}
               onLogout={handleLogout}
             >
-              <DashboardView
-                tab="messages"
-                stats={stats}
-                inquiries={inquiries}
-                onUpdateStatus={handleUpdateStatus}
-                loadData={loadData}
-                isRefreshing={isRefreshing}
-                error={error}
-                currentTime={currentTime}
-                isBackendConnected={isBackendConnected}
-              />
+              {({ onOpenMobileMenu }) => (
+                <DashboardView
+                  tab="messages"
+                  stats={stats}
+                  inquiries={inquiries}
+                  onUpdateStatus={handleUpdateStatus}
+                  loadData={loadData}
+                  isRefreshing={isRefreshing}
+                  error={error}
+                  currentTime={currentTime}
+                  isBackendConnected={isBackendConnected}
+                  onOpenMobileMenu={onOpenMobileMenu}
+                />
+              )}
             </MainLayout>
           }
         />
@@ -626,44 +662,53 @@ export function App() {
               adminEmail={adminEmail}
               onLogout={handleLogout}
             >
-              <div className="flex-1 flex flex-col min-w-0">
-                <header
-                  className="sticky top-0 z-30 flex items-center justify-between px-6 py-3 backdrop-blur-xl"
-                  style={{
-                    background: 'rgba(5,10,18,0.85)',
-                    borderBottom: '1px solid rgba(23,48,78,0.6)',
-                    boxShadow: '0 1px 0 rgba(56,178,216,0.04)',
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 text-sm font-mono">
-                      <span style={{ color: '#38B2D8', textShadow: '0 0 12px rgba(56,178,216,0.4)', fontWeight: 700 }}>NOVARCH</span>
-                      <span className="text-[#1E3A5F]">/</span>
-                      <span className="text-white font-semibold">Winter Arc</span>
+              {({ onOpenMobileMenu }) => (
+                <div className="flex-1 flex flex-col min-w-0">
+                  <header
+                    className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3 backdrop-blur-xl"
+                    style={{
+                      background: 'rgba(5,10,18,0.85)',
+                      borderBottom: '1px solid rgba(23,48,78,0.6)',
+                      boxShadow: '0 1px 0 rgba(56,178,216,0.04)',
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={onOpenMobileMenu}
+                        className="lg:hidden p-1.5 -ml-1.5 rounded-lg text-[#7A8FA6] hover:text-white hover:bg-[#17304E]/50 transition-colors"
+                        aria-label="Open navigation menu"
+                      >
+                        <Menu className="h-5 w-5 text-[#38B2D8]" />
+                      </button>
+                      <div className="flex items-center gap-2 text-sm font-mono">
+                        <span style={{ color: '#38B2D8', textShadow: '0 0 12px rgba(56,178,216,0.4)', fontWeight: 700 }}>NOVARCH</span>
+                        <span className="text-[#1E3A5F]">/</span>
+                        <span className="text-white font-semibold">Winter Arc</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => loadData(true)}
-                      disabled={isRefreshing}
-                      className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-mono font-semibold cursor-pointer disabled:opacity-50 transition-all"
-                      style={{ background: 'rgba(30,95,191,0.12)', border: '1px solid rgba(56,178,216,0.2)', color: '#38B2D8' }}
-                    >
-                      <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                      <span className="hidden md:inline">Refresh</span>
-                    </button>
-                  </div>
-                </header>
-                <main className="relative flex-1 p-6 sm:p-8 max-w-7xl w-full mx-auto z-10">
-                  <CommunityTable
-                    members={winterArcMembers}
-                    onUpdateStatus={handleUpdateCommunityStatus}
-                    isWinterArc={true}
-                    pageTitle="Winter Arc · Treffen 01 Applications"
-                    icon={Flame}
-                  />
-                </main>
-              </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => loadData(true)}
+                        disabled={isRefreshing}
+                        className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-mono font-semibold cursor-pointer disabled:opacity-50 transition-all"
+                        style={{ background: 'rgba(30,95,191,0.12)', border: '1px solid rgba(56,178,216,0.2)', color: '#38B2D8' }}
+                      >
+                        <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        <span className="hidden sm:inline">Refresh</span>
+                      </button>
+                    </div>
+                  </header>
+                  <main className="relative flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto z-10">
+                    <CommunityTable
+                      members={winterArcMembers}
+                      onUpdateStatus={handleUpdateCommunityStatus}
+                      isWinterArc={true}
+                      pageTitle="Winter Arc · Treffen 01 Applications"
+                      icon={Flame}
+                    />
+                  </main>
+                </div>
+              )}
             </MainLayout>
           }
         />
@@ -680,44 +725,53 @@ export function App() {
               adminEmail={adminEmail}
               onLogout={handleLogout}
             >
-              <div className="flex-1 flex flex-col min-w-0">
-                <header
-                  className="sticky top-0 z-30 flex items-center justify-between px-6 py-3 backdrop-blur-xl"
-                  style={{
-                    background: 'rgba(5,10,18,0.85)',
-                    borderBottom: '1px solid rgba(23,48,78,0.6)',
-                    boxShadow: '0 1px 0 rgba(56,178,216,0.04)',
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 text-sm font-mono">
-                      <span style={{ color: '#38B2D8', textShadow: '0 0 12px rgba(56,178,216,0.4)', fontWeight: 700 }}>NOVARCH</span>
-                      <span className="text-[#1E3A5F]">/</span>
-                      <span className="text-white font-semibold">Community</span>
+              {({ onOpenMobileMenu }) => (
+                <div className="flex-1 flex flex-col min-w-0">
+                  <header
+                    className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3 backdrop-blur-xl"
+                    style={{
+                      background: 'rgba(5,10,18,0.85)',
+                      borderBottom: '1px solid rgba(23,48,78,0.6)',
+                      boxShadow: '0 1px 0 rgba(56,178,216,0.04)',
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={onOpenMobileMenu}
+                        className="lg:hidden p-1.5 -ml-1.5 rounded-lg text-[#7A8FA6] hover:text-white hover:bg-[#17304E]/50 transition-colors"
+                        aria-label="Open navigation menu"
+                      >
+                        <Menu className="h-5 w-5 text-[#38B2D8]" />
+                      </button>
+                      <div className="flex items-center gap-2 text-sm font-mono">
+                        <span style={{ color: '#38B2D8', textShadow: '0 0 12px rgba(56,178,216,0.4)', fontWeight: 700 }}>NOVARCH</span>
+                        <span className="text-[#1E3A5F]">/</span>
+                        <span className="text-white font-semibold">Community</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => loadData(true)}
-                      disabled={isRefreshing}
-                      className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-mono font-semibold cursor-pointer disabled:opacity-50 transition-all"
-                      style={{ background: 'rgba(30,95,191,0.12)', border: '1px solid rgba(56,178,216,0.2)', color: '#38B2D8' }}
-                    >
-                      <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                      <span className="hidden md:inline">Refresh</span>
-                    </button>
-                  </div>
-                </header>
-                <main className="relative flex-1 p-6 sm:p-8 max-w-7xl w-full mx-auto z-10">
-                  <CommunityTable
-                    members={generalCommunityMembers}
-                    onUpdateStatus={handleUpdateCommunityStatus}
-                    isWinterArc={false}
-                    pageTitle="Community Member Applications"
-                    icon={Users}
-                  />
-                </main>
-              </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => loadData(true)}
+                        disabled={isRefreshing}
+                        className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-mono font-semibold cursor-pointer disabled:opacity-50 transition-all"
+                        style={{ background: 'rgba(30,95,191,0.12)', border: '1px solid rgba(56,178,216,0.2)', color: '#38B2D8' }}
+                      >
+                        <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        <span className="hidden sm:inline">Refresh</span>
+                      </button>
+                    </div>
+                  </header>
+                  <main className="relative flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto z-10">
+                    <CommunityTable
+                      members={generalCommunityMembers}
+                      onUpdateStatus={handleUpdateCommunityStatus}
+                      isWinterArc={false}
+                      pageTitle="Community Member Applications"
+                      icon={Users}
+                    />
+                  </main>
+                </div>
+              )}
             </MainLayout>
           }
         />
