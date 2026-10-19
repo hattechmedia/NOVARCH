@@ -274,3 +274,8 @@ body {
   background-color: transparent !important;
   box-shadow: none !important;
 }
+
+#goog-gt-tt,
+.goog-te-balloon-frame {
+  display: none !important;
+}

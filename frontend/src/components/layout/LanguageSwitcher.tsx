@@ -100,10 +100,13 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
 
   if (!mounted) {
     return (
-      <div className={cn('inline-flex items-center gap-1 rounded-full p-1 bg-[#081224]/90 border border-white/10 text-xs font-mono', className)}>
-        <span className="px-2 py-0.5 text-slate-400">EN</span>
-        <span className="text-white/20">|</span>
-        <span className="px-2 py-0.5 text-slate-400">DE</span>
+      <div
+        translate="no"
+        className={cn('notranslate inline-flex items-center gap-1 rounded-full px-2 py-1 bg-[#081224]/90 border border-white/10 text-[11px] font-mono select-none', className)}
+      >
+        <span translate="no" className="notranslate text-slate-400">EN</span>
+        <span translate="no" className="notranslate text-white/20">|</span>
+        <span translate="no" className="notranslate text-slate-400">DE</span>
       </div>
     );
   }
@@ -111,80 +114,88 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
   // Variant: Drawer (Used in mobile slide-out menu)
   if (variant === 'drawer') {
     return (
-      <div className={cn('flex items-center justify-between p-1.5 rounded-xl bg-white/5 border border-white/10', className)}>
+      <div
+        translate="no"
+        className={cn('notranslate flex items-center justify-between p-1 rounded-xl bg-white/5 border border-white/10 select-none', className)}
+      >
         <button
           type="button"
+          translate="no"
           onClick={() => switchLanguage('en')}
           className={cn(
-            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-mono font-bold transition-all',
+            'notranslate flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer',
             currentLang === 'en'
               ? 'bg-[#1E5FBF] text-white shadow-[0_0_12px_rgba(30,95,191,0.5)]'
               : 'text-slate-400 hover:text-white hover:bg-white/5'
           )}
         >
           {currentLang === 'en' && <Check className="h-3.5 w-3.5 text-cyan-300" />}
-          <span>English (EN)</span>
+          <span translate="no" className="notranslate">English (EN)</span>
         </button>
 
         <button
           type="button"
+          translate="no"
           onClick={() => switchLanguage('de')}
           className={cn(
-            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-mono font-bold transition-all',
+            'notranslate flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer',
             currentLang === 'de'
               ? 'bg-[#1E5FBF] text-white shadow-[0_0_12px_rgba(30,95,191,0.5)]'
               : 'text-slate-400 hover:text-white hover:bg-white/5'
           )}
         >
           {currentLang === 'de' && <Check className="h-3.5 w-3.5 text-cyan-300" />}
-          <span>Deutsch (DE)</span>
+          <span translate="no" className="notranslate">Deutsch (DE)</span>
         </button>
       </div>
     );
   }
 
-  // Variant: Pill (Default Navbar header component)
+  // Variant: Pill (Navbar header component - compact & strictly not translated)
   return (
     <div
+      translate="no"
       className={cn(
-        'inline-flex items-center p-1 rounded-full bg-[#081224]/90 backdrop-blur-md border border-white/15 shadow-xl select-none',
+        'notranslate inline-flex items-center p-0.5 rounded-full bg-[#081224]/90 backdrop-blur-md border border-white/15 shadow-lg select-none flex-shrink-0',
         className
       )}
       role="group"
       aria-label="Language selection"
     >
-      <div className="flex items-center pl-2 pr-1 text-cyan-400">
+      <div className="flex items-center pl-1.5 pr-1 text-cyan-400 pointer-events-none">
         <Globe className={cn('h-3.5 w-3.5 transition-transform duration-300', isTranslating && 'animate-spin')} />
       </div>
 
       <button
         type="button"
+        translate="no"
         onClick={() => switchLanguage('en')}
         className={cn(
-          'px-2.5 py-1 rounded-full text-xs font-mono font-bold transition-all duration-200 cursor-pointer',
+          'notranslate px-2 py-0.5 rounded-full text-[11px] font-mono font-bold tracking-wider transition-all duration-200 cursor-pointer',
           currentLang === 'en'
-            ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-[0_0_10px_rgba(56,178,216,0.5)]'
+            ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-[0_0_8px_rgba(56,178,216,0.5)]'
             : 'text-slate-400 hover:text-white hover:bg-white/5'
         )}
         title="Switch to English"
         aria-pressed={currentLang === 'en'}
       >
-        EN
+        <span translate="no" className="notranslate">EN</span>
       </button>
 
       <button
         type="button"
+        translate="no"
         onClick={() => switchLanguage('de')}
         className={cn(
-          'px-2.5 py-1 rounded-full text-xs font-mono font-bold transition-all duration-200 cursor-pointer',
+          'notranslate px-2 py-0.5 rounded-full text-[11px] font-mono font-bold tracking-wider transition-all duration-200 cursor-pointer',
           currentLang === 'de'
-            ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-[0_0_10px_rgba(56,178,216,0.5)]'
+            ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-[0_0_8px_rgba(56,178,216,0.5)]'
             : 'text-slate-400 hover:text-white hover:bg-white/5'
         )}
         title="Auf Deutsch umschalten"
         aria-pressed={currentLang === 'de'}
       >
-        DE
+        <span translate="no" className="notranslate">DE</span>
       </button>
     </div>
   );

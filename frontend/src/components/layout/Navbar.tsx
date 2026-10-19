@@ -38,7 +38,7 @@ export function Navbar() {
   // Close mobile menu on resize
   React.useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) setMobileOpen(false);
+      if (window.innerWidth >= 1280) setMobileOpen(false);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -97,12 +97,12 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* ── Floating Center Glass NavPill (Desktop) ───────────── */}
+          {/* ── Center Glass NavPill (Desktop) ───────────── */}
           <nav
             aria-label="Main navigation"
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden lg:flex items-center"
+            className="hidden xl:flex items-center justify-center flex-1 min-w-0 mx-2 2xl:mx-4"
           >
-            <div className="flex items-center gap-1 p-1.5 rounded-full bg-[#081224]/90 backdrop-blur-md border border-white/15 shadow-xl shadow-black/50">
+            <div className="flex items-center gap-0.5 2xl:gap-1 p-1 2xl:p-1.5 rounded-full bg-[#081224]/90 backdrop-blur-md border border-white/15 shadow-xl shadow-black/50">
               {navigation.map((item) => {
                 const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
 
@@ -120,7 +120,7 @@ export function Navbar() {
                         aria-expanded={dropdownOpen}
                         aria-haspopup="true"
                         className={cn(
-                          'inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200 whitespace-nowrap',
+                          'inline-flex items-center gap-1.5 rounded-full px-2.5 2xl:px-3.5 py-1.5 text-xs 2xl:text-sm font-medium transition-all duration-200 whitespace-nowrap',
                           'text-slate-300 hover:text-white hover:bg-white/10',
                           dropdownOpen && 'text-cyan-400 bg-white/10'
                         )}
@@ -187,7 +187,7 @@ export function Navbar() {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        'relative inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200 whitespace-nowrap',
+                        'relative inline-flex items-center gap-1.5 rounded-full px-2.5 2xl:px-3.5 py-1.5 text-xs 2xl:text-sm font-medium transition-all duration-200 whitespace-nowrap',
                         isActive
                           ? 'bg-gradient-to-r from-blue-600/35 to-cyan-500/35 text-white border border-cyan-400/50 shadow-[0_0_12px_rgba(56,178,216,0.3)]'
                           : 'bg-cyan-500/10 text-cyan-300 border border-cyan-400/30 hover:bg-cyan-500/20 hover:border-cyan-400/50 hover:text-white'
@@ -196,7 +196,7 @@ export function Navbar() {
                       <Flame className="h-3.5 w-3.5 text-amber-400 flex-shrink-0" />
                       <span>{item.label}</span>
                       {item.badge && (
-                        <span className="rounded-full bg-cyan-400/20 px-1.5 py-0.5 text-[10px] font-mono font-bold text-cyan-300 border border-cyan-400/30 whitespace-nowrap">
+                        <span className="hidden 2xl:inline-block rounded-full bg-cyan-400/20 px-1.5 py-0.5 text-[10px] font-mono font-bold text-cyan-300 border border-cyan-400/30 whitespace-nowrap">
                           {item.badge}
                         </span>
                       )}
@@ -209,7 +209,7 @@ export function Navbar() {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      'relative inline-flex items-center justify-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200 whitespace-nowrap',
+                      'relative inline-flex items-center justify-center gap-1.5 rounded-full px-2.5 2xl:px-3.5 py-1.5 text-xs 2xl:text-sm font-medium transition-all duration-200 whitespace-nowrap',
                       isActive
                         ? 'text-white'
                         : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -234,11 +234,11 @@ export function Navbar() {
           </nav>
 
           {/* ── Right CTA: Language Switcher + Start a Project Pill Button ── */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden xl:flex items-center gap-2.5 2xl:gap-3 flex-shrink-0">
             <LanguageSwitcher />
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold bg-gradient-to-r from-[#1B64F2] via-[#2277F7] to-[#0D47C7] hover:from-[#2575FC] hover:to-[#1A5BFF] text-white transition-all duration-200 shadow-[0_0_20px_rgba(34,119,247,0.55)] hover:shadow-[0_0_30px_rgba(34,119,247,0.85)] hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-full px-4 2xl:px-5 py-2 2xl:py-2.5 text-xs 2xl:text-sm font-semibold bg-gradient-to-r from-[#1B64F2] via-[#2277F7] to-[#0D47C7] hover:from-[#2575FC] hover:to-[#1A5BFF] text-white transition-all duration-200 shadow-[0_0_20px_rgba(34,119,247,0.55)] hover:shadow-[0_0_30px_rgba(34,119,247,0.85)] hover:scale-105 active:scale-95"
             >
               <span>Start a Project</span>
               <ArrowRight className="h-4 w-4" />
@@ -246,7 +246,7 @@ export function Navbar() {
           </div>
 
           {/* ── Mobile: Language Switcher + Hamburger ── */}
-          <div className="lg:hidden flex items-center gap-2">
+          <div className="xl:hidden flex items-center gap-2 flex-shrink-0">
             <LanguageSwitcher />
             <button
               onClick={() => setMobileOpen(true)}

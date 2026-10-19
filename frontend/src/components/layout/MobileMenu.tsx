@@ -28,7 +28,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
       {/* Backdrop */}
       <div
         className={cn(
-          'fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-300 lg:hidden',
+          'fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-300 xl:hidden',
           open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         )}
         onClick={handleClose}
@@ -38,7 +38,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
       {/* Drawer */}
       <div
         className={cn(
-          'fixed top-0 right-0 z-50 h-full w-80 max-w-full bg-[#07101E] text-white shadow-2xl transition-transform duration-300 ease-out lg:hidden flex flex-col border-l border-white/10',
+          'fixed top-0 right-0 z-50 h-full w-80 max-w-full bg-[#07101E] text-white shadow-2xl transition-transform duration-300 ease-out xl:hidden flex flex-col border-l border-white/10',
           open ? 'translate-x-0' : 'translate-x-full'
         )}
         role="dialog"
