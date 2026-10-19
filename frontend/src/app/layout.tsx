@@ -58,6 +58,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
         />
       </head>
       <body className="flex min-h-full flex-col bg-background text-foreground antialiased" suppressHydrationWarning>
+        {/* Hidden mount target for Google Translate web engine */}
+        <div id="google_translate_element" style={{ display: 'none' }} aria-hidden="true" />
         <ThemeProvider>
           <ScrollToTop />
           <Navbar />

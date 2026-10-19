@@ -8,6 +8,7 @@ import { ChevronDown, ArrowRight, Menu, Globe, GitBranch, Cpu, Code2, Flame, Ter
 import { navigation } from '@/data/navigation';
 import { cn } from '@/lib/utils';
 import { MobileMenu } from './MobileMenu';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 const CHILD_ICON_MAP = {
   'Digital Launch': Globe,
@@ -232,8 +233,9 @@ export function Navbar() {
             </div>
           </nav>
 
-          {/* ── Right CTA: Start a Project Pill Button ── */}
-          <div className="hidden lg:flex items-center">
+          {/* ── Right CTA: Language Switcher + Start a Project Pill Button ── */}
+          <div className="hidden lg:flex items-center gap-3">
+            <LanguageSwitcher />
             <Link
               href="/contact"
               className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold bg-gradient-to-r from-[#1B64F2] via-[#2277F7] to-[#0D47C7] hover:from-[#2575FC] hover:to-[#1A5BFF] text-white transition-all duration-200 shadow-[0_0_20px_rgba(34,119,247,0.55)] hover:shadow-[0_0_30px_rgba(34,119,247,0.85)] hover:scale-105 active:scale-95"
@@ -243,8 +245,9 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* ── Mobile Hamburger (top-right) ── */}
-          <div className="lg:hidden">
+          {/* ── Mobile: Language Switcher + Hamburger ── */}
+          <div className="lg:hidden flex items-center gap-2">
+            <LanguageSwitcher />
             <button
               onClick={() => setMobileOpen(true)}
               className="flex items-center justify-center h-10 w-10 rounded-full bg-[#081224]/85 backdrop-blur-md border border-white/15 text-white hover:bg-white/10 transition-colors shadow-lg"

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { X, ChevronDown, ArrowRight, Flame, Terminal } from 'lucide-react';
 import { navigation } from '@/data/navigation';
 import { cn } from '@/lib/utils';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface MobileMenuProps {
   open: boolean;
@@ -189,8 +190,16 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
           </ul>
         </nav>
 
+        {/* Language Switcher */}
+        <div className="border-t border-white/10 px-4 pt-3 pb-1">
+          <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-2">
+            Language / Sprache
+          </div>
+          <LanguageSwitcher variant="drawer" />
+        </div>
+
         {/* Footer CTA */}
-        <div className="border-t border-white/10 p-4 space-y-3">
+        <div className="p-4 pt-2 space-y-3">
           <Link
             href="/contact"
             onClick={handleClose}

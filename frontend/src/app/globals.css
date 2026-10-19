@@ -239,3 +239,38 @@ html {
     stroke-dashoffset: 0;
   }
 }
+
+/* ─── Google Translate Overrides & Dark Theme Integration ────────────────────── */
+
+/* Hide Google Translate top banner frame so layout doesn't shift down */
+.goog-te-banner-frame.skiptranslate,
+.goog-te-banner-frame,
+iframe.goog-te-banner-frame {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+}
+
+body {
+  top: 0px !important;
+  position: static !important;
+}
+
+#google_translate_element {
+  display: none !important;
+}
+
+.skiptranslate:not(.goog-te-gadget) {
+  display: none !important;
+}
+
+/* Hide annoying tooltips and highlights on translated text */
+.goog-tooltip,
+.goog-tooltip:hover {
+  display: none !important;
+}
+
+.goog-text-highlight {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
