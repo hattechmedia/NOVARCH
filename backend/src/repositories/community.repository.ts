@@ -12,6 +12,7 @@ export interface ICommunityRepository {
   ): Promise<CommunityMember | null>;
   create(dto: CreateCommunityDTO): Promise<CommunityMember>;
   updateStatus(id: string, status: CommunityStatus): Promise<CommunityMember | null>;
+  updateMarketingConsent(id: string, consented: boolean): Promise<CommunityMember | null>;
   delete(id: string): Promise<boolean>;
 }
 
@@ -47,7 +48,7 @@ export class MongoCommunityRepository implements ICommunityRepository {
         const docs = await CommunityModel.find(query).sort({ createdAt: -1 }).lean();
         return docs.map(formatCommunityDoc);
       } catch (err) {
-        console.error('Error in MongoCommunityRepository.findAll:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -63,7 +64,7 @@ export class MongoCommunityRepository implements ICommunityRepository {
         const doc = await CommunityModel.findById(id).lean();
         if (doc) return formatCommunityDoc(doc);
       } catch (err) {
-        console.error('Error in MongoCommunityRepository.findById:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -91,7 +92,7 @@ export class MongoCommunityRepository implements ICommunityRepository {
           .lean();
         if (doc) return formatCommunityDoc(doc);
       } catch (err) {
-        console.error('Error in MongoCommunityRepository.findRecentByEmail:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -109,6 +110,10 @@ export class MongoCommunityRepository implements ICommunityRepository {
     const referralSource =
       dto.referral && typeof dto.referral === 'object' ? dto.referral.utmSource : undefined;
     const source = dto.source || (referralSource ? `Campaign: ${referralSource}` : 'Website Form');
+
+    const now = new Date();
+    const marketingConsent = Boolean(dto.marketingConsent);
+    const photoConsent = Boolean(dto.photoConsent);
 
     const connected = await connectDatabase();
     if (connected) {
@@ -134,12 +139,18 @@ export class MongoCommunityRepository implements ICommunityRepository {
           referral: dto.referral || undefined,
           status: dto.status || 'New',
           source: source,
+          marketingConsent: marketingConsent,
+          marketingConsentAt: marketingConsent ? now : null,
+          marketingConsentVersion: marketingConsent ? 'v1-2026-10' : undefined,
+          photoConsent: photoConsent,
+          photoConsentAt: photoConsent ? now : null,
+          photoConsentVersion: photoConsent ? 'v1-2026-10' : undefined,
         });
 
-        console.log(`💾 Saved ${appType} application to MongoDB: ${doc.fullName} (${doc._id})`);
+        console.log('Record saved');
         return formatCommunityDoc(doc.toJSON ? doc.toJSON() : doc);
       } catch (err) {
-        console.error('Error saving community/winter-arc application to MongoDB:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -166,8 +177,14 @@ export class MongoCommunityRepository implements ICommunityRepository {
       referral: dto.referral || undefined,
       status: dto.status || 'New',
       source: source,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      marketingConsent: marketingConsent,
+      marketingConsentAt: marketingConsent ? now.toISOString() : null,
+      marketingConsentVersion: marketingConsent ? 'v1-2026-10' : undefined,
+      photoConsent: photoConsent,
+      photoConsentAt: photoConsent ? now.toISOString() : null,
+      photoConsentVersion: photoConsent ? 'v1-2026-10' : undefined,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
     };
 
     this.inMemoryFallback.unshift(newMember);
@@ -181,11 +198,11 @@ export class MongoCommunityRepository implements ICommunityRepository {
         const doc = await CommunityModel.findByIdAndUpdate(
           id,
           { status, updatedAt: new Date() },
-          { returnDocument: 'after' }
+          { returnDocument: 'after', runValidators: true }
         ).lean();
         if (doc) return formatCommunityDoc(doc);
       } catch (err) {
-        console.error('Error in MongoCommunityRepository.updateStatus:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -201,6 +218,39 @@ export class MongoCommunityRepository implements ICommunityRepository {
     return { ...this.inMemoryFallback[index] };
   }
 
+  async updateMarketingConsent(id: string, consented: boolean): Promise<CommunityMember | null> {
+    const now = new Date();
+    const connected = await connectDatabase();
+    if (connected) {
+      try {
+        const updateFields: any = {
+          marketingConsent: consented,
+          updatedAt: now,
+        };
+        if (!consented) {
+          updateFields.marketingConsentWithdrawnAt = now;
+        }
+        const doc = await CommunityModel.findByIdAndUpdate(
+          id,
+          updateFields,
+          { returnDocument: 'after', runValidators: true }
+        ).lean();
+        if (doc) return formatCommunityDoc(doc);
+      } catch (err) {
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
+      }
+    }
+    const index = this.inMemoryFallback.findIndex((i) => i.id === id);
+    if (index === -1) return null;
+    this.inMemoryFallback[index] = {
+      ...this.inMemoryFallback[index],
+      marketingConsent: consented,
+      marketingConsentWithdrawnAt: consented ? undefined : now.toISOString(),
+      updatedAt: now.toISOString(),
+    };
+    return { ...this.inMemoryFallback[index] };
+  }
+
   async delete(id: string): Promise<boolean> {
     const connected = await connectDatabase();
     if (connected) {
@@ -208,7 +258,7 @@ export class MongoCommunityRepository implements ICommunityRepository {
         const res = await CommunityModel.findByIdAndDelete(id);
         return !!res;
       } catch (err) {
-        console.error('Error in MongoCommunityRepository.delete:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 

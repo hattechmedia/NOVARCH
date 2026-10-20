@@ -64,23 +64,6 @@ export const communityController = {
         validatedData = CreatePublicCommunitySchema.parse(req.body);
       }
 
-      const recent = await communityService.findRecentByEmail(
-        validatedData.email,
-        validatedData.applicationType === 'winter-arc' ? 'winter-arc' : 'community',
-        10 * 60 * 1000
-      );
-      if (recent) {
-        const isWinterArcApp = recent.applicationType === 'winter-arc';
-        const dupMessage = isWinterArcApp
-          ? "Thank you for applying to Winter Arc. Your application has been received. We'll review it and contact you if you're selected. Thanks for your interest in Treffen 01."
-          : 'Community application received successfully. Welcome to NOVARCH!';
-        return res.status(200).json({
-          success: true,
-          message: dupMessage,
-          data: { id: recent.id },
-        });
-      }
-
       const { member, emailResult } = await communityService.submitMember(validatedData);
 
       const isWinterArcApp = member.applicationType === 'winter-arc';
@@ -201,6 +184,33 @@ export const communityController = {
       return res.status(200).json({
         success: true,
         message: 'Record deleted successfully',
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+
+  withdrawMarketingConsent: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      if (!isValidResourceId(id)) {
+        return res.status(400).json({ success: false, message: 'Invalid record id' });
+      }
+      const updated = await communityService.withdrawMarketingConsent(id);
+      if (!updated) {
+        return res.status(404).json({
+          success: false,
+          message: 'Application/member record not found',
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        message: 'Marketing consent withdrawn successfully',
+        data: {
+          id: updated.id,
+          marketingConsent: false,
+          marketingConsentWithdrawnAt: updated.marketingConsentWithdrawnAt,
+        },
       });
     } catch (error) {
       return next(error);

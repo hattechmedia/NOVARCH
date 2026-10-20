@@ -30,8 +30,14 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
     const lang = (cookieMatch?.[1] || saved || 'en').toLowerCase();
     if (lang === 'de') {
       setCurrentLang('de');
+      if (typeof document !== 'undefined') {
+        document.documentElement.lang = 'de';
+      }
     } else {
       setCurrentLang('en');
+      if (typeof document !== 'undefined') {
+        document.documentElement.lang = 'en';
+      }
     }
 
     // 2. Load Google Translate script dynamically if not present
@@ -66,6 +72,7 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
 
     if (typeof window !== 'undefined') {
       localStorage.setItem('novarch_lang', targetLang);
+      document.documentElement.lang = targetLang;
 
       // Set cookie for current domain and root path
       const hostname = window.location.hostname;
@@ -145,7 +152,7 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
           )}
         >
           {currentLang === 'de' && <Check className="h-3.5 w-3.5 text-cyan-300" />}
-          <span translate="no" className="notranslate">Deutsch (DE)</span>
+          <span translate="no" className="notranslate">Deutsch / German (DE)</span>
         </button>
       </div>
     );
@@ -160,9 +167,9 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
         className
       )}
       role="group"
-      aria-label="Language selection"
+      aria-label="Language selection / Sprachauswahl"
     >
-      <div className="flex items-center pl-1.5 pr-1 text-cyan-400 pointer-events-none">
+      <div className="flex items-center pl-1.5 pr-1 text-cyan-400 pointer-events-none" title="English / German (Deutsch)">
         <Globe className={cn('h-3.5 w-3.5 transition-transform duration-300', isTranslating && 'animate-spin')} />
       </div>
 
@@ -176,7 +183,7 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
             ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-[0_0_8px_rgba(56,178,216,0.5)]'
             : 'text-slate-400 hover:text-white hover:bg-white/5'
         )}
-        title="Switch to English"
+        title="English (EN)"
         aria-pressed={currentLang === 'en'}
       >
         <span translate="no" className="notranslate">EN</span>
@@ -192,7 +199,7 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
             ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-[0_0_8px_rgba(56,178,216,0.5)]'
             : 'text-slate-400 hover:text-white hover:bg-white/5'
         )}
-        title="Auf Deutsch umschalten"
+        title="German / Deutsch (DE)"
         aria-pressed={currentLang === 'de'}
       >
         <span translate="no" className="notranslate">DE</span>

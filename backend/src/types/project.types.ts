@@ -46,14 +46,14 @@ export const CreateProjectSchema = z.object({
   description: z.string().min(5).max(5000),
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
   isSample: z.boolean().optional().default(false),
-  image: z.string().url().or(z.string().startsWith('/')).optional(),
-  liveUrl: z.string().url().optional(),
-  websiteUrl: z.string().url().optional(),
-  githubUrl: z.string().url().optional(),
+  image: z.string().url().refine(value => /^https?:\/\//i.test(value), "HTTP(S) URL required").or(z.string().startsWith('/')).optional(),
+  liveUrl: z.string().url().refine(value => /^https?:\/\//i.test(value), "HTTP(S) URL required").optional(),
+  websiteUrl: z.string().url().refine(value => /^https?:\/\//i.test(value), "HTTP(S) URL required").optional(),
+  githubUrl: z.string().url().refine(value => /^https?:\/\//i.test(value), "HTTP(S) URL required").optional(),
   tags: z.array(z.string()).default([]),
   techStack: z.array(z.string()).optional(),
   metrics: z.array(z.object({ label: z.string(), value: z.string() })).optional(),
-  links: z.array(z.object({ label: z.string(), url: z.string().url(), isExternal: z.boolean().optional() })).optional(),
+  links: z.array(z.object({ label: z.string(), url: z.string().url().refine(value => /^https?:\/\//i.test(value), "HTTP(S) URL required"), isExternal: z.boolean().optional() })).optional(),
   featured: z.boolean().optional().default(false),
 });
 
@@ -63,7 +63,7 @@ export const ProjectFilterSchema = z.object({
   category: z.enum(['venture', 'client', 'lab', 'internal', 'case-study']).optional(),
   status: z.enum(['draft', 'published', 'archived']).optional(),
   featured: z.boolean().optional(),
-  search: z.string().optional(),
+  search: z.string().trim().max(100).optional(),
 });
 
 export type CreateProjectDTO = z.infer<typeof CreateProjectSchema>;

@@ -1,3 +1,4 @@
+import { htmlValues } from '../utils/html.js';
 /**
  * NOVARCH Email Service
  * Handles transactional emails, customer acknowledgments, and instant admin lead notifications
@@ -52,7 +53,7 @@ export class EmailService {
     const recipientStr = Array.isArray(to) ? to.join(', ') : to;
 
     if (!this.isConfigured()) {
-      const msg = `[Email Service]: Neither RESEND_API_KEY nor SMTP credentials configured. Email skipped for ${recipientStr}.`;
+      const msg = `[Email Service]: Neither RESEND_API_KEY nor SMTP credentials configured. Email skipped.`;
       console.log(msg);
       return { sent: false, status: 'unconfigured', message: msg };
     }
@@ -62,6 +63,7 @@ export class EmailService {
       if (process.env.RESEND_API_KEY) {
         const toList = Array.isArray(to) ? to : [to];
         const res = await fetch('https://api.resend.com/emails', {
+          signal: AbortSignal.timeout(15000),
           method: 'POST',
           headers: {
             Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
@@ -78,11 +80,11 @@ export class EmailService {
         });
 
         if (res.ok) {
-          console.log(`✉️ Email successfully dispatched via Resend to ${recipientStr}`);
+          console.log(`✉️ Email successfully dispatched via Resend `);
           return { sent: true, status: 'sent' };
         } else {
           const errData = await res.text();
-          console.warn(`⚠️ Resend API error for ${recipientStr}:`, errData);
+          console.warn('Email provider rejected request', res.status);
           return { sent: false, status: 'failed', error: errData };
         }
       }
@@ -115,10 +117,10 @@ export class EmailService {
         html,
       });
 
-      console.log(`✉️ Email successfully dispatched via SMTP to ${recipientStr}`);
+      console.log(`✉️ Email successfully dispatched via SMTP `);
       return { sent: true, status: 'sent' };
     } catch (err: any) {
-      console.error(`❌ Failed to dispatch email to ${recipientStr}:`, err.message || err);
+      console.error('Email dispatch failed');
       return { sent: false, status: 'failed', error: err.message || String(err) };
     }
   }
@@ -160,6 +162,7 @@ Lead ID: ${inquiry.id}
 Direct Dashboard: https://novarch-dashboard.vercel.app/inquiry/${inquiry.id}
     `.trim();
 
+    const safeHtml = htmlValues(inquiry);
     const htmlBody = `
 <!DOCTYPE html>
 <html>
@@ -192,23 +195,23 @@ Direct Dashboard: https://novarch-dashboard.vercel.app/inquiry/${inquiry.id}
       <table class="data-table">
         <tr>
           <td class="label">Full Name</td>
-          <td class="value"><strong>${inquiry.name}</strong></td>
+          <td class="value"><strong>${safeHtml.name}</strong></td>
         </tr>
         <tr>
           <td class="label">Work Email</td>
-          <td class="value"><a href="mailto:${inquiry.email}" style="color: #38B2D8; text-decoration: none;">${inquiry.email}</a></td>
+          <td class="value"><a href="mailto:${safeHtml.email}" style="color: #38B2D8; text-decoration: none;">${safeHtml.email}</a></td>
         </tr>
-        ${inquiry.phone ? `<tr><td class="label">Phone</td><td class="value">${inquiry.phone}</td></tr>` : ''}
-        ${inquiry.company ? `<tr><td class="label">Company</td><td class="value">${inquiry.company}</td></tr>` : ''}
+        ${safeHtml.phone ? `<tr><td class="label">Phone</td><td class="value">${safeHtml.phone}</td></tr>` : ''}
+        ${safeHtml.company ? `<tr><td class="label">Company</td><td class="value">${safeHtml.company}</td></tr>` : ''}
         <tr>
           <td class="label">Service / Scope</td>
-          <td class="value">${inquiry.serviceType || 'General Inquiry'}</td>
+          <td class="value">${safeHtml.serviceType || 'General Inquiry'}</td>
         </tr>
-        ${inquiry.planName ? `<tr><td class="label">Package Plan</td><td class="value" style="color: #38B2D8;"><strong>${inquiry.planName}</strong> (${inquiry.planTier || 'Standard'})</td></tr>` : ''}
-        ${inquiry.planPrice ? `<tr><td class="label">Estimated Value</td><td class="value" style="color: #34D399; font-weight: bold;">${inquiry.planPrice}</td></tr>` : ''}
+        ${safeHtml.planName ? `<tr><td class="label">Package Plan</td><td class="value" style="color: #38B2D8;"><strong>${safeHtml.planName}</strong> (${safeHtml.planTier || 'Standard'})</td></tr>` : ''}
+        ${safeHtml.planPrice ? `<tr><td class="label">Estimated Value</td><td class="value" style="color: #34D399; font-weight: bold;">${safeHtml.planPrice}</td></tr>` : ''}
         <tr>
           <td class="label">Submission Date</td>
-          <td class="value">${new Date(inquiry.createdAt || Date.now()).toLocaleString()}</td>
+          <td class="value">${new Date(safeHtml.createdAt || Date.now()).toLocaleString()}</td>
         </tr>
       </table>
 
@@ -216,11 +219,11 @@ Direct Dashboard: https://novarch-dashboard.vercel.app/inquiry/${inquiry.id}
         Inquiry Message / Notes:
       </div>
       <div class="message-box">
-        ${inquiry.message || inquiry.news || 'No additional note provided.'}
+        ${safeHtml.message || safeHtml.news || 'No additional note provided.'}
       </div>
 
       <div class="cta-container">
-        <a href="https://novarch-dashboard.vercel.app/inquiry/${inquiry.id}" class="btn">
+        <a href="https://novarch-dashboard.vercel.app/inquiry/${safeHtml.id}" class="btn">
           Open in Command Dashboard &rarr;
         </a>
       </div>
@@ -268,6 +271,7 @@ The NOVARCH Team
 https://novarch.eu
     `.trim();
 
+    const safeHtml = htmlValues(inquiry);
     const htmlBody = `
 <!DOCTYPE html>
 <html>
@@ -285,12 +289,12 @@ https://novarch.eu
 <body>
   <div class="card">
     <h1 class="title">Thank you for connecting with NOVARCH</h1>
-    <p>Hello <strong>${inquiry.name}</strong>,</p>
-    <p>We have successfully logged your inquiry. Our engineering and architecture team will review your requirements and respond directly to this email within 24 hours.</p>
+    <p>Hello <strong>${safeHtml.name}</strong>,</p>
+    <p>We have successfully logged your safeHtml. Our engineering and architecture team will review your requirements and respond directly to this email within 24 hours.</p>
     
     <div class="highlight-box">
-      <strong>Scope:</strong> ${inquiry.serviceType || 'General Inquiry'}<br/>
-      ${inquiry.planName ? `<strong>Package:</strong> ${inquiry.planName}<br/>` : ''}
+      <strong>Scope:</strong> ${safeHtml.serviceType || 'General Inquiry'}<br/>
+      ${safeHtml.planName ? `<strong>Package:</strong> ${safeHtml.planName}<br/>` : ''}
       <strong>Status:</strong> Under Architecture Review
     </div>
 
@@ -367,6 +371,7 @@ Application ID: ${member.id}
 View in Dashboard: https://novarch-dashboard.vercel.app/${isWinterArc ? 'winter-arc' : 'community'}/${member.id}
     `.trim();
 
+    const safeHtml = htmlValues(member);
     const htmlBody = `
 <!DOCTYPE html>
 <html>
@@ -400,50 +405,50 @@ View in Dashboard: https://novarch-dashboard.vercel.app/${isWinterArc ? 'winter-
       <table class="data-table">
         <tr>
           <td class="label">Full Name</td>
-          <td class="value"><strong>${member.fullName}</strong></td>
+          <td class="value"><strong>${safeHtml.fullName}</strong></td>
         </tr>
         <tr>
           <td class="label">Email Address</td>
-          <td class="value"><a href="mailto:${member.email}" style="color: #38B2D8; text-decoration: none;">${member.email}</a></td>
+          <td class="value"><a href="mailto:${safeHtml.email}" style="color: #38B2D8; text-decoration: none;">${safeHtml.email}</a></td>
         </tr>
-        ${member.country ? `<tr><td class="label">Country / Location</td><td class="value">${member.country}</td></tr>` : ''}
-        ${member.organization ? `<tr><td class="label">Organization / Company</td><td class="value">${member.organization}</td></tr>` : ''}
-        ${member.role ? `<tr><td class="label">Role</td><td class="value">${member.role}</td></tr>` : ''}
-        ${!isWinterArc && referralText ? `<tr><td class="label">Source / Referral</td><td class="value">${referralText}</td></tr>` : ''}
+        ${safeHtml.country ? `<tr><td class="label">Country / Location</td><td class="value">${safeHtml.country}</td></tr>` : ''}
+        ${safeHtml.organization ? `<tr><td class="label">Organization / Company</td><td class="value">${safeHtml.organization}</td></tr>` : ''}
+        ${safeHtml.role ? `<tr><td class="label">Role</td><td class="value">${safeHtml.role}</td></tr>` : ''}
+        ${!isWinterArc && referralText ? `<tr><td class="label">Source / Referral</td><td class="value">${htmlValues(referralText)}</td></tr>` : ''}
         <tr>
           <td class="label">Submitted</td>
-          <td class="value">${new Date(member.createdAt || Date.now()).toLocaleString()}</td>
+          <td class="value">${new Date(safeHtml.createdAt || Date.now()).toLocaleString()}</td>
         </tr>
       </table>
 
       ${isWinterArc ? `
-        ${member.whatYouDo ? `
+        ${safeHtml.whatYouDo ? `
           <div class="section-title">What You Do</div>
-          <div class="content-box">${member.whatYouDo}</div>
+          <div class="content-box">${safeHtml.whatYouDo}</div>
         ` : ''}
-        ${member.whatCanYouOffer ? `
+        ${safeHtml.whatCanYouOffer ? `
           <div class="section-title">What You Can Offer</div>
-          <div class="content-box">${member.whatCanYouOffer}</div>
+          <div class="content-box">${safeHtml.whatCanYouOffer}</div>
         ` : ''}
-        ${member.whatAreYouLookingFor ? `
+        ${safeHtml.whatAreYouLookingFor ? `
           <div class="section-title">What You Are Looking For</div>
-          <div class="content-box">${member.whatAreYouLookingFor}</div>
+          <div class="content-box">${safeHtml.whatAreYouLookingFor}</div>
         ` : ''}
-        ${member.linkedinUrl ? `<p style="font-size: 13px; color: #94A3B8;">LinkedIn: <a href="${member.linkedinUrl}" style="color: #38B2D8;">${member.linkedinUrl}</a></p>` : ''}
-        ${member.portfolioUrl ? `<p style="font-size: 13px; color: #94A3B8;">Portfolio / GitHub: <a href="${member.portfolioUrl}" style="color: #38B2D8;">${member.portfolioUrl}</a></p>` : ''}
+        ${safeHtml.linkedinUrl ? `<p style="font-size: 13px; color: #94A3B8;">LinkedIn: <a href="${safeHtml.linkedinUrl}" style="color: #38B2D8;">${safeHtml.linkedinUrl}</a></p>` : ''}
+        ${safeHtml.portfolioUrl ? `<p style="font-size: 13px; color: #94A3B8;">Portfolio / GitHub: <a href="${safeHtml.portfolioUrl}" style="color: #38B2D8;">${safeHtml.portfolioUrl}</a></p>` : ''}
       ` : `
-        ${member.interests && member.interests.length > 0 ? `
+        ${safeHtml.interests && safeHtml.interests.length > 0 ? `
           <div class="section-title">Interests</div>
-          <p style="color: #38B2D8; font-family: monospace; font-size: 13px; margin: 0 0 16px 0;">${member.interests.join(' &bull; ')}</p>
+          <p style="color: #38B2D8; font-family: monospace; font-size: 13px; margin: 0 0 16px 0;">${safeHtml.interests.join(' &bull; ')}</p>
         ` : ''}
-        ${member.message ? `
+        ${safeHtml.message ? `
           <div class="section-title">Introduction / Message</div>
-          <div class="content-box">${member.message}</div>
+          <div class="content-box">${safeHtml.message}</div>
         ` : ''}
       `}
 
       <div class="cta-container">
-        <a href="https://novarch-dashboard.vercel.app/${isWinterArc ? 'winter-arc' : 'community'}/${member.id}" class="btn">
+        <a href="https://novarch-dashboard.vercel.app/${isWinterArc ? 'winter-arc' : 'community'}/${safeHtml.id}" class="btn">
           View Application in Dashboard &rarr;
         </a>
       </div>
@@ -502,6 +507,17 @@ View in Dashboard: https://novarch-dashboard.vercel.app/${isWinterArc ? 'winter-
       subject: params.subject,
       text: params.message,
     });
+  }
+
+  /**
+   * Guard: returns true ONLY if the member has active, unrevoked marketing consent.
+   * This MUST be called at the last responsible moment before sending any promotional email.
+   * Absence of consent, explicit false, or a recorded withdrawal all return false.
+   */
+  canSendMarketingEmail(member: Pick<CommunityMember, 'marketingConsent' | 'marketingConsentWithdrawnAt'>): boolean {
+    if (!member.marketingConsent) return false;
+    if (member.marketingConsentWithdrawnAt) return false;
+    return true;
   }
 }
 

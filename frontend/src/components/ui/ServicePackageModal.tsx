@@ -119,6 +119,11 @@ export function ServicePackageModal({
         }),
       });
 
+      if (!resContact.ok) {
+        const failure = await resContact.json().catch(() => ({}));
+        throw new Error(failure.error || 'Unable to save your request. Please try again.');
+      }
+
       if (isImplementationScope) {
         // Implementation comes after qualification & scope: do not create blind checkout product
         setIsSubmitted(true);

@@ -16,7 +16,7 @@ const CreateCheckoutSessionSchema = z.object({
   userEmail: z.string().trim().email().toLowerCase(),
   userPhone: z.string().trim().max(50).optional(),
   userCompany: z.string().trim().max(100).optional(),
-  userNotes: z.string().trim().max(2000).optional(),
+  userNotes: z.string().trim().max(500).optional(),
 });
 
 const router = Router();
@@ -67,6 +67,7 @@ router.post('/create-session', async (req: Request, res: Response) => {
     const productTitle = `${catalogItem.name} (${catalogItem.serviceName})`;
     const productDesc = `One-time Blueprint purchase for ${catalogItem.serviceName} System`;
 
+    await connectDatabase();
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -122,7 +123,8 @@ router.post('/create-session', async (req: Request, res: Response) => {
         message: `Stripe checkout session initiated (${session.id}). Notes: ${userNotes || 'None'}`,
       });
     } catch (dbError) {
-      console.error('Failed to create initial lead in DB:', dbError);
+      await stripe.checkout.sessions.expire(session.id).catch(() => undefined);
+      throw new Error('Unable to persist checkout');
     }
 
     res.json({
@@ -130,7 +132,7 @@ router.post('/create-session', async (req: Request, res: Response) => {
       sessionId: session.id,
     });
   } catch (error: any) {
-    console.error('Stripe Checkout Error:', error);
+    console.error('Stripe checkout creation failed');
     res.status(500).json({
       error: 'Failed to create Stripe Checkout session',
     });
@@ -194,141 +196,65 @@ router.post('/webhook', async (req: Request, res: Response) => {
     );
   } catch (err: any) {
     console.error('❌ Webhook signature verification failed:', err.message);
-    res.status(400).send(`Webhook Error: ${err.message}`);
+    res.status(400).send('Invalid webhook signature');
     return;
   }
 
-  // Ensure DB connection is active before processing Mongoose operations in cold serverless functions
-  await connectDatabase();
 
-  // 1. Payment Accepted (Checkout Completed)
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.Checkout.Session;
-    const metadata = session.metadata || {};
-    const sessionId = session.id;
-    const paymentIntentId = typeof session.payment_intent === 'string' ? session.payment_intent : undefined;
-
-    const amountEUR = session.amount_total
-      ? session.amount_total / 100
-      : (parseInt(metadata.numericPrice, 10) || 1);
-
-    console.log(`✅ Webhook: Payment ACCEPTED (€${amountEUR}) for session: ${sessionId}`);
-
-    try {
-      // IDEMPOTENCY CHECK: Find by stripeSessionId or email
-      let existing = await ContactModel.findOne({ stripeSessionId: sessionId });
-
-      if (!existing && metadata.userEmail) {
-        existing = await ContactModel.findOne({
-          email: metadata.userEmail.toLowerCase(),
-          status: 'Payment Pending',
-        }).sort({ createdAt: -1 });
+  try {
+    await connectDatabase();
+    if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const metadata = session.metadata || {};
+      const item = getPackageBySlugOrId(metadata.packageId);
+      if (session.payment_status !== 'paid') { res.json({ received: true }); return; }
+      if (!item || session.currency !== 'eur' || session.amount_total !== item.amountCents) {
+        res.status(400).json({ error: 'Payment does not match catalog' }); return;
       }
-
-      if (existing) {
-        // Prevent duplicate updates if already marked Paid
-        if (existing.status === 'Paid') {
-          console.log(`ℹ️ Session ${sessionId} already processed as Paid. Idempotency preserved.`);
-          res.json({ received: true, status: 'already_processed' });
-          return;
-        }
-
-        existing.status = 'Paid';
-        existing.estimatedValue = amountEUR;
-        existing.planPrice = metadata.price || `€${amountEUR}`;
-        existing.stripeSessionId = sessionId;
-        if (paymentIntentId) existing.stripePaymentIntentId = paymentIntentId;
-        existing.message = `✅ Stripe Payment ACCEPTED! Session: ${sessionId}. Notes: ${metadata.userNotes || 'None'}`;
-        await existing.save();
-        console.log('📥 Updated existing lead status to Paid:', sessionId);
-
-        try {
-          await emailService.sendContactLeadNotification({
-            id: existing.id,
-            name: existing.name,
-            email: existing.email,
-            phone: existing.phone,
-            company: existing.company,
-            submissionType: 'service_lead',
-            serviceType: existing.serviceType,
-            planName: existing.planName,
-            planTier: existing.planTier,
-            planPrice: existing.planPrice,
-            estimatedValue: existing.estimatedValue,
-            status: 'Paid',
-            source: 'Service Package',
-            message: existing.message,
-            createdAt: existing.createdAt.toISOString(),
-            updatedAt: existing.updatedAt.toISOString(),
-          });
-        } catch (emailErr) {
-          console.warn('Webhook email notification warning:', emailErr);
-        }
-      } else {
-        const createdInquiry = await contactRepository.create({
-          name: metadata.userName || session.customer_details?.name || 'Valued Client',
-          email: metadata.userEmail || session.customer_email || 'client@novarch.io',
-          phone: metadata.userPhone || undefined,
-          company: metadata.userCompany || undefined,
-          submissionType: 'service_lead',
-          serviceType: metadata.serviceName || 'Service Blueprint',
-          preferredService: metadata.serviceName || 'Service Blueprint',
-          planName: metadata.packageName || 'Launch Blueprint',
-          planTier: (metadata.tier === 'Basic' || metadata.tier === 'Premium') ? metadata.tier : 'Basic',
-          planPrice: metadata.price || `€${amountEUR}`,
-          estimatedValue: amountEUR,
-          status: 'Paid',
-          source: 'Service Package',
-          stripeSessionId: sessionId,
-          stripePaymentIntentId: paymentIntentId,
-          message: `✅ Stripe Payment ACCEPTED! Session: ${sessionId}. Notes: ${metadata.userNotes || 'None'}`,
-        });
-        console.log('📥 Created new Paid inquiry in DB:', sessionId);
-
-        try {
-          await emailService.sendContactLeadNotification(createdInquiry);
-        } catch (emailErr) {
-          console.warn('Webhook email notification warning:', emailErr);
-        }
+      const email = session.customer_details?.email || session.customer_email;
+      if (!email) { res.status(400).json({ error: 'Missing customer email' }); return; }
+      const intent = typeof session.payment_intent === 'string' ? session.payment_intent : undefined;
+      // Unique session ID plus an immutable receipt marker makes concurrent retries harmless,
+      // even when the lead status is subsequently edited by an administrator.
+      const paid = await ContactModel.findOneAndUpdate(
+        { stripeSessionId: session.id, paymentReceivedAt: { $exists: false } },
+        {
+          $set: { status: 'Paid', paymentReceivedAt: new Date(), estimatedValue: item.priceEUR,
+            planPrice: `€${item.priceEUR}`, stripePaymentIntentId: intent,
+            message: 'Stripe payment verified' },
+          $setOnInsert: { stripeSessionId: session.id, name: metadata.userName || 'Customer',
+            email: email.toLowerCase(), submissionType: 'service_lead', serviceType: item.serviceName,
+            preferredService: item.serviceName, planName: item.name, planTier: item.tier,
+            source: 'Service Package' },
+        }, { upsert: true, new: true, runValidators: true }
+      );
+      if (paid) {
+        await emailService.sendContactLeadNotification({ ...paid.toJSON(), id: String(paid._id),
+          createdAt: paid.createdAt.toISOString(), updatedAt: paid.updatedAt.toISOString() });
       }
-    } catch (dbErr) {
-      console.error('❌ Database processing error during webhook handling:', dbErr);
-      res.status(500).json({ error: 'Database processing failure, retry queued' });
-      return;
+    } else if (event.type === 'payment_intent.payment_failed' || event.type === 'checkout.session.async_payment_failed') {
+      const object = event.data.object;
+      let identity = event.type === 'payment_intent.payment_failed'
+        ? { stripePaymentIntentId: object.id } : { stripeSessionId: object.id };
+      if (event.type === 'payment_intent.payment_failed') {
+        const sessions = await stripe.checkout.sessions.list({ payment_intent: object.id, limit: 1 });
+        if (sessions.data[0]) identity = { stripeSessionId: sessions.data[0].id };
+      }
+      await ContactModel.updateOne({ ...identity, paymentReceivedAt: { $exists: false }, status: 'Payment Pending' },
+        { $set: { status: 'Payment Declined', message: 'Payment failed; please retry checkout' } });
     }
-  }
-
-  // 2. Payment Declined / Failed
-  if (
-    event.type === 'payment_intent.payment_failed' ||
-    event.type === 'checkout.session.async_payment_failed'
-  ) {
-    const object = event.data.object as any;
-    const metadata = object.metadata || {};
-    const failureReason = object.last_payment_error?.message || 'Payment declined by issuing bank';
-    const sessionId = object.id;
-
-    console.log('❌ Webhook: Payment DECLINED for session/intent:', sessionId, failureReason);
-
-    try {
-      const email = metadata.userEmail || object.customer_email;
-      if (email) {
-        const existing = await ContactModel.findOne({ email: email.toLowerCase() }).sort({ createdAt: -1 });
-        if (existing && existing.status !== 'Paid') {
-          existing.status = 'Payment Declined';
-          existing.message = `❌ Stripe Payment DECLINED: ${failureReason}`;
-          await existing.save();
-          console.log('📥 Updated lead status to Payment Declined');
-        }
-      }
-    } catch (dbErr) {
-      console.error('❌ Database processing error during failure webhook:', dbErr);
-      res.status(500).json({ error: 'Database failure' });
-      return;
+    res.json({ received: true });
+  } catch (error) {
+    if ((error as { code?: number }).code === 11000) {
+      const object = event.data.object;
+      try {
+        const received = await ContactModel.exists({ stripeSessionId: (object as { id?: string }).id, paymentReceivedAt: { $exists: true } });
+        if (received) { res.json({ received: true, status: 'already_processed' }); return; }
+      } catch { /* Database failures must ask Stripe to retry. */ }
     }
+    console.error('Webhook persistence failed');
+    res.status(503).json({ error: 'Payment processing temporarily unavailable; retry required' });
   }
-
-  res.json({ received: true });
 });
 
 export default router;

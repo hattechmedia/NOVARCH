@@ -6,7 +6,9 @@
   "scripts": {
     "dev": ".\\node_modules\\.bin\\tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "test:security": "tsx --test src/scripts/security.test.ts",
+    "hash-password": "tsx src/scripts/hash-password.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

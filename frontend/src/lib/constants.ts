@@ -25,6 +25,12 @@ export const ROUTES = {
     aiWorkflow: '/services/ai-workflow',
     customSoftware: '/services/custom-software',
   },
+  legal: {
+    hub: '/legal',
+    winterArc: '/legal/winter-arc-2026',
+    photographyConsent: '/legal/photography-consent',
+    nda: '/legal/nda',
+  },
 } as const;
 
 export const HACKTHEFLAG_CHALLENGE_URL = 'https://34f9fabd0dc1.ngrok.app/' as const;

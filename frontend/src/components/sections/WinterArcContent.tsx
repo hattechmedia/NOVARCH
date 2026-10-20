@@ -45,6 +45,8 @@ interface WinterArcFormData {
   portfolioUrl: string;
   proposedGuest: string;
   website_hp: string;
+  marketingConsent: boolean;
+  photoConsent: boolean;
 }
 
 const INITIAL_FORM: WinterArcFormData = {
@@ -59,6 +61,8 @@ const INITIAL_FORM: WinterArcFormData = {
   portfolioUrl: '',
   proposedGuest: '',
   website_hp: '',
+  marketingConsent: false,
+  photoConsent: false,
 };
 
 const PROFILES = [
@@ -448,6 +452,8 @@ export function WinterArcContent() {
         form_token: formToken,
         referral: referralParams,
         source: referralParams.utmSource ? `Campaign: ${referralParams.utmSource}` : 'Website Form',
+        marketingConsent: formData.marketingConsent,
+        photoConsent: formData.photoConsent,
       };
 
       const res = await fetch('/api/community', {
@@ -1148,6 +1154,86 @@ export function WinterArcContent() {
                       placeholder="Name, organization, or profile link if bringing someone"
                       className="w-full px-3.5 py-2.5 bg-surface/80 border border-border/80 rounded-xl text-white placeholder-text-muted/40 focus:border-cyan-400 focus:outline-none transition-colors text-sm disabled:opacity-50"
                     />
+                  </div>
+
+                  {/* ── Optional Consents (GDPR & Media) ── */}
+                  <div className="pt-3 border-t border-border/40 space-y-3.5">
+                    {/* Photography & Video Consent */}
+                    <div className="rounded-xl border border-border/70 bg-surface/50 p-3 sm:p-3.5 transition-colors hover:border-cyan-400/40">
+                      <label htmlFor="photoConsent" className="flex items-start gap-3 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          id="photoConsent"
+                          disabled={isSubmitting}
+                          checked={formData.photoConsent}
+                          onChange={(e) =>
+                            setFormData((prev) => ({ ...prev, photoConsent: e.target.checked }))
+                          }
+                          className="mt-0.5 h-4 w-4 rounded border-border/80 bg-surface/90 accent-cyan-400 cursor-pointer flex-shrink-0"
+                        />
+                        <div className="text-xs text-slate-300 leading-relaxed">
+                          <p className="font-semibold text-white mb-0.5">
+                            Photography &amp; Video Consent / Foto- &amp; Videoeinwilligung{' '}
+                            <span className="text-[11px] font-mono text-cyan-400 font-normal">(Optional / Freiwillig)</span>
+                          </p>
+                          <p className="text-slate-300 mb-1">
+                            I consent to photographs and videos being taken at this event and used by NOVARCH for its website and social-media channels. I understand that this consent is optional, I may withdraw it at any time, and declining will not affect my application or participation.{' '}
+                            <a
+                              href="/legal/photography-consent"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-cyan-400 underline underline-offset-2 hover:text-cyan-300"
+                            >
+                              Learn more / Details
+                            </a>
+                          </p>
+                          <p className="text-slate-400 text-[11px]">
+                            Ich stimme zu, dass Fotos und Videos bei dieser Veranstaltung aufgenommen und von NOVARCH für die Website und soziale Medien genutzt werden dürfen. Diese Einwilligung ist freiwillig und kann jederzeit widerrufen werden.
+                          </p>
+                        </div>
+                      </label>
+                    </div>
+
+                    {/* Marketing / Promotional Email Consent */}
+                    <div className="rounded-xl border border-border/70 bg-surface/50 p-3 sm:p-3.5 transition-colors hover:border-cyan-400/40">
+                      <label htmlFor="marketingConsent" className="flex items-start gap-3 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          id="marketingConsent"
+                          disabled={isSubmitting}
+                          checked={formData.marketingConsent}
+                          onChange={(e) =>
+                            setFormData((prev) => ({ ...prev, marketingConsent: e.target.checked }))
+                          }
+                          className="mt-0.5 h-4 w-4 rounded border-border/80 bg-surface/90 accent-cyan-400 cursor-pointer flex-shrink-0"
+                        />
+                        <div className="text-xs text-slate-300 leading-relaxed">
+                          <p className="font-semibold text-white mb-0.5">
+                            Future Event Updates / Zukünftige Veranstaltungs-Updates{' '}
+                            <span className="text-[11px] font-mono text-cyan-400 font-normal">(Optional / Freiwillig)</span>
+                          </p>
+                          <p className="text-slate-300 mb-1">
+                            &ldquo;Yes, I would like to receive occasional email updates about future NOVARCH hackathons, events, and activities. I understand that I can withdraw my consent at any time.&rdquo;
+                          </p>
+                          <p className="text-slate-400 text-[11px]">
+                            &bdquo;Ja, ich möchte gelegentlich E-Mail-Updates zu zukünftigen Hackathons, Veranstaltungen und Aktivitäten von NOVARCH erhalten. Ich kann meine Einwilligung jederzeit widerrufen.&ldquo;
+                          </p>
+                        </div>
+                      </label>
+                    </div>
+
+                    <p className="text-[11px] text-text-muted/80 leading-relaxed px-1">
+                      Both checkboxes are unchecked by default and optional. Declining does not condition participation or selection. See our{' '}
+                      <a
+                        href="/legal/winter-arc-2026"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-cyan-400 underline underline-offset-2 hover:text-cyan-300"
+                      >
+                        Participant Privacy Notice (Datenschutzhinweis)
+                      </a>{' '}
+                      for full details on data handling, retention, and how to exercise your rights.
+                    </p>
                   </div>
 
                   {/* Submit Button & Privacy Note */}

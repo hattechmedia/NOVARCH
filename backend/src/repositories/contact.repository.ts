@@ -46,7 +46,7 @@ export class MongoContactRepository implements IContactRepository {
         const docs = await ContactModel.find().sort({ createdAt: -1 }).lean();
         return docs.map(formatContactDoc);
       } catch (err) {
-        console.error('Error in MongoContactRepository.findAll:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -62,7 +62,7 @@ export class MongoContactRepository implements IContactRepository {
         const doc = await ContactModel.findById(id).lean();
         if (doc) return formatContactDoc(doc);
       } catch (err) {
-        console.error('Error in MongoContactRepository.findById:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -90,7 +90,7 @@ export class MongoContactRepository implements IContactRepository {
           .lean();
         if (doc) return formatContactDoc(doc);
       } catch (err) {
-        console.error('Error in MongoContactRepository.findRecentByEmail:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -182,10 +182,10 @@ export class MongoContactRepository implements IContactRepository {
           stripePaymentIntentId: dto.stripePaymentIntentId || undefined,
         });
 
-        console.log(`💾 Saved ${submissionType} to MongoDB Atlas: ${doc.name} (${doc._id})`);
+        console.log('Record saved');
         return formatContactDoc(doc.toJSON ? doc.toJSON() : doc);
       } catch (err) {
-        console.error('Error saving to MongoDB:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -224,11 +224,11 @@ export class MongoContactRepository implements IContactRepository {
         const doc = await ContactModel.findByIdAndUpdate(
           id,
           { status, updatedAt: new Date() },
-          { new: true }
+          { new: true, runValidators: true }
         ).lean();
         if (doc) return formatContactDoc(doc);
       } catch (err) {
-        console.error('Error in MongoContactRepository.updateStatus:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -251,7 +251,7 @@ export class MongoContactRepository implements IContactRepository {
         const res = await ContactModel.findByIdAndDelete(id);
         return !!res;
       } catch (err) {
-        console.error('Error in MongoContactRepository.delete:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 

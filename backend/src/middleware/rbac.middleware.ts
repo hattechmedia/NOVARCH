@@ -86,7 +86,7 @@ function checkUserPermission(
   next: NextFunction,
   permission: Permission
 ): void {
-  const role = req.adminUser?.role === 'superadmin' ? 'admin' : req.adminUser?.role || 'admin';
+  const role = req.adminUser?.role === 'superadmin' ? 'admin' : req.adminUser?.role || '';
 
   if (!hasPermission(role, permission)) {
     res.status(403).json({
