@@ -57,20 +57,20 @@ export default function RootLayout({ children }: RootLayoutProps) {
           }}
         />
       </head>
-      <body className="bg-background text-foreground antialiased" suppressHydrationWarning>
+      <body className="bg-background text-foreground antialiased min-h-screen flex flex-col" suppressHydrationWarning>
         <ThemeProvider>
-          <div className="flex min-h-screen flex-col">
+          <div className="flex min-h-screen flex-col flex-1 w-full">
             <ScrollToTop />
             <Navbar />
-            <main className="flex-1 pt-20">{children}</main>
+            <main className="flex-1 flex flex-col pt-20 w-full">{children}</main>
             <Footer />
           </div>
         </ThemeProvider>
         {/* Hidden mount target for Google Translate web engine outside page flow */}
         <div
           id="google_translate_element"
-          className="hidden absolute pointer-events-none w-0 h-0 overflow-hidden -z-50"
-          style={{ display: 'none', height: 0, width: 0, margin: 0, padding: 0 }}
+          className="hidden pointer-events-none overflow-hidden -z-50"
+          style={{ position: 'fixed', top: -9999, left: -9999, width: 0, height: 0, opacity: 0 }}
           aria-hidden="true"
         />
       </body>

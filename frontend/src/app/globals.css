@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
-html {
+html,
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100% !important;
   scroll-behavior: smooth;
 }
 
@@ -243,6 +247,9 @@ html {
 /* ─── Google Translate Overrides & Frame Suppression ────────────────────── */
 
 /* Completely hide all Google Translate injected banners, gadgets, iframes, tooltips & blank spaces */
+iframe,
+body > iframe,
+body > div[id^=":"],
 .goog-te-banner-frame,
 .goog-te-banner-frame.skiptranslate,
 iframe.goog-te-banner-frame,
@@ -279,6 +286,7 @@ body {
   position: static !important;
   margin-top: 0px !important;
   margin-bottom: 0px !important;
+  padding-bottom: 0px !important;
 }
 
 /* Hide annoying tooltips and highlights on translated text */

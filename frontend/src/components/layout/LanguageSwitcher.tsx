@@ -62,7 +62,7 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
       script.async = true;
       document.head.appendChild(script);
 
-      // Prevent Google Translate from modifying body.style.top / margins
+      // Prevent Google Translate from modifying body.style.top / margins or leaving rogue iframes
       const observer = new MutationObserver(() => {
         if (document.body.style.top && document.body.style.top !== '0px') {
           document.body.style.top = '0px';
@@ -70,8 +70,14 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
         if (document.body.style.position === 'relative') {
           document.body.style.position = 'static';
         }
+        const iframes = document.querySelectorAll('iframe');
+        iframes.forEach((el) => {
+          if (el.style.display !== 'none') {
+            el.style.display = 'none';
+          }
+        });
       });
-      observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
+      observer.observe(document.body, { attributes: true, attributeFilter: ['style'], childList: true });
     }
   }, []);
 
