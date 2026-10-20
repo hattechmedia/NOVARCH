@@ -52,7 +52,7 @@ export const PACKAGE_CATALOG: Record<string, PackageCatalogItem> = {
   },
 };
 
-export function getPackageBySlugOrId(identifier: string): PackageCatalogItem | undefined {
+export function getPackageBySlugOrId(identifier?: string): PackageCatalogItem | undefined {
   if (!identifier) return undefined;
   const key = identifier.toLowerCase().trim();
   if (PACKAGE_CATALOG[key]) return PACKAGE_CATALOG[key];

@@ -206,4 +206,31 @@ export const communityController = {
       return next(error);
     }
   },
+
+  withdrawMarketingConsent: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      if (!isValidResourceId(id)) {
+        return res.status(400).json({ success: false, message: 'Invalid record id' });
+      }
+      const updated = await communityService.withdrawMarketingConsent(id);
+      if (!updated) {
+        return res.status(404).json({
+          success: false,
+          message: 'Application/member record not found',
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        message: 'Marketing consent withdrawn successfully',
+        data: {
+          id: updated.id,
+          marketingConsent: false,
+          marketingConsentWithdrawnAt: updated.marketingConsentWithdrawnAt,
+        },
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
 };

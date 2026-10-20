@@ -82,6 +82,8 @@ export async function POST(request: Request) {
       message: body.message ? String(body.message).trim() : undefined,
       referral: body.referral || undefined,
       source: body.source || undefined,
+      marketingConsent: Boolean(body.marketingConsent === true),
+      photoConsent: Boolean(body.photoConsent === true),
     };
 
     try {

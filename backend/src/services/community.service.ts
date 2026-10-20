@@ -46,6 +46,10 @@ export class CommunityService {
     return this.repo.updateStatus(id, status);
   }
 
+  async withdrawMarketingConsent(id: string): Promise<CommunityMember | null> {
+    return this.repo.updateMarketingConsent(id, false);
+  }
+
   async deleteMember(id: string): Promise<boolean> {
     return this.repo.delete(id);
   }

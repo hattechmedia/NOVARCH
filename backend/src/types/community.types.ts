@@ -41,6 +41,13 @@ export interface CommunityMember {
   status: CommunityStatus;
   source: string;
   referral?: string | ApplicationReferral;
+  marketingConsent?: boolean;
+  marketingConsentAt?: string | null;
+  marketingConsentVersion?: string;
+  marketingConsentWithdrawnAt?: string | null;
+  photoConsent?: boolean;
+  photoConsentAt?: string | null;
+  photoConsentVersion?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -83,6 +90,8 @@ export const CreatePublicCommunitySchema = z.object({
   referral: z.union([z.string().max(200), ReferralSchema]).optional(),
   source: z.string().max(100).optional(),
   website_hp: z.string().max(0, 'Spam detected').optional(), // Anti-spam honeypot
+  marketingConsent: z.boolean().optional().default(false),
+  photoConsent: z.boolean().optional().default(false),
 });
 
 // PUBLIC schema for Winter Arc Treffen 01 Applications
@@ -103,6 +112,8 @@ export const CreateWinterArcPublicSchema = z.object({
   referral: ReferralSchema,
   source: z.string().max(100).optional(),
   website_hp: z.string().max(0, 'Spam detected').optional(), // Anti-spam honeypot
+  marketingConsent: z.boolean().optional().default(false),
+  photoConsent: z.boolean().optional().default(false),
 });
 
 // Unified polymorphic schema for API submissions
@@ -138,6 +149,9 @@ export interface CreateCommunityDTO {
   status?: CommunityStatus;
   source?: string;
   referral?: string | ApplicationReferral;
+  marketingConsent?: boolean;
+  photoConsent?: boolean;
+  // Timestamps are NEVER accepted from client; always set server-side
 }
 
 export const ReplyWinterArcSchema = z.object({

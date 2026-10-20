@@ -503,6 +503,17 @@ View in Dashboard: https://novarch-dashboard.vercel.app/${isWinterArc ? 'winter-
       text: params.message,
     });
   }
+
+  /**
+   * Guard: returns true ONLY if the member has active, unrevoked marketing consent.
+   * This MUST be called at the last responsible moment before sending any promotional email.
+   * Absence of consent, explicit false, or a recorded withdrawal all return false.
+   */
+  canSendMarketingEmail(member: Pick<CommunityMember, 'marketingConsent' | 'marketingConsentWithdrawnAt'>): boolean {
+    if (!member.marketingConsent) return false;
+    if (member.marketingConsentWithdrawnAt) return false;
+    return true;
+  }
 }
 
 export const emailService = new EmailService();

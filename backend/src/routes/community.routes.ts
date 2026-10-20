@@ -14,6 +14,7 @@ router.get('/', verifyAdminToken as any, communityController.getMembers);
 router.post('/:id/reply', verifyAdminToken as any, communityController.replyWinterArc);
 router.get('/:id', verifyAdminToken as any, communityController.getMemberById);
 router.patch('/:id/status', verifyAdminToken as any, communityController.updateMemberStatus);
+router.patch('/:id/withdraw-marketing-consent', verifyAdminToken as any, communityController.withdrawMarketingConsent);
 router.delete('/:id', verifyAdminToken as any, communityController.deleteMember);
 
 export default router;

@@ -12,6 +12,7 @@ export interface ICommunityRepository {
   ): Promise<CommunityMember | null>;
   create(dto: CreateCommunityDTO): Promise<CommunityMember>;
   updateStatus(id: string, status: CommunityStatus): Promise<CommunityMember | null>;
+  updateMarketingConsent(id: string, consented: boolean): Promise<CommunityMember | null>;
   delete(id: string): Promise<boolean>;
 }
 
@@ -110,6 +111,10 @@ export class MongoCommunityRepository implements ICommunityRepository {
       dto.referral && typeof dto.referral === 'object' ? dto.referral.utmSource : undefined;
     const source = dto.source || (referralSource ? `Campaign: ${referralSource}` : 'Website Form');
 
+    const now = new Date();
+    const marketingConsent = Boolean(dto.marketingConsent);
+    const photoConsent = Boolean(dto.photoConsent);
+
     const connected = await connectDatabase();
     if (connected) {
       try {
@@ -134,6 +139,12 @@ export class MongoCommunityRepository implements ICommunityRepository {
           referral: dto.referral || undefined,
           status: dto.status || 'New',
           source: source,
+          marketingConsent: marketingConsent,
+          marketingConsentAt: marketingConsent ? now : null,
+          marketingConsentVersion: marketingConsent ? 'v1-2026-10' : undefined,
+          photoConsent: photoConsent,
+          photoConsentAt: photoConsent ? now : null,
+          photoConsentVersion: photoConsent ? 'v1-2026-10' : undefined,
         });
 
         console.log(`💾 Saved ${appType} application to MongoDB: ${doc.fullName} (${doc._id})`);
@@ -166,8 +177,14 @@ export class MongoCommunityRepository implements ICommunityRepository {
       referral: dto.referral || undefined,
       status: dto.status || 'New',
       source: source,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      marketingConsent: marketingConsent,
+      marketingConsentAt: marketingConsent ? now.toISOString() : null,
+      marketingConsentVersion: marketingConsent ? 'v1-2026-10' : undefined,
+      photoConsent: photoConsent,
+      photoConsentAt: photoConsent ? now.toISOString() : null,
+      photoConsentVersion: photoConsent ? 'v1-2026-10' : undefined,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
     };
 
     this.inMemoryFallback.unshift(newMember);
@@ -198,6 +215,39 @@ export class MongoCommunityRepository implements ICommunityRepository {
       updatedAt: new Date().toISOString(),
     };
 
+    return { ...this.inMemoryFallback[index] };
+  }
+
+  async updateMarketingConsent(id: string, consented: boolean): Promise<CommunityMember | null> {
+    const now = new Date();
+    const connected = await connectDatabase();
+    if (connected) {
+      try {
+        const updateFields: any = {
+          marketingConsent: consented,
+          updatedAt: now,
+        };
+        if (!consented) {
+          updateFields.marketingConsentWithdrawnAt = now;
+        }
+        const doc = await CommunityModel.findByIdAndUpdate(
+          id,
+          updateFields,
+          { returnDocument: 'after' }
+        ).lean();
+        if (doc) return formatCommunityDoc(doc);
+      } catch (err) {
+        console.error('Error in MongoCommunityRepository.updateMarketingConsent:', err);
+      }
+    }
+    const index = this.inMemoryFallback.findIndex((i) => i.id === id);
+    if (index === -1) return null;
+    this.inMemoryFallback[index] = {
+      ...this.inMemoryFallback[index],
+      marketingConsent: consented,
+      marketingConsentWithdrawnAt: consented ? undefined : now.toISOString(),
+      updatedAt: now.toISOString(),
+    };
     return { ...this.inMemoryFallback[index] };
   }
 

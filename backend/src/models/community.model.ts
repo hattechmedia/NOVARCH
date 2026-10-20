@@ -40,6 +40,14 @@ const CommunitySchema = new Schema<CommunityDocument>(
     referral: {
       type: Schema.Types.Mixed,
     },
+    // Consent fields (all optional; absence = opted-out; server sets timestamps)
+    marketingConsent: { type: Boolean, default: false },
+    marketingConsentAt: { type: Date, default: null },
+    marketingConsentVersion: { type: String, trim: true },
+    marketingConsentWithdrawnAt: { type: Date, default: null },
+    photoConsent: { type: Boolean, default: false },
+    photoConsentAt: { type: Date, default: null },
+    photoConsentVersion: { type: String, trim: true },
   },
   {
     timestamps: true,
@@ -59,6 +67,7 @@ CommunitySchema.index({ applicationType: 1 });
 CommunitySchema.index({ createdAt: -1 });
 CommunitySchema.index({ email: 1 });
 CommunitySchema.index({ applicationType: 1, status: 1, createdAt: -1 });
+CommunitySchema.index({ marketingConsent: 1, applicationType: 1 });
 
 export const CommunityModel =
   mongoose.models.Community || mongoose.model<CommunityDocument>('Community', CommunitySchema);

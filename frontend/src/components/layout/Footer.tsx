@@ -18,6 +18,13 @@ const companyLinks = [
   { label: 'Contact', href: '/contact' },
 ];
 
+const legalLinks = [
+  { label: 'Legal Hub', href: '/legal' },
+  { label: 'Privacy Notice', href: '/legal/winter-arc-2026' },
+  { label: 'Photography Consent', href: '/legal/photography-consent' },
+  { label: 'Confidentiality (NDA)', href: '/legal/nda' },
+];
+
 export function Footer() {
   const year = new Date().getFullYear();
 
@@ -112,6 +119,25 @@ export function Footer() {
               >
                 {SITE.email}
               </a>
+            </div>
+
+            <div className="mt-8">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-[#4A5B6F] mb-3">
+                Legal &amp; Compliance
+              </h3>
+              <ul className="space-y-2" role="list">
+                {legalLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="group flex items-center gap-1.5 text-xs text-[#7A8FA6] hover:text-white transition-colors duration-200"
+                    >
+                      <ArrowRight className="h-2.5 w-2.5 text-[#1E5FBF] opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
