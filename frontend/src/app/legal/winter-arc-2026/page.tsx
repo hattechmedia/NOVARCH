@@ -1,17 +1,17 @@
 import type { Metadata } from 'next';
-import { WinterArcLegalContent } from '@/components/sections/WinterArcLegalContent';
+import { EventLegalHub } from '@/components/sections/EventLegalHub';
 
 export const metadata: Metadata = {
-  title: 'Participant Privacy Notice — Winter Arc 2026 | NOVARCH',
+  title: 'Legal & Event Hub — Winter Arc 2026 | NOVARCH',
   description:
-    'Participant Privacy Notice for Winter Arc · Treffen 01 in Ilmenau. Information regarding participant data collection, legal bases under GDPR, retention, and rights.',
+    'Winter Arc event information: confidentiality, participant data, photography choices, challenge information and participation guidance in English and German.',
   alternates: {
     canonical: 'https://www.novarch.eu/legal/winter-arc-2026',
   },
   openGraph: {
-    title: 'Participant Privacy Notice — Winter Arc 2026 | NOVARCH',
+    title: 'Legal & Event Hub — Winter Arc 2026 | NOVARCH',
     description:
-      'Participant Privacy Notice for Winter Arc · Treffen 01 in Ilmenau. Official GDPR/DSGVO disclosures, data retention, and participant rights.',
+      'The permanent NOVARCH Winter Arc event hub in English and German.',
     url: 'https://www.novarch.eu/legal/winter-arc-2026',
     siteName: 'NOVARCH',
     type: 'website',
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export default function WinterArcLegalPage() {
   return (
     <main className="w-full">
-      <WinterArcLegalContent />
+      <EventLegalHub />
     </main>
   );
 }

@@ -16,8 +16,7 @@ const allowedOrigins = process.env.CORS_ORIGINS
       'http://localhost:5173',
     ];
 
-const INSECURE_JWT_FALLBACK = 'NOVARCH_SECURE_JWT_SECRET_KEY_2026_PRODUCTION_TOKEN';
-const INSECURE_PASSWORD_FALLBACK = 'Novarch@Admin2026!';
+
 
 export const config = {
   port: process.env.PORT ? parseInt(process.env.PORT, 10) : 5000,
@@ -27,29 +26,27 @@ export const config = {
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
   frontendUrl: process.env.FRONTEND_URL || 'https://novarch.eu',
-  jwtSecret: process.env.JWT_SECRET || (isProduction ? '' : INSECURE_JWT_FALLBACK),
+  jwtSecret: process.env.JWT_SECRET || '',
   adminUsername: (process.env.ADMIN_USERNAME || 'admin@novarch.eu').trim().toLowerCase(),
-  adminPassword: process.env.ADMIN_PASSWORD || (isProduction ? '' : INSECURE_PASSWORD_FALLBACK),
+  adminPassword: process.env.ADMIN_PASSWORD || '',
   internalApiSecret: process.env.INTERNAL_API_SECRET || '',
 };
 
 if (isProduction) {
   const fatal: string[] = [];
-  if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32 || process.env.JWT_SECRET === INSECURE_JWT_FALLBACK) {
+  if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32 || /your-|example|placeholder/i.test(process.env.JWT_SECRET)) {
     fatal.push('JWT_SECRET must be set to a unique value of at least 32 characters');
   }
-  if (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === INSECURE_PASSWORD_FALLBACK) {
-    fatal.push('ADMIN_PASSWORD must be set and must not use the documented default');
+  if (!/^\$2[aby]\$(1[2-6])\$[./A-Za-z0-9]{53}$/.test(process.env.ADMIN_PASSWORD || '')) {
+    fatal.push('ADMIN_PASSWORD must be a bcrypt hash with cost 12 through 16');
   }
   if (fatal.length > 0) {
     throw new Error(`[Security] Refusing to start in production: ${fatal.join('; ')}`);
   }
   if (!config.mongodbUri) {
-    console.warn('⚠️ WARNING: MONGODB_URI is not set in production environment variables.');
+    throw new Error('MONGODB_URI is required in production');
   }
   if (!process.env.INTERNAL_API_SECRET || process.env.INTERNAL_API_SECRET.length < 32) {
-    console.warn(
-      '⚠️ WARNING: INTERNAL_API_SECRET is missing or short. Public form POSTs can be sent directly to this API origin.'
-    );
+    throw new Error('INTERNAL_API_SECRET must have at least 32 characters in production');
   }
 }

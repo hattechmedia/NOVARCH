@@ -47,15 +47,21 @@ export function verifyFormToken(token: unknown): boolean {
 }
 
 function clientIp(request: Request): string {
-  const forwarded = request.headers.get('x-forwarded-for');
+  const forwarded = request.headers.get(process.env.VERCEL ? 'x-vercel-forwarded-for' : process.env.NODE_ENV === 'production' ? 'x-novarch-verified-ip' : 'x-forwarded-for');
   if (forwarded) return forwarded.split(',')[0]?.trim() || 'unknown';
-  return request.headers.get('x-real-ip') || 'unknown';
+  return 'unknown';
 }
 
 function pruneAndCount(ip: string): number {
   const now = Date.now();
+  if (hits.size >= 5000) {
+    for (const [key, times] of hits) {
+      if (times.every(t => now - t >= WINDOW_MS)) hits.delete(key);
+    }
+  }
   const next = (hits.get(ip) || []).filter((t) => now - t < WINDOW_MS);
-  next.push(now);
+  if (next.length <= MAX_PER_WINDOW) next.push(now);
+  if (!hits.has(ip) && hits.size >= 5000) return MAX_PER_WINDOW + 1;
   hits.set(ip, next);
   if (hits.size > 5000) {
     for (const [key, times] of hits) {

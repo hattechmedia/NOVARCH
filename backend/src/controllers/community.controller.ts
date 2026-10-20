@@ -64,23 +64,6 @@ export const communityController = {
         validatedData = CreatePublicCommunitySchema.parse(req.body);
       }
 
-      const recent = await communityService.findRecentByEmail(
-        validatedData.email,
-        validatedData.applicationType === 'winter-arc' ? 'winter-arc' : 'community',
-        10 * 60 * 1000
-      );
-      if (recent) {
-        const isWinterArcApp = recent.applicationType === 'winter-arc';
-        const dupMessage = isWinterArcApp
-          ? "Thank you for applying to Winter Arc. Your application has been received. We'll review it and contact you if you're selected. Thanks for your interest in Treffen 01."
-          : 'Community application received successfully. Welcome to NOVARCH!';
-        return res.status(200).json({
-          success: true,
-          message: dupMessage,
-          data: { id: recent.id },
-        });
-      }
-
       const { member, emailResult } = await communityService.submitMember(validatedData);
 
       const isWinterArcApp = member.applicationType === 'winter-arc';

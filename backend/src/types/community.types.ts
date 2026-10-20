@@ -59,7 +59,11 @@ const optionalUrl = z
   .max(500)
   .optional()
   .refine(
-    (val) => !val || val === '' || /^https?:\/\/.+/i.test(val),
+    (val) => {
+      if (!val) return true;
+      try { const url = new URL(val); return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password; }
+      catch { return false; }
+    },
     { message: 'Must be a valid web URL starting with http:// or https://' }
   );
 

@@ -18,7 +18,6 @@ export async function connectDatabase(): Promise<boolean> {
   }
 
   try {
-    console.log('🔄 Connecting to MongoDB Atlas...');
     const conn = await mongoose.connect(config.mongodbUri, {
       serverSelectionTimeoutMS: 8000,
       maxPoolSize: 10,
@@ -30,12 +29,11 @@ export async function connectDatabase(): Promise<boolean> {
     });
 
     isConnected = (conn.connection.readyState as number) === 1;
-    console.log(`✅ MongoDB Atlas Connected: ${conn.connection.host} (DB: ${conn.connection.name})`);
+    console.log('Database connected');
     return true;
   } catch (error) {
-    console.error('❌ MongoDB Connection Error:', error);
-    isConnected = (mongoose.connection.readyState as number) === 1;
-    return isConnected;
+    isConnected = false;
+    throw Object.assign(new Error('Database unavailable'), { status: 503 });
   }
 }
 

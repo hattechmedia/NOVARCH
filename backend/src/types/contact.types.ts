@@ -22,6 +22,7 @@ export interface ContactInquiry {
   status: LeadStatus;
   estimatedValue: number;
   source: 'Website Form' | 'Service Package' | 'Direct API' | 'Referral';
+  paymentReceivedAt?: Date;
   stripeSessionId?: string;
   stripePaymentIntentId?: string;
   createdAt: string;
@@ -57,6 +58,7 @@ export interface CreateContactDTO extends CreatePublicContactDTO {
   estimatedValue?: number;
   source?: 'Website Form' | 'Service Package' | 'Direct API' | 'Referral';
   planPrice?: string;
+  paymentReceivedAt?: Date;
   stripeSessionId?: string;
   stripePaymentIntentId?: string;
 }

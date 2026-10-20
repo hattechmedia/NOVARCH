@@ -422,7 +422,7 @@ export function App() {
           if (document.visibilityState !== 'hidden') {
             loadData();
           }
-        }, 15000);
+        }, 60000);
       }
     };
 
@@ -456,7 +456,9 @@ export function App() {
     setIsAuthenticated(true);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try { await api.logout(); }
+    catch { setError('Could not revoke this session. Please retry logout.'); return; }
     localStorage.removeItem('novarch_admin_token');
     localStorage.removeItem('novarch_admin_user');
     sessionStorage.removeItem('novarch_admin_token');

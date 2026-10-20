@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { config } from '../config/index.js';
+import { validateSession } from '../services/session.service.js';
 
 export interface AdminAuthRequest extends Request {
   adminUser?: {
@@ -9,7 +8,7 @@ export interface AdminAuthRequest extends Request {
   };
 }
 
-export function verifyAdminToken(req: AdminAuthRequest, res: Response, next: NextFunction): void {
+export async function verifyAdminToken(req: AdminAuthRequest, res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -23,13 +22,15 @@ export function verifyAdminToken(req: AdminAuthRequest, res: Response, next: Nex
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, config.jwtSecret, { algorithms: ['HS256'] }) as {
-      username: string;
-      role: string;
-    };
+    const decoded = await validateSession(token);
+    res.setHeader('Cache-Control', 'no-store');
     req.adminUser = decoded;
     next();
-  } catch {
+  } catch (error) {
+    if ((error as { status?: number }).status === 503) {
+      res.status(503).json({ error: 'Authentication temporarily unavailable' });
+      return;
+    }
     res.status(401).json({
       error: 'Unauthorized',
       message: 'Invalid or expired authentication token. Please log in again.',
