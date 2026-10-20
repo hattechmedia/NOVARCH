@@ -60,7 +60,18 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
       script.id = 'google-translate-script';
       script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
       script.async = true;
-      document.body.appendChild(script);
+      document.head.appendChild(script);
+
+      // Prevent Google Translate from modifying body.style.top / margins
+      const observer = new MutationObserver(() => {
+        if (document.body.style.top && document.body.style.top !== '0px') {
+          document.body.style.top = '0px';
+        }
+        if (document.body.style.position === 'relative') {
+          document.body.style.position = 'static';
+        }
+      });
+      observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
     }
   }, []);
 
