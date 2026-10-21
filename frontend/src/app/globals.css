@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
-html {
+html,
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 100% !important;
   scroll-behavior: smooth;
 }
 
@@ -240,28 +244,49 @@ html {
   }
 }
 
-/* ─── Google Translate Overrides & Dark Theme Integration ────────────────────── */
+/* ─── Google Translate Overrides & Frame Suppression ────────────────────── */
 
-/* Hide Google Translate top banner frame so layout doesn't shift down */
-.goog-te-banner-frame.skiptranslate,
+/* Completely hide all Google Translate injected banners, gadgets, iframes, tooltips & blank spaces */
+iframe,
+body > iframe,
+body > div[id^=":"],
 .goog-te-banner-frame,
-iframe.goog-te-banner-frame {
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-banner-frame,
+.goog-te-gadget,
+.goog-te-gadget-simple,
+.goog-te-menu-frame,
+.goog-te-spinner-pos,
+.skiptranslate,
+#google_translate_element,
+div[id^="goog-gt-"],
+.VIpgJd-ZVi9od-aZ2wjd-wuaDFl,
+.VIpgJd-ZVi9od-ORHb-OEVmcd,
+.VIpgJd-ZVi9od-xl07Ob-OEVmcd,
+.VIpgJd-yAWNEb-hvhgNd,
+iframe[id^=":"] {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
+  width: 0 !important;
+  max-height: 0 !important;
+  max-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  pointer-events: none !important;
+  z-index: -9999 !important;
 }
 
 body {
   top: 0px !important;
+  bottom: 0px !important;
   position: static !important;
-}
-
-#google_translate_element {
-  display: none !important;
-}
-
-.skiptranslate:not(.goog-te-gadget) {
-  display: none !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  padding-bottom: 0px !important;
 }
 
 /* Hide annoying tooltips and highlights on translated text */

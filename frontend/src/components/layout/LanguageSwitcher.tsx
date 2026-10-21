@@ -87,8 +87,29 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
     const observer = new MutationObserver(syncLanguage);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     syncLanguage();
+
+    // Prevent Google Translate from modifying body.style.top / margins or leaving rogue iframes
+    const bodyObserver = new MutationObserver(() => {
+      if (document.body.style.top && document.body.style.top !== '0px') {
+        document.body.style.top = '0px';
+      }
+      if (document.body.style.position === 'relative') {
+        document.body.style.position = 'static';
+      }
+      const iframes = document.querySelectorAll('iframe');
+      iframes.forEach((el) => {
+        if (el.style.display !== 'none') {
+          el.style.display = 'none';
+        }
+      });
+    });
+    bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['style'], childList: true });
+
     ensureTranslate().catch(() => setTranslationError('Translation unavailable. Please try DE again.'));
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      bodyObserver.disconnect();
+    };
   }, []);
 
   const switchLanguage = async (targetLang: 'en' | 'de') => {

@@ -28,7 +28,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#0D1B2A] text-white" role="contentinfo">
+    <footer className="mt-auto bg-[#0D1B2A] text-white" role="contentinfo">
       {/* Main Footer */}
       <Container className="pt-16 pb-12">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">

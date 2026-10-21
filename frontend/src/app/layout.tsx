@@ -43,15 +43,36 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" className={`${inter.variable} h-full dark`} data-scroll-behavior="smooth" suppressHydrationWarning>
-      <body className="flex min-h-full flex-col bg-background text-foreground antialiased" suppressHydrationWarning>
-        {/* Hidden mount target for Google Translate web engine */}
-        <div id="google_translate_element" style={{ display: 'none' }} aria-hidden="true" />
+      <head>
+        <script
+          id="theme-init"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  document.documentElement.classList.add('dark');
+                } catch (e) {}
+              })()
+            `,
+          }}
+        />
+      </head>
+      <body className="bg-background text-foreground antialiased min-h-screen flex flex-col" suppressHydrationWarning>
         <ThemeProvider>
-          <ScrollToTop />
-          <Navbar />
-          <main className="flex-1 pt-20">{children}</main>
-          <Footer />
+          <div className="flex min-h-screen flex-col flex-1 w-full">
+            <ScrollToTop />
+            <Navbar />
+            <main className="flex-1 flex flex-col pt-20 w-full">{children}</main>
+            <Footer />
+          </div>
         </ThemeProvider>
+        {/* Hidden mount target for Google Translate web engine outside page flow */}
+        <div
+          id="google_translate_element"
+          className="hidden pointer-events-none overflow-hidden -z-50"
+          style={{ position: 'fixed', top: -9999, left: -9999, width: 0, height: 0, opacity: 0 }}
+          aria-hidden="true"
+        />
       </body>
     </html>
   );
