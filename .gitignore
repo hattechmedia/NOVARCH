@@ -34,3 +34,10 @@ yarn-debug.log*
 yarn-error.log*
 logs/
 *.log
+
+# Secrets in any deployment naming convention
+.env.*
+!.env.example
+*.pem
+*.key
+.vercel/

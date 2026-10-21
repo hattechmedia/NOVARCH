@@ -101,9 +101,9 @@ export class MongoProjectRepository implements IProjectRepository {
         if (filter?.featured !== undefined) query.featured = filter.featured;
         if (filter?.search) {
           query.$or = [
-            { name: { $regex: filter.search, $options: 'i' } },
-            { description: { $regex: filter.search, $options: 'i' } },
-            { tags: { $in: [new RegExp(filter.search, 'i')] } },
+            { name: { $regex: filter.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' } },
+            { description: { $regex: filter.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), $options: 'i' } },
+            { tags: { $in: [new RegExp(filter.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')] } },
           ];
         }
 
@@ -112,7 +112,7 @@ export class MongoProjectRepository implements IProjectRepository {
           return docs.map(formatProjectDoc);
         }
       } catch (err) {
-        console.error('Error in MongoProjectRepository.findAll:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -140,7 +140,7 @@ export class MongoProjectRepository implements IProjectRepository {
         const doc = await ProjectModel.findById(id).lean();
         if (doc) return formatProjectDoc(doc);
       } catch (err) {
-        console.error('Error in MongoProjectRepository.findById:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -155,7 +155,7 @@ export class MongoProjectRepository implements IProjectRepository {
         const doc = await ProjectModel.findOne({ slug: slug.toLowerCase() }).lean();
         if (doc) return formatProjectDoc(doc);
       } catch (err) {
-        console.error('Error in MongoProjectRepository.findBySlug:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -173,7 +173,7 @@ export class MongoProjectRepository implements IProjectRepository {
         });
         return formatProjectDoc(doc.toJSON ? doc.toJSON() : doc);
       } catch (err) {
-        console.error('Error saving project to MongoDB:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -211,11 +211,11 @@ export class MongoProjectRepository implements IProjectRepository {
         const doc = await ProjectModel.findByIdAndUpdate(
           id,
           { ...dto, updatedAt: new Date() },
-          { new: true }
+          { new: true, runValidators: true }
         ).lean();
         if (doc) return formatProjectDoc(doc);
       } catch (err) {
-        console.error('Error updating project in MongoDB:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -242,7 +242,7 @@ export class MongoProjectRepository implements IProjectRepository {
         const res = await ProjectModel.findByIdAndDelete(id);
         return !!res;
       } catch (err) {
-        console.error('Error deleting project in MongoDB:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 

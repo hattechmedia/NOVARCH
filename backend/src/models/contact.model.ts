@@ -36,6 +36,7 @@ const ContactSchema = new Schema<ContactDocument>(
       enum: ['Website Form', 'Service Package', 'Direct API', 'Referral'],
       default: 'Website Form',
     },
+    paymentReceivedAt: { type: Date },
     stripeSessionId: { type: String, trim: true, index: { unique: true, sparse: true } },
     stripePaymentIntentId: { type: String, trim: true, index: { unique: true, sparse: true } },
   },

@@ -1,10 +1,11 @@
+import { readObject, RequestBodyError } from '@/lib/requestBody';
 import { NextResponse } from 'next/server';
 import { BACKEND_UNAVAILABLE_MESSAGE, guardPublicForm } from '@/lib/formGuard';
 import { BACKEND_API_URL, backendForwardHeaders } from '@/lib/backend';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = await readObject(request);
     const blocked = guardPublicForm(request, body);
     if (blocked) return blocked;
 
@@ -58,7 +59,8 @@ export async function POST(request: Request) {
     try {
       const backendRes = await fetch(`${BACKEND_API_URL}/contact`, {
         method: 'POST',
-        headers: backendForwardHeaders(),
+        headers: backendForwardHeaders(request),
+        signal: AbortSignal.timeout(20000),
         body: JSON.stringify(backendPayload),
       });
 
@@ -89,6 +91,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: BACKEND_UNAVAILABLE_MESSAGE }, { status: 502 });
     }
   } catch (error) {
+    if (error instanceof RequestBodyError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error('[NOVARCH Intake Error]:', error);
     return NextResponse.json(
       { error: 'Internal server error processing intake.' },

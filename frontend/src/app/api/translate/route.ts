@@ -1,4 +1,6 @@
+import { timingSafeEqual } from 'crypto';
 import { NextResponse } from 'next/server';
+import { readObject, RequestBodyError } from '@/lib/requestBody';
 
 /**
  * POST /api/translate
@@ -7,10 +9,14 @@ import { NextResponse } from 'next/server';
  */
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const secret = process.env.TRANSLATION_API_SECRET;
+    const provided = request.headers.get('x-translation-token') || '';
+    if (!secret || secret.length < 32) return NextResponse.json({ error: 'Not available' }, { status: 404 });
+    if (Buffer.byteLength(provided) !== Buffer.byteLength(secret) || !timingSafeEqual(Buffer.from(provided), Buffer.from(secret))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    const body = await readObject(request);
     const { text, target = 'de', source = 'en' } = body;
 
-    if (!text) {
+    if (!((typeof text === 'string' && text.length > 0 && text.length <= 3000) || (Array.isArray(text) && text.length > 0 && text.length <= 15 && text.every(t => typeof t === 'string' && t.length <= 3000))) || !['en', 'de'].includes(String(target)) || !['en', 'de'].includes(String(source))) {
       return NextResponse.json({ error: 'Text parameter is required.' }, { status: 400 });
     }
 
@@ -26,12 +32,13 @@ export async function POST(request: Request) {
 
       const textArray = Array.isArray(text) ? text : [text];
       const params = new URLSearchParams();
-      textArray.forEach((t) => params.append('text', t));
-      params.append('target_lang', target.toUpperCase());
-      if (source) params.append('source_lang', source.toUpperCase());
+      textArray.forEach((t) => params.append('text', String(t)));
+      params.append('target_lang', String(target).toUpperCase());
+      if (source) params.append('source_lang', String(source).toUpperCase());
 
       const res = await fetch(deeplUrl, {
         method: 'POST',
+        signal: AbortSignal.timeout(15000),
         headers: {
           Authorization: `DeepL-Auth-Key ${deeplKey}`,
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -41,7 +48,7 @@ export async function POST(request: Request) {
 
       if (res.ok) {
         const data = await res.json();
-        const translations = data.translations.map((t: any) => t.text);
+        const translations = data.translations.map((t: { text: string }) => t.text);
         return NextResponse.json({
           provider: 'deepl',
           translations: Array.isArray(text) ? translations : translations[0],
@@ -56,6 +63,7 @@ export async function POST(request: Request) {
         `https://translation.googleapis.com/language/translate/v2?key=${googleKey}`,
         {
           method: 'POST',
+        signal: AbortSignal.timeout(15000),
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             q: textArray,
@@ -68,7 +76,7 @@ export async function POST(request: Request) {
 
       if (res.ok) {
         const data = await res.json();
-        const translations = data.data.translations.map((t: any) => t.translatedText);
+        const translations = data.data.translations.map((t: { translatedText: string }) => t.translatedText);
         return NextResponse.json({
           provider: 'google',
           translations: Array.isArray(text) ? translations : translations[0],
@@ -84,10 +92,11 @@ export async function POST(request: Request) {
       target,
       text,
     });
-  } catch (error: any) {
-    console.error('[Translation API Error]:', error);
+  } catch (error) {
+    if (error instanceof RequestBodyError) return NextResponse.json({ error: error.message }, { status: error.status });
+    console.error('[Translation API Error]');
     return NextResponse.json(
-      { error: 'Translation processing failed', details: error.message },
+      { error: 'Translation processing failed' },
       { status: 500 }
     );
   }

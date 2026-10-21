@@ -59,6 +59,9 @@ async function fetchWithAuth<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  async logout(): Promise<void> {
+    await fetchWithAuth(`${API_BASE}/auth/logout`, { method: 'POST' });
+  },
   async login(email: string, password: string): Promise<{ token: string; user: { email: string } }> {
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',

@@ -63,18 +63,9 @@ export const contactController = {
       }
 
       const submissionType = validatedData.submissionType === 'service_lead' ? 'service_lead' : 'message';
-      const recent = await contactService.findRecentByEmail(validatedData.email, submissionType, 10 * 60 * 1000);
-      if (recent) {
-        return res.status(200).json({
-          success: true,
-          message: 'Inquiry received successfully. Our architecture team will be in touch.',
-          data: { id: recent.id },
-        });
-      }
-
       const newContact = await contactService.submitInquiry(validatedData);
 
-      console.log(`[Lead Created]: ${newContact.id} -> ${newContact.serviceType}`);
+      console.log(`[Lead Created]: ${newContact.id}`);
 
       return res.status(201).json({
         success: true,

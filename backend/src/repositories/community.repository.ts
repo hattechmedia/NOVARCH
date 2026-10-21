@@ -48,7 +48,7 @@ export class MongoCommunityRepository implements ICommunityRepository {
         const docs = await CommunityModel.find(query).sort({ createdAt: -1 }).lean();
         return docs.map(formatCommunityDoc);
       } catch (err) {
-        console.error('Error in MongoCommunityRepository.findAll:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -64,7 +64,7 @@ export class MongoCommunityRepository implements ICommunityRepository {
         const doc = await CommunityModel.findById(id).lean();
         if (doc) return formatCommunityDoc(doc);
       } catch (err) {
-        console.error('Error in MongoCommunityRepository.findById:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -92,7 +92,7 @@ export class MongoCommunityRepository implements ICommunityRepository {
           .lean();
         if (doc) return formatCommunityDoc(doc);
       } catch (err) {
-        console.error('Error in MongoCommunityRepository.findRecentByEmail:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -147,10 +147,10 @@ export class MongoCommunityRepository implements ICommunityRepository {
           photoConsentVersion: photoConsent ? 'v1-2026-10' : undefined,
         });
 
-        console.log(`💾 Saved ${appType} application to MongoDB: ${doc.fullName} (${doc._id})`);
+        console.log('Record saved');
         return formatCommunityDoc(doc.toJSON ? doc.toJSON() : doc);
       } catch (err) {
-        console.error('Error saving community/winter-arc application to MongoDB:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -198,11 +198,11 @@ export class MongoCommunityRepository implements ICommunityRepository {
         const doc = await CommunityModel.findByIdAndUpdate(
           id,
           { status, updatedAt: new Date() },
-          { returnDocument: 'after' }
+          { returnDocument: 'after', runValidators: true }
         ).lean();
         if (doc) return formatCommunityDoc(doc);
       } catch (err) {
-        console.error('Error in MongoCommunityRepository.updateStatus:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 
@@ -233,11 +233,11 @@ export class MongoCommunityRepository implements ICommunityRepository {
         const doc = await CommunityModel.findByIdAndUpdate(
           id,
           updateFields,
-          { returnDocument: 'after' }
+          { returnDocument: 'after', runValidators: true }
         ).lean();
         if (doc) return formatCommunityDoc(doc);
       } catch (err) {
-        console.error('Error in MongoCommunityRepository.updateMarketingConsent:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
     const index = this.inMemoryFallback.findIndex((i) => i.id === id);
@@ -258,7 +258,7 @@ export class MongoCommunityRepository implements ICommunityRepository {
         const res = await CommunityModel.findByIdAndDelete(id);
         return !!res;
       } catch (err) {
-        console.error('Error in MongoCommunityRepository.delete:', err);
+        throw Object.assign(new Error('Database operation failed'), { status: 503 });
       }
     }
 

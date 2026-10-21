@@ -279,3 +279,10 @@ body {
 .goog-te-balloon-frame {
   display: none !important;
 }
+
+/* Translate's current banner and loading overlay must not become body flex
+   items: the invisible loader otherwise leaves an empty strip after the footer. */
+iframe.VIpgJd-ZVi9od-ORHb-OEVmcd,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf {
+  display: none !important;
+}

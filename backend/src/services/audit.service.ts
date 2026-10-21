@@ -1,3 +1,5 @@
+import { SecurityEventModel } from '../models/securityEvent.model.js';
+import { connectDatabase } from '../config/database.js';
 export type AuditAction =
   | 'CREATE'
   | 'UPDATE'
@@ -26,6 +28,8 @@ export class AuditService {
   private maxLogs = 500;
 
   async log(entry: Omit<AuditLogEntry, 'id' | 'timestamp'>): Promise<AuditLogEntry> {
+    await connectDatabase();
+    await SecurityEventModel.create(entry);
     const fullEntry: AuditLogEntry = {
       ...entry,
       id: `audit-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,

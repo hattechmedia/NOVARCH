@@ -19,10 +19,9 @@ const companyLinks = [
 ];
 
 const legalLinks = [
-  { label: 'Legal Hub', href: '/legal' },
-  { label: 'Privacy Notice', href: '/legal/winter-arc-2026' },
-  { label: 'Photography Consent', href: '/legal/photography-consent' },
-  { label: 'Confidentiality (NDA)', href: '/legal/nda' },
+  { label: 'Legal & Event Hub', href: '/legal/winter-arc-2026' },
+  { label: 'Impressum', href: '/impressum' },
+  { label: 'Datenschutz / Privacy', href: '/datenschutz' },
 ];
 
 export function Footer() {

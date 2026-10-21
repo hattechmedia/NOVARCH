@@ -43,20 +43,6 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" className={`${inter.variable} h-full dark`} data-scroll-behavior="smooth" suppressHydrationWarning>
-      <head>
-        <script
-          id="theme-init"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  document.documentElement.classList.add('dark');
-                } catch (e) {}
-              })()
-            `,
-          }}
-        />
-      </head>
       <body className="flex min-h-full flex-col bg-background text-foreground antialiased" suppressHydrationWarning>
         {/* Hidden mount target for Google Translate web engine */}
         <div id="google_translate_element" style={{ display: 'none' }} aria-hidden="true" />

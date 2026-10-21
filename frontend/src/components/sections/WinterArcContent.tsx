@@ -312,7 +312,7 @@ export function WinterArcContent() {
     setMounted(true);
     const updateCountdown = () => {
       const now = new Date().getTime();
-      const diff = TARGET_EVENT_TIME - now;
+      const diff = Math.max(0, now - TARGET_EVENT_TIME);
 
       if (diff <= 0) {
         setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -320,7 +320,7 @@ export function WinterArcContent() {
       }
 
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const hours = Math.floor(diff / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
@@ -531,9 +531,8 @@ export function WinterArcContent() {
               real conversation, shared perspectives, collaborative problem-solving.
             </p>
 
-            {/* 4. Countdown Timer Box (4 animated cards: DAYS, HOURS, MIN, SEC) */}
+            {/* Elapsed time since the event: total hours, minutes and seconds. */}
             <div className="flex items-center justify-start gap-2.5 sm:gap-3.5 mb-6">
-              <CountdownCard value={countdown.days} label="DAYS" mounted={mounted} />
               <CountdownCard value={countdown.hours} label="HOURS" mounted={mounted} />
               <CountdownCard value={countdown.minutes} label="MIN" mounted={mounted} />
               <CountdownCard value={countdown.seconds} label="SEC" mounted={mounted} />

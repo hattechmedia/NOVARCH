@@ -16,92 +16,111 @@ declare global {
   }
 }
 
+let translateReady: Promise<HTMLSelectElement> | undefined;
+
+function ensureTranslate(): Promise<HTMLSelectElement> {
+  const existing = document.querySelector<HTMLSelectElement>('.goog-te-combo');
+  if (existing) return Promise.resolve(existing);
+  if (translateReady) return translateReady;
+  translateReady = new Promise<HTMLSelectElement>((resolve, reject) => {
+    let initialized = false;
+    const init = () => {
+      if (initialized || document.querySelector('.goog-te-combo')) return;
+      if (window.google?.translate?.TranslateElement) {
+        initialized = true;
+        new window.google.translate.TranslateElement({
+          pageLanguage: 'en', includedLanguages: 'en,de', autoDisplay: false,
+        }, 'google_translate_element');
+      }
+    };
+    window.googleTranslateElementInit = init;
+    const poll = window.setInterval(() => {
+      init();
+      const select = document.querySelector<HTMLSelectElement>('.goog-te-combo');
+      if (select) {
+        window.clearInterval(poll);
+        window.clearTimeout(timeout);
+        resolve(select);
+      }
+    }, 100);
+    const timeout = window.setTimeout(() => {
+      window.clearInterval(poll);
+      document.getElementById('google-translate-script')?.remove();
+      reject(new Error('Translation engine did not load'));
+    }, 15000);
+    init();
+    if (!window.google?.translate?.TranslateElement && !document.getElementById('google-translate-script')) {
+      const script = document.createElement('script');
+      script.id = 'google-translate-script';
+      script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      script.async = true;
+      document.head.appendChild(script);
+    }
+  }).catch((error) => {
+    translateReady = undefined;
+    throw error;
+  });
+  return translateReady;
+}
+
 export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitcherProps) {
   const [currentLang, setCurrentLang] = React.useState<'en' | 'de'>('en');
   const [mounted, setMounted] = React.useState(false);
   const [isTranslating, setIsTranslating] = React.useState(false);
 
+  const [translationError, setTranslationError] = React.useState('');
+
   React.useEffect(() => {
     setMounted(true);
-
-    // 1. Read existing language preference from cookies or localStorage
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('novarch_lang') : null;
-    const cookieMatch = typeof document !== 'undefined' ? document.cookie.match(/googtrans=\/en\/([a-z]{2})/i) : null;
-    const lang = (cookieMatch?.[1] || saved || 'en').toLowerCase();
-    if (lang === 'de') {
-      setCurrentLang('de');
-      if (typeof document !== 'undefined') {
-        document.documentElement.lang = 'de';
+    // Google detects the source language before applying the saved cookie.
+    // Do not label the English DOM as German before the engine has translated it.
+    const syncLanguage = () => {
+      const translated = document.documentElement.classList.contains('translated-ltr');
+      const lang = translated ? 'de' : 'en';
+      setCurrentLang(lang);
+      document.documentElement.lang = lang;
+      if (translated) {
+        setIsTranslating(false);
+        setTranslationError('');
       }
-    } else {
-      setCurrentLang('en');
-      if (typeof document !== 'undefined') {
-        document.documentElement.lang = 'en';
-      }
-    }
-
-    // 2. Load Google Translate script dynamically if not present
-    if (typeof window !== 'undefined' && !document.getElementById('google-translate-script')) {
-      window.googleTranslateElementInit = function () {
-        if (window.google?.translate?.TranslateElement) {
-          new window.google.translate.TranslateElement(
-            {
-              pageLanguage: 'en',
-              includedLanguages: 'en,de',
-              autoDisplay: false,
-              multilanguagePage: true,
-            },
-            'google_translate_element'
-          );
-        }
-      };
-
-      const script = document.createElement('script');
-      script.id = 'google-translate-script';
-      script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-      script.async = true;
-      document.body.appendChild(script);
-    }
+    };
+    const observer = new MutationObserver(syncLanguage);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    syncLanguage();
+    ensureTranslate().catch(() => setTranslationError('Translation unavailable. Please try DE again.'));
+    return () => observer.disconnect();
   }, []);
 
-  const switchLanguage = (targetLang: 'en' | 'de') => {
-    if (targetLang === currentLang && !isTranslating) return;
-
+  const switchLanguage = async (targetLang: 'en' | 'de') => {
+    setTranslationError('');
     setIsTranslating(true);
-    setCurrentLang(targetLang);
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('novarch_lang', targetLang);
-      document.documentElement.lang = targetLang;
-
-      // Set cookie for current domain and root path
-      const hostname = window.location.hostname;
-      const cookieValue = `/en/${targetLang}`;
-
-      // Set for path=/
-      document.cookie = `googtrans=${cookieValue}; path=/; max-age=31536000; SameSite=Lax`;
-
-      // Set for domain if on a public domain (e.g. .novarch.eu)
-      if (hostname.includes('.') && !hostname.startsWith('localhost') && !hostname.startsWith('127.')) {
-        const domainParts = hostname.split('.');
-        if (domainParts.length >= 2) {
-          const rootDomain = '.' + domainParts.slice(-2).join('.');
-          document.cookie = `googtrans=${cookieValue}; path=/; domain=${rootDomain}; max-age=31536000; SameSite=Lax`;
+    localStorage.setItem('novarch_lang', targetLang);
+    // Clear domain-scoped preferences left by older versions as well.
+    const parts = window.location.hostname.split('.');
+    for (let i = 0; i < parts.length - 1; i++) {
+      const domain = parts.slice(i).join('.');
+      document.cookie = `googtrans=; path=/; domain=.${domain}; max-age=0`;
+    }
+    document.cookie = `googtrans=/en/${targetLang}; path=/; max-age=31536000; SameSite=Lax`;
+    if (targetLang === 'en') {
+      // Restore the original React document rather than retaining translated DOM nodes.
+      window.location.reload();
+      return;
+    }
+    try {
+      const select = await ensureTranslate();
+      select.value = targetLang;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      // Selecting a language is not evidence that translation succeeded.
+      window.setTimeout(() => {
+        setIsTranslating(false);
+        if (!document.documentElement.classList.contains('translated-ltr')) {
+          setTranslationError('Translation unavailable. Please try DE again.');
         }
-      }
-
-      // Try triggering the Google Translate combo box directly if available
-      const select = document.querySelector<HTMLSelectElement>('.goog-te-combo');
-      if (select) {
-        select.value = targetLang;
-        select.dispatchEvent(new Event('change', { bubbles: true }));
-        setTimeout(() => setIsTranslating(false), 300);
-      } else {
-        // If the combo is not mounted yet, reloading applies the googtrans cookie cleanly
-        setTimeout(() => {
-          window.location.reload();
-        }, 150);
-      }
+      }, 15000);
+    } catch {
+      setIsTranslating(false);
+      setTranslationError('Translation unavailable. Please try DE again.');
     }
   };
 
@@ -123,6 +142,7 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
     return (
       <div
         translate="no"
+        title={translationError || undefined}
         className={cn('notranslate flex items-center justify-between p-1 rounded-xl bg-white/5 border border-white/10 select-none', className)}
       >
         <button
@@ -163,12 +183,14 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
     <div
       translate="no"
       className={cn(
-        'notranslate inline-flex items-center p-0.5 rounded-full bg-[#081224]/90 backdrop-blur-md border border-white/15 shadow-lg select-none flex-shrink-0',
+        'notranslate relative inline-flex items-center p-0.5 rounded-full bg-[#081224]/90 backdrop-blur-md border border-white/15 shadow-lg select-none flex-shrink-0',
         className
       )}
       role="group"
       aria-label="Language selection / Sprachauswahl"
+      title={translationError || undefined}
     >
+      {translationError && <span role="status" className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-white/15 bg-[#081224] p-2 text-xs text-white">{translationError}</span>}
       <div className="flex items-center pl-1.5 pr-1 text-cyan-400 pointer-events-none" title="English / German (Deutsch)">
         <Globe className={cn('h-3.5 w-3.5 transition-transform duration-300', isTranslating && 'animate-spin')} />
       </div>

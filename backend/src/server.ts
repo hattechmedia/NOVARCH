@@ -15,12 +15,17 @@ import communityRoutes from './routes/community.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import checkoutRoutes from './routes/checkout.routes.js';
 import authRoutes from './routes/auth.routes.js';
+import { MongoRateStore } from './middleware/mongoRateStore.js';
+import { timingSafeEqualString } from './utils/crypto.js';
 
 const app = express();
 
 // Disable x-powered-by header for security
 app.disable('x-powered-by');
-app.set('trust proxy', 1);
+const proxyHops = Number(process.env.TRUST_PROXY_HOPS || 0);
+if (!Number.isInteger(proxyHops) || proxyHops < 0 || proxyHops > 5) throw new Error('Invalid TRUST_PROXY_HOPS');
+app.set('trust proxy', proxyHops || false);
+app.set('query parser', 'simple');
 
 // Security HTTP Headers with Helmet.
 // CSP applies to documents loaded from this API origin (JSON), not to the Next.js/Vite apps.
@@ -44,6 +49,10 @@ app.use(compression());
 
 // Strict Rate Limiting - General API Limiter (100 requests per 15 mins)
 const generalLimiter = rateLimit({
+  store: new MongoRateStore('general'),
+  skip: (req) => ['/checkout/webhook', '/api/checkout/webhook'].includes(req.path) ||
+    (req.method === 'POST' && ['/api/contact', '/api/community'].includes(req.path) &&
+      !!config.internalApiSecret && timingSafeEqualString(req.get('x-internal-token') || '', config.internalApiSecret)),
   windowMs: 15 * 60 * 1000,
   max: 200,
   standardHeaders: true,
@@ -53,6 +62,7 @@ const generalLimiter = rateLimit({
 
 // Sensitive Operations Limiter (15 requests per 15 mins) - login, contact submission, checkout creation
 const sensitiveOpsLimiter = rateLimit({
+  store: new MongoRateStore('sensitive'),
   windowMs: 15 * 60 * 1000,
   max: 20,
   standardHeaders: true,
@@ -100,6 +110,11 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 // Apply rate limiting to login and checkout only.
 // Public form POSTs use publicFormLimiter on those routes so dashboard GETs stay usable.
 app.use('/api/auth/login', sensitiveOpsLimiter);
+app.use('/api/auth/login', rateLimit({
+  windowMs: 15 * 60 * 1000, max: 30,
+  store: new MongoRateStore('login-account'),
+  keyGenerator: req => typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase().slice(0, 254) : 'invalid',
+}));
 app.use('/api/checkout/create-session', sensitiveOpsLimiter);
 app.use('/checkout/create-session', sensitiveOpsLimiter);
 
@@ -148,6 +163,6 @@ async function startServer() {
   }
 }
 
-startServer();
+startServer().catch(() => { console.error('Database startup failed; requests will fail closed until it is available'); });
 
 export default app;
