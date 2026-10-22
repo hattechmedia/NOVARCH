@@ -5,7 +5,7 @@ export const SITE = {
     'NOVARCH designs and builds AI, software and digital systems that help businesses sell, operate and grow — with human control and data ownership built in.',
   url: 'https://novarch.io',
   location: 'Ilmenau, Germany',
-  email: 'hello@novarch.io',
+  email: 'mesum@novarch.eu',
 } as const;
 
 export const VAT_CONFIG = {

@@ -19,9 +19,9 @@ const companyLinks = [
 ];
 
 const legalLinks = [
-  { label: 'Legal & Event Hub', href: '/legal/winter-arc-2026' },
-  { label: 'Impressum', href: '/impressum' },
   { label: 'Datenschutz / Privacy', href: '/datenschutz' },
+  { label: 'Impressum', href: '/impressum' },
+  { label: 'Legal & Event Hub', href: '/legal/winter-arc-2026' },
 ];
 
 export function Footer() {
@@ -31,9 +31,9 @@ export function Footer() {
     <footer className="mt-auto bg-[#0D1B2A] text-white" role="contentinfo">
       {/* Main Footer */}
       <Container className="pt-16 pb-12">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8">
           {/* Brand Column */}
-          <div className="lg:col-span-4">
+          <div className="sm:col-span-2 lg:col-span-4">
             <Link href="/" aria-label="NOVARCH — Home" className="flex flex-col items-center gap-0.5 mb-6 group w-fit">
               <Image
                 src="/images/logo/newLogo2.png"
@@ -69,7 +69,7 @@ export function Footer() {
           </div>
 
           {/* Services Column */}
-          <div className="lg:col-span-3 lg:col-start-6">
+          <div className="lg:col-span-3 lg:col-start-5">
             <h3 className="text-xs font-semibold uppercase tracking-widest text-[#4A5B6F] mb-4">
               Services
             </h3>
@@ -89,7 +89,7 @@ export function Footer() {
           </div>
 
           {/* Company Column */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-2">
             <h3 className="text-xs font-semibold uppercase tracking-widest text-[#4A5B6F] mb-4">
               Company
             </h3>
@@ -119,24 +119,40 @@ export function Footer() {
                 {SITE.email}
               </a>
             </div>
+          </div>
+
+          {/* Rechtliches / Legal Column (AI-UI style organization) */}
+          <div className="lg:col-span-3">
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-[#4A5B6F] mb-4">
+              Rechtliches / Legal
+            </h3>
+            <ul className="space-y-2.5" role="list">
+              {legalLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="group flex items-center gap-1.5 text-sm text-[#7A8FA6] hover:text-white transition-colors duration-200"
+                  >
+                    <ArrowRight className="h-3 w-3 text-[#1E5FBF] opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
 
             <div className="mt-8">
-              <h3 className="text-xs font-semibold uppercase tracking-widest text-[#4A5B6F] mb-3">
-                Legal &amp; Compliance
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-[#4A5B6F] mb-2">
+                Datenschutz / Privacy
               </h3>
-              <ul className="space-y-2" role="list">
-                {legalLinks.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="group flex items-center gap-1.5 text-xs text-[#7A8FA6] hover:text-white transition-colors duration-200"
-                    >
-                      <ArrowRight className="h-2.5 w-2.5 text-[#1E5FBF] opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <p className="text-xs text-[#7A8FA6] leading-relaxed">
+                Fragen zum Datenschutz oder Betroffenenrechte richten Sie bitte an:
+              </p>
+              <a
+                href={`mailto:${SITE.email}`}
+                className="mt-1 block text-xs text-[#38B2D8] hover:text-cyan-200 transition-colors"
+              >
+                {SITE.email}
+              </a>
             </div>
           </div>
         </div>
