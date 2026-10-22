@@ -43,14 +43,7 @@ export function ImpressumPage() {
     <div translate="no" className="notranslate min-h-[70vh] bg-[#030712] text-slate-200">
       <Container className="py-14 sm:py-20">
         <div className="mx-auto max-w-3xl">
-          <Link
-            href="/legal/winter-arc-2026"
-            className="text-sm text-cyan-300 hover:text-cyan-100 transition-colors"
-          >
-            ← {de ? 'Zurück zum Legal Hub' : 'Back to Legal Hub'}
-          </Link>
-
-          <p className="mt-10 text-xs font-mono uppercase tracking-widest text-cyan-300">NOVARCH</p>
+          <p className="text-xs font-mono uppercase tracking-widest text-cyan-300">NOVARCH</p>
           <h1 className="mt-3 text-4xl font-bold text-white">
             {de ? 'Impressum' : 'Legal Notice / Impressum'}
           </h1>
