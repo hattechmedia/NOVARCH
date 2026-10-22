@@ -55,7 +55,7 @@ export function EventLegalHub() {
         </Container>
       </div>
       <Container className="py-8 sm:py-12">
-        <div className="mb-8 rounded-xl border border-amber-400/25 bg-amber-400/5 p-4 text-sm leading-6 text-amber-100" role="note">Review in progress / Prüfung läuft. Approved NDA text, operator details and final competition terms are still outstanding. This hub is not a completed legal approval.</div>
+        {/* <div className="mb-8 rounded-xl border border-amber-400/25 bg-amber-400/5 p-4 text-sm leading-6 text-amber-100" role="note">Review in progress / Prüfung läuft. Approved NDA text, operator details and final competition terms are still outstanding. This hub is not a completed legal approval.</div> */}
         <div className="grid gap-8 lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-14">
           <nav aria-label="Event hub sections" className="self-start lg:sticky lg:top-28">
             <p className="mb-4 text-xs font-mono uppercase tracking-widest text-slate-400">On this page / Übersicht</p>
