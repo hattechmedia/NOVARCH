@@ -37,10 +37,32 @@ function InfoBox({ children }: { children: React.ReactNode }) {
 
 export function DatenschutzPage() {
   const [lang, setLang] = React.useState<Lang>('de');
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem('novarch_lang');
+    if (saved === 'en' || saved === 'de') {
+      setLang(saved);
+    } else if (typeof document !== 'undefined' && document.cookie.includes('googtrans=/en/de')) {
+      setLang('de');
+    }
+  }, []);
+
+  const handleSetLang = (l: Lang) => {
+    setLang(l);
+    try {
+      localStorage.setItem('novarch_lang', l);
+      const combo = document.querySelector<HTMLSelectElement>('.goog-te-combo');
+      if (combo) {
+        combo.value = l;
+        combo.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    } catch {}
+  };
+
   const de = lang === 'de';
 
   return (
-    <div translate="no" className="notranslate min-h-[70vh] bg-[#030712] text-slate-200">
+    <div className="min-h-[70vh] bg-[#030712] text-slate-200">
       <Container className="py-14 sm:py-20">
         <div className="mx-auto max-w-3xl">
           <Link
@@ -60,7 +82,7 @@ export function DatenschutzPage() {
               : 'Last updated: October 2026'}
           </p>
 
-          <LangToggle lang={lang} setLang={setLang} />
+          <LangToggle lang={lang} setLang={handleSetLang} />
 
           <div className="mt-10 space-y-12 leading-7 text-[15px]">
 

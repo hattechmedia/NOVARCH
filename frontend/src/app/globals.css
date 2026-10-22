@@ -244,52 +244,56 @@ body {
   }
 }
 
-/* ─── Google Translate Overrides & Frame Suppression ────────────────────── */
+/* ─── Google Translate Overrides & Banner Suppression ────────────────────── */
 
-/* Completely hide all Google Translate injected banners, gadgets, iframes, tooltips & blank spaces */
-iframe,
-body > iframe,
-body > div[id^=":"],
+/* Suppress Google Translate injected top banners, tooltips, and overlay popups without breaking workers */
 .goog-te-banner-frame,
-.goog-te-banner-frame.skiptranslate,
 iframe.goog-te-banner-frame,
-.goog-te-gadget,
-.goog-te-gadget-simple,
+.goog-te-banner-frame.skiptranslate,
 .goog-te-menu-frame,
-.goog-te-spinner-pos,
-.skiptranslate,
-#google_translate_element,
-div[id^="goog-gt-"],
+.goog-te-balloon-frame,
+#goog-gt-tt,
 .VIpgJd-ZVi9od-aZ2wjd-wuaDFl,
 .VIpgJd-ZVi9od-ORHb-OEVmcd,
 .VIpgJd-ZVi9od-xl07Ob-OEVmcd,
 .VIpgJd-yAWNEb-hvhgNd,
-iframe[id^=":"] {
+iframe.VIpgJd-ZVi9od-ORHb-OEVmcd,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+body > div[id^="goog-gt-"],
+div[id^="goog-gt-"] {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
   width: 0 !important;
-  max-height: 0 !important;
-  max-width: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
   overflow: hidden !important;
   position: absolute !important;
+  top: -9999px !important;
   pointer-events: none !important;
+  z-index: -9999 !important;
+}
+
+#google_translate_element {
+  position: fixed !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
   z-index: -9999 !important;
 }
 
 body {
   top: 0px !important;
-  bottom: 0px !important;
   position: static !important;
   margin-top: 0px !important;
-  margin-bottom: 0px !important;
-  padding-bottom: 0px !important;
 }
 
-/* Hide annoying tooltips and highlights on translated text */
+/* Hide tooltips and highlights on translated text */
 .goog-tooltip,
 .goog-tooltip:hover {
   display: none !important;
@@ -298,16 +302,4 @@ body {
 .goog-text-highlight {
   background-color: transparent !important;
   box-shadow: none !important;
-}
-
-#goog-gt-tt,
-.goog-te-balloon-frame {
-  display: none !important;
-}
-
-/* Translate's current banner and loading overlay must not become body flex
-   items: the invisible loader otherwise leaves an empty strip after the footer. */
-iframe.VIpgJd-ZVi9od-ORHb-OEVmcd,
-.VIpgJd-ZVi9od-aZ2wEe-wOHMyf {
-  display: none !important;
 }

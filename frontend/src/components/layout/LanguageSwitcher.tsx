@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Globe, Check } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 interface LanguageSwitcherProps {
@@ -16,24 +17,78 @@ declare global {
   }
 }
 
+function setGoogleTransCookies(lang: 'en' | 'de') {
+  if (typeof document === 'undefined') return;
+  const value = `/en/${lang}`;
+  const hostname = window.location.hostname;
+  const maxAge = 31536000; // 1 year
+
+  // 1. Host-only
+  document.cookie = `googtrans=${value}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  // 2. Exact hostname
+  document.cookie = `googtrans=${value}; path=/; domain=${hostname}; max-age=${maxAge}; SameSite=Lax`;
+  // 3. Root domain (e.g. .novarch.eu)
+  const parts = hostname.split('.');
+  if (parts.length >= 2) {
+    const rootDomain = '.' + parts.slice(-2).join('.');
+    document.cookie = `googtrans=${value}; path=/; domain=${rootDomain}; max-age=${maxAge}; SameSite=Lax`;
+  }
+}
+
+function clearGoogleTransCookies() {
+  if (typeof document === 'undefined') return;
+  const hostname = window.location.hostname;
+  const parts = hostname.split('.');
+
+  // Expire cookies across scopes
+  document.cookie = 'googtrans=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  document.cookie = `googtrans=; path=/; domain=${hostname}; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  if (parts.length >= 2) {
+    const rootDomain = '.' + parts.slice(-2).join('.');
+    document.cookie = `googtrans=; path=/; domain=${rootDomain}; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  }
+
+  // Set explicitly to /en/en to overwrite cached translation
+  document.cookie = 'googtrans=/en/en; path=/; max-age=31536000; SameSite=Lax';
+  document.cookie = `googtrans=/en/en; path=/; domain=${hostname}; max-age=31536000; SameSite=Lax`;
+  if (parts.length >= 2) {
+    const rootDomain = '.' + parts.slice(-2).join('.');
+    document.cookie = `googtrans=/en/en; path=/; domain=${rootDomain}; max-age=31536000; SameSite=Lax`;
+  }
+}
+
 let translateReady: Promise<HTMLSelectElement> | undefined;
 
 function ensureTranslate(): Promise<HTMLSelectElement> {
+  if (typeof document === 'undefined') {
+    return Promise.reject(new Error('Document not available'));
+  }
   const existing = document.querySelector<HTMLSelectElement>('.goog-te-combo');
   if (existing) return Promise.resolve(existing);
   if (translateReady) return translateReady;
+
   translateReady = new Promise<HTMLSelectElement>((resolve, reject) => {
     let initialized = false;
+
     const init = () => {
       if (initialized || document.querySelector('.goog-te-combo')) return;
       if (window.google?.translate?.TranslateElement) {
         initialized = true;
-        new window.google.translate.TranslateElement({
-          pageLanguage: 'en', includedLanguages: 'en,de', autoDisplay: false,
-        }, 'google_translate_element');
+        try {
+          new window.google.translate.TranslateElement(
+            {
+              pageLanguage: 'en',
+              includedLanguages: 'en,de',
+              autoDisplay: false,
+            },
+            'google_translate_element'
+          );
+        } catch {}
       }
     };
+
     window.googleTranslateElementInit = init;
+
     const poll = window.setInterval(() => {
       init();
       const select = document.querySelector<HTMLSelectElement>('.goog-te-combo');
@@ -43,12 +98,19 @@ function ensureTranslate(): Promise<HTMLSelectElement> {
         resolve(select);
       }
     }, 100);
+
     const timeout = window.setTimeout(() => {
       window.clearInterval(poll);
-      document.getElementById('google-translate-script')?.remove();
-      reject(new Error('Translation engine did not load'));
-    }, 15000);
+      const select = document.querySelector<HTMLSelectElement>('.goog-te-combo');
+      if (select) {
+        resolve(select);
+      } else {
+        reject(new Error('Translation engine did not load in time'));
+      }
+    }, 10000);
+
     init();
+
     if (!window.google?.translate?.TranslateElement && !document.getElementById('google-translate-script')) {
       const script = document.createElement('script');
       script.id = 'google-translate-script';
@@ -60,35 +122,49 @@ function ensureTranslate(): Promise<HTMLSelectElement> {
     translateReady = undefined;
     throw error;
   });
+
   return translateReady;
 }
 
 export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitcherProps) {
+  const pathname = usePathname();
+  const prevPathname = React.useRef(pathname);
+
   const [currentLang, setCurrentLang] = React.useState<'en' | 'de'>('en');
   const [mounted, setMounted] = React.useState(false);
   const [isTranslating, setIsTranslating] = React.useState(false);
-
   const [translationError, setTranslationError] = React.useState('');
 
   React.useEffect(() => {
     setMounted(true);
-    // Google detects the source language before applying the saved cookie.
-    // Do not label the English DOM as German before the engine has translated it.
+    let initialLang: 'en' | 'de' = 'en';
+
+    try {
+      const saved = localStorage.getItem('novarch_lang');
+      if (saved === 'de' || saved === 'en') {
+        initialLang = saved;
+      } else if (document.cookie.includes('googtrans=/en/de')) {
+        initialLang = 'de';
+      }
+    } catch {}
+
+    setCurrentLang(initialLang);
+
+    // Keep state in sync with DOM translated state
     const syncLanguage = () => {
       const translated = document.documentElement.classList.contains('translated-ltr');
-      const lang = translated ? 'de' : 'en';
-      setCurrentLang(lang);
-      document.documentElement.lang = lang;
       if (translated) {
+        setCurrentLang('de');
+        document.documentElement.lang = 'de';
         setIsTranslating(false);
         setTranslationError('');
       }
     };
+
     const observer = new MutationObserver(syncLanguage);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    syncLanguage();
 
-    // Prevent Google Translate from modifying body.style.top / margins or leaving rogue iframes
+    // Clean body margins/top set by Google Translate
     const bodyObserver = new MutationObserver(() => {
       if (document.body.style.top && document.body.style.top !== '0px') {
         document.body.style.top = '0px';
@@ -96,52 +172,95 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
       if (document.body.style.position === 'relative') {
         document.body.style.position = 'static';
       }
-      const iframes = document.querySelectorAll('iframe');
-      iframes.forEach((el) => {
-        if (el.style.display !== 'none') {
-          el.style.display = 'none';
-        }
-      });
     });
-    bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['style'], childList: true });
+    bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['style'] });
 
-    ensureTranslate().catch(() => setTranslationError('Translation unavailable. Please try DE again.'));
+    // Ensure engine is loaded and applies saved language if DE
+    ensureTranslate()
+      .then((select) => {
+        if (initialLang === 'de' && !document.documentElement.classList.contains('translated-ltr')) {
+          select.value = 'de';
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      })
+      .catch(() => {
+        // Silently catch background load
+      });
+
     return () => {
       observer.disconnect();
       bodyObserver.disconnect();
     };
   }, []);
 
+  // Handle client-side Next.js route navigation
+  React.useEffect(() => {
+    if (prevPathname.current !== pathname) {
+      prevPathname.current = pathname;
+
+      let isDe = currentLang === 'de';
+      try {
+        if (!isDe && localStorage.getItem('novarch_lang') === 'de') {
+          isDe = true;
+        }
+      } catch {}
+
+      if (isDe) {
+        // When client navigates in Next.js, re-trigger translation on the new DOM
+        const timer = setTimeout(() => {
+          const select = document.querySelector<HTMLSelectElement>('.goog-te-combo');
+          if (select) {
+            select.value = 'en';
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            setTimeout(() => {
+              select.value = 'de';
+              select.dispatchEvent(new Event('change', { bubbles: true }));
+            }, 60);
+          }
+        }, 150);
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [pathname, currentLang]);
+
   const switchLanguage = async (targetLang: 'en' | 'de') => {
+    if (targetLang === currentLang && !translationError) return;
     setTranslationError('');
     setIsTranslating(true);
-    localStorage.setItem('novarch_lang', targetLang);
-    // Clear domain-scoped preferences left by older versions as well.
-    const parts = window.location.hostname.split('.');
-    for (let i = 0; i < parts.length - 1; i++) {
-      const domain = parts.slice(i).join('.');
-      document.cookie = `googtrans=; path=/; domain=.${domain}; max-age=0`;
-    }
-    document.cookie = `googtrans=/en/${targetLang}; path=/; max-age=31536000; SameSite=Lax`;
+
+    try {
+      localStorage.setItem('novarch_lang', targetLang);
+    } catch {}
+
     if (targetLang === 'en') {
-      // Restore the original React document rather than retaining translated DOM nodes.
+      clearGoogleTransCookies();
+      setCurrentLang('en');
+      document.documentElement.lang = 'en';
+      // Full reload restores pristine original English React DOM
       window.location.reload();
       return;
     }
+
+    // Target: German ('de')
+    setGoogleTransCookies('de');
+    setCurrentLang('de');
+
     try {
       const select = await ensureTranslate();
-      select.value = targetLang;
+      select.value = 'de';
       select.dispatchEvent(new Event('change', { bubbles: true }));
-      // Selecting a language is not evidence that translation succeeded.
+
+      // If in-place translation doesn't apply within 400ms, reload with cookie to ensure full page translation
       window.setTimeout(() => {
         setIsTranslating(false);
         if (!document.documentElement.classList.contains('translated-ltr')) {
-          setTranslationError('Translation unavailable. Please try DE again.');
+          window.location.reload();
         }
-      }, 15000);
+      }, 400);
     } catch {
-      setIsTranslating(false);
-      setTranslationError('Translation unavailable. Please try DE again.');
+      // Fallback: reload with the newly set cookie
+      window.location.reload();
     }
   };
 
@@ -211,7 +330,11 @@ export function LanguageSwitcher({ className, variant = 'pill' }: LanguageSwitch
       aria-label="Language selection / Sprachauswahl"
       title={translationError || undefined}
     >
-      {translationError && <span role="status" className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-white/15 bg-[#081224] p-2 text-xs text-white">{translationError}</span>}
+      {translationError && (
+        <span role="status" className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-white/15 bg-[#081224] p-2 text-xs text-white">
+          {translationError}
+        </span>
+      )}
       <div className="flex items-center pl-1.5 pr-1 text-cyan-400 pointer-events-none" title="English / German (Deutsch)">
         <Globe className={cn('h-3.5 w-3.5 transition-transform duration-300', isTranslating && 'animate-spin')} />
       </div>

@@ -45,7 +45,7 @@ const content = [
 
 export function EventLegalHub() {
   return (
-    <div translate="no" className="notranslate min-h-screen bg-[#030712] text-slate-200">
+    <div className="min-h-screen bg-[#030712] text-slate-200">
       <div className="border-b border-white/10 bg-[radial-gradient(ellipse_at_top_right,rgba(30,95,191,0.22),transparent_65%)]">
         <Container className="py-12 sm:py-20">
           <div className="mb-6 flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-cyan-300"><Shield className="h-4 w-4" /> NOVARCH / Winter Arc 2026</div>

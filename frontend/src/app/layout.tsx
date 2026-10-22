@@ -66,11 +66,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
             <Footer />
           </div>
         </ThemeProvider>
-        {/* Hidden mount target for Google Translate web engine outside page flow */}
+        {/* Mount target for Google Translate web engine outside visible viewport */}
         <div
           id="google_translate_element"
-          className="hidden pointer-events-none overflow-hidden -z-50"
-          style={{ position: 'fixed', top: -9999, left: -9999, width: 0, height: 0, opacity: 0 }}
+          className="pointer-events-none overflow-hidden -z-50"
+          style={{ position: 'fixed', top: -9999, left: -9999, width: 1, height: 1, opacity: 0 }}
           aria-hidden="true"
         />
       </body>
